@@ -1,5 +1,6 @@
 'use client';
 import React, { useState } from 'react';
+import Link from 'next/link';
 
 function Logo() {
   return (
@@ -197,8 +198,10 @@ export default function AdminPanel() {
         alignItems: 'center'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Logo />
-          <span style={{ fontSize: 22, fontWeight: 600, color: brand.text }}>BetterView</span>
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
+            <Logo />
+            <span style={{ fontSize: 22, fontWeight: 600, color: brand.text }}>BetterView</span>
+          </Link>
           <span style={{ 
             marginLeft: 12,
             padding: '4px 10px',

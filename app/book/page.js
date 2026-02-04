@@ -175,10 +175,10 @@ export default function BookingFlow() {
         justifyContent: 'space-between',
         alignItems: 'center'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
           <Logo />
           <span style={{ fontSize: 22, fontWeight: 600, color: brand.text }}>BetterView</span>
-        </div>
+        </Link>
         <Link href="/dashboard" style={{
           padding: '10px 20px',
           fontSize: 14,

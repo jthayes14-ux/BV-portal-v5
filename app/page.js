@@ -93,10 +93,10 @@ export default function LandingPage() {
         top: 0,
         zIndex: 100
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
           <Logo />
           <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
-        </div>
+        </Link>
         
         <div style={{ display: 'flex', gap: 12 }}>
           <Link href="/login" style={{ 

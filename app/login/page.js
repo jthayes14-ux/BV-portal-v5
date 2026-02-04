@@ -48,10 +48,10 @@ export default function AuthPages() {
         background: 'white',
         borderBottom: `1px solid ${brand.primaryLight}`
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
           <Logo />
           <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
-        </div>
+        </Link>
         
         <div style={{ display: 'flex', gap: 12 }}>
           <button 

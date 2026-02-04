@@ -5,28 +5,10 @@ import Link from 'next/link';
 
 function Logo() {
   return (
-    <div style={{ display: 'flex', gap: 3 }}>
-      <div style={{
-        width: 6,
-        height: 32,
-        background: 'linear-gradient(180deg, #C9B037 0%, #D4AF37 50%, #C9B037 100%)',
-        borderRadius: 2,
-        boxShadow: '0 2px 4px rgba(201, 176, 55, 0.3)'
-      }} />
-      <div style={{
-        width: 6,
-        height: 32,
-        background: 'linear-gradient(180deg, #B8C5F2 0%, #9AA8E0 50%, #B8C5F2 100%)',
-        borderRadius: 2,
-        boxShadow: '0 2px 4px rgba(184, 197, 242, 0.3)'
-      }} />
-      <div style={{
-        width: 6,
-        height: 32,
-        background: 'linear-gradient(180deg, #C9B037 0%, #D4AF37 50%, #C9B037 100%)',
-        borderRadius: 2,
-        boxShadow: '0 2px 4px rgba(201, 176, 55, 0.3)'
-      }} />
+    <div style={{ display: 'flex', gap: 4 }}>
+      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 3 }} />
+      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 3 }} />
+      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 3 }} />
     </div>
   );
 }
@@ -238,17 +220,9 @@ export default function BookingFlow() {
         top: 0,
         zIndex: 100
       }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 14, textDecoration: 'none' }}>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
           <Logo />
-          <span style={{
-            fontSize: 24,
-            fontWeight: 300,
-            color: brand.text,
-            fontFamily: "'Cormorant Garamond', Georgia, serif",
-            letterSpacing: '0.02em'
-          }}>
-            BetterView
-          </span>
+          <span style={{ fontSize: 22, fontWeight: 600, color: brand.text }}>BetterView</span>
         </Link>
         <Link href="/dashboard" style={{
           padding: '12px 28px',

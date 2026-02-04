@@ -105,10 +105,10 @@ export default function PaymentFlow() {
         justifyContent: 'space-between',
         alignItems: 'center'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
           <Logo />
           <span style={{ fontSize: 22, fontWeight: 600, color: brand.text }}>BetterView</span>
-        </div>
+        </Link>
         <div style={{ fontSize: 14, color: brand.textLight }}>
           Secure checkout
         </div>

@@ -27,6 +27,10 @@ export default function PaymentFlow() {
   const [processing, setProcessing] = useState(false);
   const [booking, setBooking] = useState(null);
   const [error, setError] = useState('');
+  const [discountCode, setDiscountCode] = useState('');
+  const [appliedDiscount, setAppliedDiscount] = useState(null);
+  const [discountError, setDiscountError] = useState('');
+  const [applyingDiscount, setApplyingDiscount] = useState(false);
 
   const brand = {
     primary: '#B8C5F2', text: '#1a1a1a', textLight: '#666',
@@ -55,7 +59,54 @@ export default function PaymentFlow() {
   }
 
   const addOnsTotal = booking.add_ons_total || 0;
-  const total = booking.total || 0;
+  const subtotal = booking.total || 0;
+
+  const discountAmount = appliedDiscount
+    ? appliedDiscount.type === 'percent'
+      ? Math.round(subtotal * appliedDiscount.value / 100 * 100) / 100
+      : Math.min(appliedDiscount.value, subtotal)
+    : 0;
+  const total = Math.max(0, subtotal - discountAmount);
+
+  const handleApplyDiscount = async () => {
+    if (!discountCode.trim()) return;
+    setApplyingDiscount(true);
+    setDiscountError('');
+    setAppliedDiscount(null);
+
+    const { data, error: fetchError } = await supabase
+      .from('discount_codes')
+      .select('*')
+      .ilike('code', discountCode.trim())
+      .eq('active', true)
+      .single();
+
+    if (fetchError || !data) {
+      setDiscountError('Invalid or expired discount code');
+      setApplyingDiscount(false);
+      return;
+    }
+
+    if (data.uses_remaining !== null && data.uses_remaining <= 0) {
+      setDiscountError('This discount code has been fully redeemed');
+      setApplyingDiscount(false);
+      return;
+    }
+
+    setAppliedDiscount({
+      id: data.id,
+      code: data.code,
+      type: data.type,
+      value: Number(data.value),
+    });
+    setApplyingDiscount(false);
+  };
+
+  const handleRemoveDiscount = () => {
+    setAppliedDiscount(null);
+    setDiscountCode('');
+    setDiscountError('');
+  };
 
   const formatCardNumber = (value) => {
     const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
@@ -76,7 +127,7 @@ export default function PaymentFlow() {
     setProcessing(true);
     setError('');
 
-    const { error: insertError } = await supabase.from('bookings').insert({
+    const bookingRecord = {
       user_id: user.id,
       customer_name: user.user_metadata?.full_name || name,
       customer_email: user.email,
@@ -92,9 +143,20 @@ export default function PaymentFlow() {
       base_price: booking.base_price,
       add_ons: booking.selected_add_ons,
       add_ons_total: booking.add_ons_total,
-      total: booking.total,
+      total: total,
       status: 'upcoming',
-    });
+    };
+
+    if (appliedDiscount) {
+      bookingRecord.discount_code = appliedDiscount.code;
+      bookingRecord.discount_amount = discountAmount;
+    }
+
+    const { error: insertError } = await supabase.from('bookings').insert(bookingRecord);
+
+    if (!insertError && appliedDiscount) {
+      await supabase.rpc('decrement_discount_uses', { code_id: appliedDiscount.id });
+    }
 
     if (insertError) {
       setError('Failed to save booking: ' + insertError.message);
@@ -212,13 +274,74 @@ export default function PaymentFlow() {
                     <span style={{ color: brand.text }}>${addon.price}</span>
                   </div>
                 ))}
+
+                {/* Discount Code */}
+                <div style={{ marginTop: 16, marginBottom: 16, paddingTop: 16, borderTop: `1px solid ${brand.border}` }}>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: brand.text, marginBottom: 8 }}>Discount Code</label>
+                  {appliedDiscount ? (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 8 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2"><path d="M20 6L9 17l-5-5"/></svg>
+                        <span style={{ fontSize: 14, fontWeight: 600, color: '#16A34A' }}>{appliedDiscount.code}</span>
+                        <span style={{ fontSize: 12, color: '#15803D' }}>
+                          ({appliedDiscount.type === 'percent' ? `${appliedDiscount.value}% off` : `$${appliedDiscount.value} off`})
+                        </span>
+                      </div>
+                      <button onClick={handleRemoveDiscount} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: '#DC2626', fontWeight: 500, padding: '2px 6px' }}>
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <div>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <input
+                          type="text"
+                          value={discountCode}
+                          onChange={(e) => { setDiscountCode(e.target.value.toUpperCase()); setDiscountError(''); }}
+                          placeholder="Enter code"
+                          style={{ flex: 1, padding: '10px 12px', fontSize: 14, border: `1px solid ${discountError ? '#FCA5A5' : brand.border}`, borderRadius: 8, background: brand.white, boxSizing: 'border-box' }}
+                        />
+                        <button
+                          onClick={handleApplyDiscount}
+                          disabled={!discountCode.trim() || applyingDiscount}
+                          style={{
+                            padding: '10px 16px', fontSize: 13, fontWeight: 600,
+                            background: discountCode.trim() && !applyingDiscount ? brand.text : brand.border,
+                            color: discountCode.trim() && !applyingDiscount ? brand.white : '#999',
+                            border: 'none', borderRadius: 8,
+                            cursor: discountCode.trim() && !applyingDiscount ? 'pointer' : 'not-allowed',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {applyingDiscount ? '...' : 'Apply'}
+                        </button>
+                      </div>
+                      {discountError && (
+                        <p style={{ fontSize: 12, color: '#DC2626', marginTop: 6 }}>{discountError}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {appliedDiscount && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, fontSize: 14 }}>
+                    <span style={{ color: '#16A34A' }}>Discount</span>
+                    <span style={{ color: '#16A34A', fontWeight: 600 }}>-${discountAmount.toFixed(2)}</span>
+                  </div>
+                )}
+
                 <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 16, marginTop: 8, borderTop: `1px solid ${brand.border}` }}>
                   <span style={{ fontSize: 16, fontWeight: 600, color: brand.text }}>Total</span>
-                  <span style={{ fontSize: 20, fontWeight: 700, color: brand.text }}>${total}</span>
+                  <div style={{ textAlign: 'right' }}>
+                    {appliedDiscount && (
+                      <span style={{ fontSize: 14, color: brand.textLight, textDecoration: 'line-through', marginRight: 8 }}>${subtotal}</span>
+                    )}
+                    <span style={{ fontSize: 20, fontWeight: 700, color: brand.text }}>${total.toFixed(2)}</span>
+                  </div>
                 </div>
               </div>
               <p style={{ fontSize: 12, color: brand.textLight, marginTop: 16, padding: 12, background: brand.bg, borderRadius: 6 }}>
-                Your card will be saved and charged <strong>${total}</strong> after your cleaning is complete. Free cancellation up to 24 hours before.
+                Your card will be saved and charged <strong>${total.toFixed(2)}</strong> after your cleaning is complete. Free cancellation up to 24 hours before.
               </p>
             </div>
           </div>
@@ -246,7 +369,12 @@ export default function PaymentFlow() {
             </div>
             <div>
               <p style={{ fontSize: 13, color: brand.textLight, marginBottom: 4 }}>TOTAL</p>
-              <p style={{ fontSize: 24, fontWeight: 700, color: brand.text }}>${total}</p>
+              {appliedDiscount && (
+                <p style={{ fontSize: 14, color: '#16A34A', marginBottom: 4 }}>
+                  Discount ({appliedDiscount.code}): -${discountAmount.toFixed(2)}
+                </p>
+              )}
+              <p style={{ fontSize: 24, fontWeight: 700, color: brand.text }}>${total.toFixed(2)}</p>
               <p style={{ fontSize: 13, color: brand.textLight }}>Charged after service</p>
             </div>
           </div>

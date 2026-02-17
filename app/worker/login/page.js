@@ -17,10 +17,12 @@ function Logo() {
 
 export default function WorkerLogin() {
   const router = useRouter();
-  const { user, loading, signIn, signOut } = useAuth();
+  const { user, loading, signIn, signUp, signOut } = useAuth();
+  const [view, setView] = useState('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const brand = {
@@ -54,33 +56,41 @@ export default function WorkerLogin() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setMessage('');
     setSubmitting(true);
 
-    // Step 1: Sign in with Supabase auth
-    const { data, error: signInError } = await signIn(email, password);
-    if (signInError) {
-      setError(signInError.message);
-      setSubmitting(false);
-      return;
-    }
-
-    // Step 2: Verify this email belongs to a worker
+    // Always verify email is in workers table first
     const { data: workerData } = await supabase
       .from('workers')
-      .select('id')
+      .select('id, name')
       .eq('email', email)
       .single();
 
     if (!workerData) {
-      // Not a worker — sign them out and show error
-      await signOut();
-      setError('No worker account found for this email. Contact your admin if you believe this is a mistake.');
+      setError('No worker profile found for this email. Ask your admin to add you to the workers list first.');
       setSubmitting(false);
       return;
     }
 
-    // Step 3: Redirect to worker dashboard
-    router.push('/worker');
+    if (view === 'login') {
+      const { error: signInError } = await signIn(email, password);
+      if (signInError) {
+        setError(signInError.message);
+        setSubmitting(false);
+        return;
+      }
+      router.push('/worker');
+    } else {
+      // Sign up — create Supabase auth account using the worker's name
+      const { error: signUpError } = await signUp(email, password, workerData.name);
+      if (signUpError) {
+        setError(signUpError.message);
+        setSubmitting(false);
+        return;
+      }
+      setMessage('Account created! Check your email for a confirmation link.');
+      setSubmitting(false);
+    }
   };
 
   if (loading) {
@@ -130,7 +140,7 @@ export default function WorkerLogin() {
           boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
         }}>
           {/* Worker badge header */}
-          <div style={{ textAlign: 'center', marginBottom: 32 }}>
+          <div style={{ textAlign: 'center', marginBottom: 24 }}>
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               padding: '8px 20px', background: brand.primaryLight,
@@ -142,17 +152,39 @@ export default function WorkerLogin() {
               </svg>
               <span style={{ fontSize: 14, fontWeight: 600, color: brand.primaryDark }}>Worker Portal</span>
             </div>
-            <h1 style={{ fontSize: 32, fontWeight: 600, color: brand.text, marginBottom: 8 }}>
-              Welcome back
-            </h1>
-            <p style={{ fontSize: 16, color: brand.textLight }}>
-              Sign in to view your assigned jobs
-            </p>
           </div>
+
+          {/* Toggle */}
+          <div style={{ display: 'flex', background: brand.primaryLight, borderRadius: 10, padding: 4, marginBottom: 24 }}>
+            <button
+              onClick={() => { setView('login'); setError(''); setMessage(''); }}
+              style={{ flex: 1, padding: '12px 24px', fontSize: 16, fontWeight: 600, background: view === 'login' ? 'white' : 'transparent', border: 'none', borderRadius: 8, color: brand.text, cursor: 'pointer', transition: 'background 0.2s' }}
+            >
+              Sign In
+            </button>
+            <button
+              onClick={() => { setView('signup'); setError(''); setMessage(''); }}
+              style={{ flex: 1, padding: '12px 24px', fontSize: 16, fontWeight: 600, background: view === 'signup' ? 'white' : 'transparent', border: 'none', borderRadius: 8, color: brand.text, cursor: 'pointer', transition: 'background 0.2s' }}
+            >
+              Create Account
+            </button>
+          </div>
+
+          <h1 style={{ fontSize: 32, fontWeight: 600, color: brand.text, marginBottom: 8, textAlign: 'center' }}>
+            {view === 'login' ? 'Welcome back' : 'Set up your account'}
+          </h1>
+          <p style={{ fontSize: 16, color: brand.textLight, marginBottom: 32, textAlign: 'center' }}>
+            {view === 'login' ? 'Sign in to view your assigned jobs' : 'Your admin must add you before you can create an account'}
+          </p>
 
           {error && (
             <div style={{ padding: '12px 16px', background: '#FEE2E2', borderRadius: 8, marginBottom: 20, fontSize: 14, color: '#DC2626' }}>
               {error}
+            </div>
+          )}
+          {message && (
+            <div style={{ padding: '12px 16px', background: '#DCFCE7', borderRadius: 8, marginBottom: 20, fontSize: 14, color: '#16A34A' }}>
+              {message}
             </div>
           )}
 
@@ -191,7 +223,7 @@ export default function WorkerLogin() {
               onMouseOver={(e) => { if (!submitting) { e.target.style.transform = 'translateY(-1px)'; e.target.style.boxShadow = `0 4px 12px rgba(201, 176, 55, 0.4)`; }}}
               onMouseOut={(e) => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = 'none'; }}
             >
-              {submitting ? 'Signing in...' : 'Sign In'}
+              {submitting ? 'Please wait...' : (view === 'login' ? 'Sign In' : 'Create Account')}
             </button>
           </form>
 

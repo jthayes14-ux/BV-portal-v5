@@ -86,7 +86,7 @@ export default function WorkerDashboard() {
   if (!worker) {
     return (
       <div style={{ minHeight: '100vh', background: brand.bg }}>
-        <header style={{ padding: '16px 32px', background: brand.white, borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <header style={{ padding: '16px 32px', background: brand.white, borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <Logo />
             <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
@@ -103,7 +103,7 @@ export default function WorkerDashboard() {
 
   return (
     <div style={{ minHeight: '100vh', background: brand.bg }}>
-      <header style={{ padding: '16px 32px', background: brand.white, borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <header style={{ padding: '16px 32px', background: brand.white, borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Logo />
           <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>

@@ -7,10 +7,10 @@ import { useAuth } from '../../lib/useAuth';
 
 function Logo() {
   return (
-    <div style={{ display: 'flex', gap: 3 }}>
-      <div style={{ width: 6, height: 32, background: 'linear-gradient(180deg, #C9B037 0%, #D4AF37 50%, #C9B037 100%)', borderRadius: 2, boxShadow: '0 2px 4px rgba(201, 176, 55, 0.3)' }} />
-      <div style={{ width: 6, height: 32, background: 'linear-gradient(180deg, #B8C5F2 0%, #9AA8E0 50%, #B8C5F2 100%)', borderRadius: 2, boxShadow: '0 2px 4px rgba(184, 197, 242, 0.3)' }} />
-      <div style={{ width: 6, height: 32, background: 'linear-gradient(180deg, #C9B037 0%, #D4AF37 50%, #C9B037 100%)', borderRadius: 2, boxShadow: '0 2px 4px rgba(201, 176, 55, 0.3)' }} />
+    <div style={{ display: 'flex', gap: 4 }}>
+      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 3 }} />
+      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 3 }} />
+      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 3 }} />
     </div>
   );
 }

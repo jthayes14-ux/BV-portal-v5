@@ -9,3 +9,91 @@ html, body {
   background: #fafafa;
   color: #1a1a1a;
 }
+
+/* Mobile responsive utilities */
+@media (max-width: 768px) {
+  .admin-layout {
+    flex-direction: column !important;
+  }
+  .admin-sidebar {
+    width: 100% !important;
+    min-height: auto !important;
+    border-right: none !important;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 12px 0 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+  }
+  .admin-sidebar button {
+    border-left: none !important;
+    border-bottom: 3px solid transparent !important;
+    white-space: nowrap;
+    padding: 10px 16px !important;
+  }
+  .admin-main {
+    padding: 16px !important;
+  }
+  .admin-header {
+    padding: 12px 16px !important;
+  }
+  .admin-header-right {
+    display: none !important;
+  }
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .checkout-grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+  .booking-form {
+    padding: 24px 20px !important;
+  }
+  .booking-main {
+    padding: 32px 16px 60px !important;
+  }
+  .dashboard-main {
+    padding: 24px 16px !important;
+  }
+  .dashboard-header {
+    padding: 12px 16px !important;
+  }
+  .auth-form-card {
+    padding: 32px 24px !important;
+    margin: 0 12px;
+  }
+  .auth-header {
+    padding: 12px 16px !important;
+  }
+  .calendar-grid {
+    font-size: 12px !important;
+  }
+  .calendar-day-cell {
+    min-height: 60px !important;
+    padding: 4px !important;
+  }
+  .worker-card-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .booking-details-row {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  .trust-indicators {
+    gap: 20px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-sidebar {
+    gap: 0 !important;
+  }
+  .social-login-row {
+    flex-direction: column !important;
+  }
+  .header-actions {
+    gap: 8px !important;
+  }
+}

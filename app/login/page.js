@@ -101,7 +101,8 @@ export default function AuthPages() {
         justifyContent: 'space-between',
         alignItems: 'center',
         background: 'white',
-        borderBottom: `1px solid ${brand.primaryLight}`
+        borderBottom: `1px solid ${brand.primaryLight}`,
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
       }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
           <Logo />

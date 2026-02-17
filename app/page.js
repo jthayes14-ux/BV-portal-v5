@@ -82,16 +82,17 @@ export default function LandingPage() {
       fontFamily: "'Cormorant Garamond', Georgia, serif"
     }}>
       {/* Header */}
-      <header style={{ 
-        padding: '20px 32px', 
-        display: 'flex', 
-        justifyContent: 'space-between', 
+      <header style={{
+        padding: '20px 32px',
+        display: 'flex',
+        justifyContent: 'space-between',
         alignItems: 'center',
         background: 'white',
         borderBottom: `1px solid ${brand.primaryLight}`,
         position: 'sticky',
         top: 0,
-        zIndex: 100
+        zIndex: 100,
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Logo />

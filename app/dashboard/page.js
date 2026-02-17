@@ -72,7 +72,7 @@ export default function CustomerDashboard() {
 
   return (
     <div style={{ minHeight: '100vh', background: brand.bg }}>
-      <header className="dashboard-header" style={{ padding: '16px 32px', background: 'white', borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <header className="dashboard-header" style={{ padding: '16px 32px', background: 'white', borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
           <Logo />
           <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>

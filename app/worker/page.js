@@ -30,7 +30,7 @@ export default function WorkerDashboard() {
   };
 
   useEffect(() => {
-    if (!authLoading && !user) { router.push('/login'); return; }
+    if (!authLoading && !user) { router.push('/worker/login'); return; }
     if (!authLoading && user) loadWorkerData();
   }, [authLoading, user]);
 
@@ -59,7 +59,7 @@ export default function WorkerDashboard() {
     setBookings(bookings.map(b => b.id === bookingId ? { ...b, status: 'completed' } : b));
   };
 
-  const handleLogout = async () => { await signOut(); router.push('/login'); };
+  const handleLogout = async () => { await signOut(); router.push('/worker/login'); };
 
   const upcomingBookings = bookings.filter(b => b.status === 'upcoming');
   const completedBookings = bookings.filter(b => b.status === 'completed');

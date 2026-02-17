@@ -15,6 +15,11 @@ function Logo() {
   );
 }
 
+const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || '')
+  .split(',')
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean);
+
 export default function AdminPanel() {
   const router = useRouter();
   const { user, loading: authLoading, signOut } = useAuth();
@@ -52,6 +57,7 @@ export default function AdminPanel() {
 
   useEffect(() => {
     if (!authLoading && !user) { router.push('/login'); return; }
+    if (!authLoading && user && !ADMIN_EMAILS.includes(user.email?.toLowerCase())) { router.push('/dashboard'); return; }
     if (!authLoading && user) loadAll();
   }, [authLoading, user]);
 

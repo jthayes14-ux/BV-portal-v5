@@ -43,7 +43,7 @@ export default function AdminCalendar() {
 
   const loadData = async () => {
     const [bkRes, wRes] = await Promise.all([
-      supabase.from('bookings').select('*').order('date'),
+      supabase.from('bookings').select('*').order('booking_date'),
       supabase.from('workers').select('*').order('name'),
     ]);
     setBookings(bkRes.data || []);
@@ -62,7 +62,7 @@ export default function AdminCalendar() {
 
   const getBookingsForDay = (day) => {
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    return bookings.filter(b => b.date === dateStr);
+    return bookings.filter(b => b.booking_date === dateStr);
   };
 
   const getWorkerName = (workerId) => {
@@ -151,7 +151,7 @@ export default function AdminCalendar() {
                       background: bk.status === 'upcoming' ? brand.primary : '#e8e8e8',
                       color: brand.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
                     }}>
-                      {bk.building} - {bk.unit}
+                      {bk.building} - {bk.unit_number}
                     </div>
                   ))}
                   {dayBk.length > 3 && (
@@ -183,8 +183,8 @@ export default function AdminCalendar() {
                 {dayBookings.map(booking => (
                   <div key={booking.id} style={{ padding: '16px 24px', borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                     <div>
-                      <p style={{ fontWeight: 600, color: brand.text }}>{booking.building} - Unit {booking.unit}</p>
-                      <p style={{ fontSize: 13, color: brand.textLight }}>{booking.time_slot} · {booking.customer_name}</p>
+                      <p style={{ fontWeight: 600, color: brand.text }}>{booking.building} - Unit {booking.unit_number}</p>
+                      <p style={{ fontSize: 13, color: brand.textLight }}>{booking.booking_time} · {booking.customer_name}</p>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                       <span style={{ fontSize: 13, color: brand.textLight }}>
@@ -196,7 +196,7 @@ export default function AdminCalendar() {
                       }}>
                         {booking.status}
                       </span>
-                      <span style={{ fontWeight: 600, color: brand.text }}>${booking.total}</span>
+                      <span style={{ fontWeight: 600, color: brand.text }}>${booking.total_price}</span>
                     </div>
                   </div>
                 ))}

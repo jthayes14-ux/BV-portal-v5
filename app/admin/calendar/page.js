@@ -78,7 +78,7 @@ export default function AdminCalendar() {
       <header className="admin-header" style={{ padding: '16px 32px', background: brand.white, borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Logo />
-          <span style={{ fontSize: 22, fontWeight: 600, color: brand.text }}>BetterView</span>
+          <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
           <span style={{ marginLeft: 12, padding: '4px 10px', background: brand.text, color: brand.white, borderRadius: 4, fontSize: 12, fontWeight: 600 }}>CALENDAR</span>
         </div>
         <Link href="/admin" style={{ fontSize: 14, color: brand.text, textDecoration: 'none', padding: '8px 16px', border: `1px solid ${brand.border}`, borderRadius: 6, fontWeight: 500 }}>

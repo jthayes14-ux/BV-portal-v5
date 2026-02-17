@@ -89,7 +89,7 @@ export default function WorkerDashboard() {
         <header style={{ padding: '16px 32px', background: brand.white, borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <Logo />
-            <span style={{ fontSize: 22, fontWeight: 600, color: brand.text }}>BetterView</span>
+            <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
           </div>
           <button onClick={handleLogout} style={{ padding: '8px 16px', fontSize: 14, background: 'transparent', border: `1px solid ${brand.border}`, borderRadius: 6, cursor: 'pointer', color: brand.text }}>Log Out</button>
         </header>
@@ -106,7 +106,7 @@ export default function WorkerDashboard() {
       <header style={{ padding: '16px 32px', background: brand.white, borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Logo />
-          <span style={{ fontSize: 22, fontWeight: 600, color: brand.text }}>BetterView</span>
+          <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
           <span style={{ marginLeft: 12, padding: '4px 10px', background: brand.gold, color: brand.white, borderRadius: 4, fontSize: 12, fontWeight: 600 }}>WORKER</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>

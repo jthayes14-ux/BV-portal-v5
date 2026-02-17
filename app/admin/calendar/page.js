@@ -41,12 +41,58 @@ export default function AdminCalendar() {
     if (!authLoading && user) loadData();
   }, [authLoading, user]);
 
+  const expandRecurringBookings = (rawBookings) => {
+    const expanded = [];
+    const horizon = new Date();
+    horizon.setFullYear(horizon.getFullYear() + 1);
+
+    for (const booking of rawBookings) {
+      expanded.push(booking);
+
+      if (!booking.recurrence || booking.recurrence === 'one-time') continue;
+
+      const start = new Date(booking.booking_date + 'T00:00:00');
+      let next = new Date(start);
+
+      while (true) {
+        if (booking.recurrence === 'weekly') {
+          next = new Date(next);
+          next.setDate(next.getDate() + 7);
+        } else if (booking.recurrence === 'biweekly') {
+          next = new Date(next);
+          next.setDate(next.getDate() + 14);
+        } else if (booking.recurrence === 'monthly') {
+          next = new Date(next);
+          next.setMonth(next.getMonth() + 1);
+        } else {
+          break;
+        }
+
+        if (next > horizon) break;
+
+        const y = next.getFullYear();
+        const m = String(next.getMonth() + 1).padStart(2, '0');
+        const d = String(next.getDate()).padStart(2, '0');
+
+        expanded.push({
+          ...booking,
+          booking_date: `${y}-${m}-${d}`,
+          _isRecurringInstance: true,
+          _originalDate: booking.booking_date,
+          status: next > new Date() ? 'upcoming' : booking.status,
+        });
+      }
+    }
+
+    return expanded;
+  };
+
   const loadData = async () => {
     const [bkRes, wRes] = await Promise.all([
       supabase.from('bookings').select('*').order('booking_date'),
       supabase.from('workers').select('*').order('name'),
     ]);
-    setBookings(bkRes.data || []);
+    setBookings(expandRecurringBookings(bkRes.data || []));
     setWorkers(wRes.data || []);
     setDataLoading(false);
   };
@@ -149,9 +195,13 @@ export default function AdminCalendar() {
                     <div key={idx} style={{
                       padding: '2px 6px', marginBottom: 2, borderRadius: 4, fontSize: 11,
                       background: bk.status === 'upcoming' ? brand.primary : '#e8e8e8',
-                      color: brand.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+                      color: brand.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      display: 'flex', alignItems: 'center', gap: 3,
                     }}>
-                      {bk.building} - {bk.unit_number}
+                      {(bk._isRecurringInstance || (bk.recurrence && bk.recurrence !== 'one-time')) && (
+                        <span style={{ fontSize: 10, flexShrink: 0 }} title={bk.recurrence}>&#x21BB;</span>
+                      )}
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{bk.building} - {bk.unit_number}</span>
                     </div>
                   ))}
                   {dayBk.length > 3 && (
@@ -180,16 +230,32 @@ export default function AdminCalendar() {
               </div>
             ) : (
               <div>
-                {dayBookings.map(booking => (
-                  <div key={booking.id} style={{ padding: '16px 24px', borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                {dayBookings.map((booking, idx) => (
+                  <div key={`${booking.id}-${idx}`} style={{ padding: '16px 24px', borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                     <div>
                       <p style={{ fontWeight: 600, color: brand.text }}>{booking.building} - Unit {booking.unit_number}</p>
                       <p style={{ fontSize: 13, color: brand.textLight }}>{booking.booking_time} · {booking.customer_name}</p>
+                      {booking.recurrence && booking.recurrence !== 'one-time' && (
+                        <p style={{ fontSize: 12, color: brand.gold, marginTop: 2 }}>
+                          &#x21BB; {booking.recurrence.charAt(0).toUpperCase() + booking.recurrence.slice(1)} recurring
+                          {booking._isRecurringInstance && (
+                            <span style={{ color: brand.textLight }}> (originally {formatDate(booking._originalDate)})</span>
+                          )}
+                        </p>
+                      )}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                       <span style={{ fontSize: 13, color: brand.textLight }}>
                         Worker: <strong>{getWorkerName(booking.worker_id)}</strong>
                       </span>
+                      {booking.recurrence && booking.recurrence !== 'one-time' && (
+                        <span style={{
+                          padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 600,
+                          background: '#F5F0DC', color: '#A69028'
+                        }}>
+                          {booking.recurrence}
+                        </span>
+                      )}
                       <span style={{
                         padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 500,
                         background: booking.status === 'upcoming' ? brand.primary : '#e8e8e8', color: brand.text

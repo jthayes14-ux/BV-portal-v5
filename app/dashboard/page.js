@@ -75,7 +75,7 @@ export default function CustomerDashboard() {
       <header className="dashboard-header" style={{ padding: '16px 32px', background: 'white', borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
           <Logo />
-          <span style={{ fontSize: 22, fontWeight: 600, color: brand.text }}>BetterView</span>
+          <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <Link href="/book" style={{ padding: '10px 20px', fontSize: 14, fontWeight: 500, background: brand.primary, border: 'none', borderRadius: 6, color: brand.text, textDecoration: 'none' }}>

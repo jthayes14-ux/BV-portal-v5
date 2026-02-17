@@ -161,9 +161,9 @@ export default function BookingFlow() {
   return (
     <div style={{ minHeight: '100vh', background: `linear-gradient(180deg, ${brand.bg} 0%, ${brand.primaryLight} 100%)`, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
       <header style={{ padding: '20px 40px', background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(20px)', borderBottom: `1px solid ${brand.borderLight}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 14, textDecoration: 'none' }}>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
           <Logo />
-          <span style={{ fontSize: 24, fontWeight: 300, color: brand.text, fontFamily: "'Cormorant Garamond', Georgia, serif", letterSpacing: '0.02em' }}>BetterView</span>
+          <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
         </Link>
         <Link href="/dashboard" style={{ padding: '12px 28px', fontSize: 14, fontWeight: 500, background: 'transparent', border: `1px solid ${brand.border}`, borderRadius: 8, textDecoration: 'none', color: brand.text, letterSpacing: '0.02em' }}>
           My Bookings

@@ -125,7 +125,7 @@ export default function PaymentFlow() {
       <header style={{ padding: '16px 32px', background: brand.white, borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
           <Logo />
-          <span style={{ fontSize: 22, fontWeight: 600, color: brand.text }}>BetterView</span>
+          <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
         </Link>
         <div style={{ fontSize: 14, color: brand.textLight }}>Secure checkout</div>
       </header>

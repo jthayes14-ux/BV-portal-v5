@@ -84,16 +84,16 @@ export default function BookingFlow() {
     setFloorPlans(data || []);
   };
 
-  const selectedPlan = floorPlans.find(p => p.id === floorPlanId);
-  const selectedBuilding = buildings.find(b => b.id === buildingId);
-  const selectedNeighborhood = neighborhoods.find(n => n.id === neighborhood);
+  const selectedPlan = floorPlans.find(p => String(p.id) === String(floorPlanId));
+  const selectedBuilding = buildings.find(b => String(b.id) === String(buildingId));
+  const selectedNeighborhood = neighborhoods.find(n => String(n.id) === String(neighborhood));
 
   const addOnsTotal = selectedAddOns.reduce((sum, id) => {
     const addon = addOns.find(a => a.id === id);
-    return sum + (addon?.price || 0);
+    return sum + (Number(addon?.price) || 0);
   }, 0);
 
-  const total = (selectedPlan?.price || 0) + addOnsTotal;
+  const total = (Number(selectedPlan?.price) || 0) + addOnsTotal;
   const canBook = neighborhood && buildingId && floorPlanId && unit && date && time;
   const today = new Date().toISOString().split('T')[0];
 

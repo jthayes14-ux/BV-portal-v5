@@ -48,7 +48,7 @@ export default function WorkerDashboard() {
         .from('bookings')
         .select('*')
         .eq('worker_id', workerData.id)
-        .order('date', { ascending: true });
+        .order('booking_date', { ascending: true });
       setBookings(bkData || []);
     }
     setDataLoading(false);
@@ -74,8 +74,8 @@ export default function WorkerDashboard() {
   // Group upcoming bookings by date
   const groupedByDate = {};
   displayedBookings.forEach(b => {
-    if (!groupedByDate[b.date]) groupedByDate[b.date] = [];
-    groupedByDate[b.date].push(b);
+    if (!groupedByDate[b.booking_date]) groupedByDate[b.booking_date] = [];
+    groupedByDate[b.booking_date].push(b);
   });
   const sortedDates = Object.keys(groupedByDate).sort();
 
@@ -128,7 +128,7 @@ export default function WorkerDashboard() {
           </div>
           <div style={{ background: brand.white, borderRadius: 12, border: `1px solid ${brand.border}`, padding: 20, textAlign: 'center' }}>
             <p style={{ fontSize: 32, fontWeight: 700, color: brand.success }}>
-              ${completedBookings.reduce((sum, b) => sum + (b.total || 0), 0)}
+              ${completedBookings.reduce((sum, b) => sum + (b.total_price || 0), 0)}
             </p>
             <p style={{ fontSize: 14, color: brand.textLight }}>Total Revenue</p>
           </div>
@@ -165,9 +165,9 @@ export default function WorkerDashboard() {
                     <div style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
                       <div>
                         <h4 style={{ fontSize: 16, fontWeight: 600, color: brand.text, marginBottom: 4 }}>
-                          {booking.building} - Unit {booking.unit}
+                          {booking.building} - Unit {booking.unit_number}
                         </h4>
-                        <p style={{ fontSize: 14, color: brand.textLight }}>{booking.time_slot} · {booking.floor_plan}</p>
+                        <p style={{ fontSize: 14, color: brand.textLight }}>{booking.booking_time} · {booking.floor_plan}</p>
                         {booking.add_ons && booking.add_ons.length > 0 && (
                           <p style={{ fontSize: 13, color: brand.gold, marginTop: 4 }}>
                             Add-Ons: {booking.add_ons.map(a => a.name).join(', ')}
@@ -175,7 +175,7 @@ export default function WorkerDashboard() {
                         )}
                       </div>
                       <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <span style={{ fontSize: 16, fontWeight: 600, color: brand.text }}>${booking.total}</span>
+                        <span style={{ fontSize: 16, fontWeight: 600, color: brand.text }}>${booking.total_price}</span>
                         {booking.status === 'upcoming' && (
                           <button onClick={() => handleMarkComplete(booking.id)} style={{
                             padding: '8px 16px', fontSize: 13, fontWeight: 600,

@@ -136,14 +136,14 @@ export default function PaymentFlow() {
       building_id: booking.building_id,
       floor_plan: booking.floor_plan_name,
       floor_plan_id: booking.floor_plan_id,
-      unit: booking.unit,
-      date: booking.date,
-      time_slot: booking.time_slot,
+      unit_number: booking.unit,
+      booking_date: booking.date,
+      booking_time: booking.time_slot,
       recurrence: booking.recurrence,
       base_price: booking.base_price,
       add_ons: booking.selected_add_ons,
       add_ons_total: booking.add_ons_total,
-      total: total,
+      total_price: total,
       status: 'upcoming',
     };
 

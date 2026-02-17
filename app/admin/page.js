@@ -67,7 +67,7 @@ export default function AdminPanel() {
       supabase.from('buildings').select('*').order('name'),
       supabase.from('floor_plans').select('*').order('name'),
       supabase.from('add_ons').select('*').order('name'),
-      supabase.from('bookings').select('*').order('date', { ascending: false }),
+      supabase.from('bookings').select('*').order('booking_date', { ascending: false }),
       supabase.from('workers').select('*').order('name'),
     ]);
     setNeighborhoods(nRes.data || []);
@@ -231,16 +231,16 @@ export default function AdminPanel() {
                           </td>
                           <td style={{ padding: '16px' }}>
                             <p style={{ fontWeight: 500, color: brand.text }}>{booking.building}</p>
-                            <p style={{ fontSize: 13, color: brand.textLight }}>Unit {booking.unit} · {booking.floor_plan}</p>
+                            <p style={{ fontSize: 13, color: brand.textLight }}>Unit {booking.unit_number} · {booking.floor_plan}</p>
                           </td>
                           <td style={{ padding: '16px' }}>
-                            <p style={{ fontWeight: 500, color: brand.text }}>{formatDate(booking.date)}</p>
-                            <p style={{ fontSize: 13, color: brand.textLight }}>{booking.time_slot}</p>
+                            <p style={{ fontWeight: 500, color: brand.text }}>{formatDate(booking.booking_date)}</p>
+                            <p style={{ fontSize: 13, color: brand.textLight }}>{booking.booking_time}</p>
                             {booking.recurrence && booking.recurrence !== 'one-time' && (
                               <p style={{ fontSize: 12, color: '#C9B037', fontWeight: 600 }}>{booking.recurrence}</p>
                             )}
                           </td>
-                          <td style={{ padding: '16px', fontWeight: 600, color: brand.text }}>${booking.total}</td>
+                          <td style={{ padding: '16px', fontWeight: 600, color: brand.text }}>${booking.total_price}</td>
                           <td style={{ padding: '16px' }}>
                             <span style={{ padding: '4px 10px', borderRadius: 100, fontSize: 13, fontWeight: 500, background: booking.status === 'upcoming' ? brand.primary : '#e8e8e8', color: brand.text }}>
                               {booking.status}

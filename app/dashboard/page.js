@@ -40,7 +40,7 @@ export default function CustomerDashboard() {
       .from('bookings')
       .select('*')
       .eq('user_id', user.id)
-      .order('date', { ascending: false });
+      .order('booking_date', { ascending: false });
     setBookings(data || []);
     setDataLoading(false);
   };
@@ -117,7 +117,7 @@ export default function CustomerDashboard() {
                 <div style={{ padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
                   <div>
                     <h3 style={{ fontSize: 18, fontWeight: 600, color: brand.text, marginBottom: 4 }}>{booking.building}</h3>
-                    <p style={{ fontSize: 14, color: brand.textLight }}>Unit {booking.unit} · {booking.floor_plan}</p>
+                    <p style={{ fontSize: 14, color: brand.textLight }}>Unit {booking.unit_number} · {booking.floor_plan}</p>
                   </div>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                     {booking.recurrence && booking.recurrence !== 'one-time' && (
@@ -133,11 +133,11 @@ export default function CustomerDashboard() {
 
                 <div className="booking-details-row" style={{ padding: '16px 24px', background: brand.bg, borderTop: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <p style={{ fontSize: 15, fontWeight: 500, color: brand.text }}>{formatDate(booking.date)}</p>
-                    <p style={{ fontSize: 14, color: brand.textLight }}>{booking.time_slot}</p>
+                    <p style={{ fontSize: 15, fontWeight: 500, color: brand.text }}>{formatDate(booking.booking_date)}</p>
+                    <p style={{ fontSize: 14, color: brand.textLight }}>{booking.booking_time}</p>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <p style={{ fontSize: 18, fontWeight: 600, color: brand.text }}>${booking.total}</p>
+                    <p style={{ fontSize: 18, fontWeight: 600, color: brand.text }}>${booking.total_price}</p>
                     {booking.add_ons && booking.add_ons.length > 0 && (
                       <p style={{ fontSize: 13, color: brand.textLight }}>+{booking.add_ons.map(a => a.name).join(', ')}</p>
                     )}

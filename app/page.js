@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
 function Logo({ size = 'normal' }) {
@@ -67,6 +67,19 @@ function FAQItem({ question, answer }) {
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showStickyBar, setShowStickyBar] = useState(false);
+  const heroButtonRef = useRef(null);
+
+  useEffect(() => {
+    const el = heroButtonRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyBar(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const brand = {
     primary: '#B8C5F2',
@@ -196,7 +209,7 @@ export default function LandingPage() {
           Professional window cleaning for Miami&#39;s finest high-rises.
         </p>
 
-        <div className="hero-buttons" style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+        <div ref={heroButtonRef} className="hero-buttons" style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
           <Link href="/book" style={{
             padding: '18px 48px',
             fontSize: 18,
@@ -594,7 +607,7 @@ export default function LandingPage() {
       </footer>
 
       {/* Sticky mobile Book Now bar */}
-      <div className="sticky-book-bar" style={{
+      <div className={`sticky-book-bar ${showStickyBar ? 'visible' : ''}`} style={{
         display: 'none',
         position: 'fixed',
         bottom: 0,

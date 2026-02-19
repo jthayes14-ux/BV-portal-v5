@@ -2,26 +2,26 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 
-function Logo({ size = 'normal' }) {
+function Logo({ size = 'normal', color = '#B8C5F2' }) {
   const isLarge = size === 'large';
   return (
     <div style={{ display: 'flex', gap: isLarge ? 8 : 4 }}>
       <div style={{
         width: isLarge ? 20 : 8,
         height: isLarge ? 56 : 28,
-        background: '#B8C5F2',
+        background: color,
         borderRadius: 3
       }} />
       <div style={{
         width: isLarge ? 20 : 8,
         height: isLarge ? 56 : 28,
-        background: '#B8C5F2',
+        background: color,
         borderRadius: 3
       }} />
       <div style={{
         width: isLarge ? 20 : 8,
         height: isLarge ? 56 : 28,
-        background: '#B8C5F2',
+        background: color,
         borderRadius: 3
       }} />
     </div>
@@ -163,6 +163,7 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <section className="hero-section" style={{
+        position: 'relative',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -170,68 +171,81 @@ export default function LandingPage() {
         minHeight: '90vh',
         padding: '60px 24px',
         textAlign: 'center',
-        background: `linear-gradient(180deg, ${brand.bg} 0%, ${brand.primaryLight} 100%)`
+        backgroundImage: 'url("https://images.unsplash.com/photo-1514924013411-cbf25faa35bb?auto=format&fit=crop&w=1920&q=80")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
       }}>
-        <div style={{ marginBottom: 40 }}>
-          <Logo size="large" />
-        </div>
+        {/* Navy overlay */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'rgba(27, 43, 90, 0.70)'
+        }} />
 
-        <h1 style={{
-          fontSize: 52,
-          fontWeight: 600,
-          color: brand.text,
-          lineHeight: 1.2,
-          marginBottom: 20,
-          maxWidth: 600
-        }}>
-          Crystal clear views,
-          <br />
-          one tap away
-        </h1>
+        {/* Hero content */}
+        <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div style={{ marginBottom: 40 }}>
+            <Logo size="large" color="rgba(255, 255, 255, 0.85)" />
+          </div>
 
-        <p style={{
-          fontSize: 20,
-          color: brand.textLight,
-          lineHeight: 1.6,
-          marginBottom: 40,
-          maxWidth: 500
-        }}>
-          Professional window cleaning for Miami's finest high-rises.
-          <br />
-          No account needed. No quotes. No waiting.
-        </p>
-
-        <div className="hero-buttons" style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          <Link href="/book" style={{
-            padding: '20px 56px',
-            fontSize: 20,
-            fontWeight: 700,
-            background: '#1B2B5A',
-            border: 'none',
-            borderRadius: 12,
+          <h1 style={{
+            fontSize: 52,
+            fontWeight: 600,
             color: '#FFFFFF',
-            cursor: 'pointer',
-            textDecoration: 'none',
-            boxShadow: '0 4px 20px rgba(27, 43, 90, 0.4)',
-            letterSpacing: '0.03em',
-            textTransform: 'uppercase',
-            transition: 'all 0.3s ease'
+            lineHeight: 1.2,
+            marginBottom: 20,
+            maxWidth: 600
           }}>
-            Book Now
-          </Link>
-          <Link href="/login" style={{
-            padding: '16px 32px',
-            fontSize: 16,
-            fontWeight: 500,
-            background: 'transparent',
-            border: `1px solid ${brand.primaryDark}`,
-            borderRadius: 10,
-            color: brand.textLight,
-            cursor: 'pointer',
-            textDecoration: 'none'
+            Crystal clear views,
+            <br />
+            one tap away
+          </h1>
+
+          <p style={{
+            fontSize: 20,
+            color: 'rgba(255, 255, 255, 0.8)',
+            lineHeight: 1.6,
+            marginBottom: 40,
+            maxWidth: 500
           }}>
-            Log In
-          </Link>
+            Professional window cleaning for Miami's finest high-rises.
+            <br />
+            No account needed. No quotes. No waiting.
+          </p>
+
+          <div className="hero-buttons" style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+            <Link href="/book" style={{
+              padding: '20px 56px',
+              fontSize: 20,
+              fontWeight: 700,
+              background: '#FFFFFF',
+              border: 'none',
+              borderRadius: 12,
+              color: '#1B2B5A',
+              cursor: 'pointer',
+              textDecoration: 'none',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)',
+              letterSpacing: '0.03em',
+              textTransform: 'uppercase',
+              transition: 'all 0.3s ease'
+            }}>
+              Book Now
+            </Link>
+            <Link href="/login" style={{
+              padding: '16px 32px',
+              fontSize: 16,
+              fontWeight: 500,
+              background: 'transparent',
+              border: '1px solid rgba(255, 255, 255, 0.6)',
+              borderRadius: 10,
+              color: '#FFFFFF',
+              cursor: 'pointer',
+              textDecoration: 'none'
+            }}>
+              Log In
+            </Link>
+          </div>
         </div>
       </section>
 

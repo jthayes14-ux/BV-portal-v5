@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '../../lib/supabase';
-import { useAuth } from '../../lib/useAuth';
 
 function Logo() {
   return (
@@ -31,7 +30,6 @@ const recurrenceOptions = [
 
 export default function BookingFlow() {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
 
   const [neighborhoods, setNeighborhoods] = useState([]);
   const [buildings, setBuildings] = useState([]);
@@ -50,6 +48,13 @@ export default function BookingFlow() {
   const [focusedField, setFocusedField] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Contact info fields
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [specialInstructions, setSpecialInstructions] = useState('');
+
   const brand = {
     primary: '#B8C5F2', primaryDark: '#9AA8E0', primaryLight: '#E8EDFC',
     gold: '#C9B037', goldLight: '#F5F0DC', goldDark: '#A69028',
@@ -58,12 +63,8 @@ export default function BookingFlow() {
   };
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
-      return;
-    }
-    if (!authLoading && user) loadData();
-  }, [authLoading, user]);
+    loadData();
+  }, []);
 
   const loadData = async () => {
     const [nRes, aoRes] = await Promise.all([
@@ -95,7 +96,9 @@ export default function BookingFlow() {
   }, 0);
 
   const total = (Number(selectedPlan?.price) || 0) + addOnsTotal;
-  const canBook = neighborhood && buildingId && floorPlanId && unit && date && time;
+  const serviceSelected = neighborhood && buildingId && floorPlanId && unit && date && time;
+  const contactValid = firstName.trim() && lastName.trim() && email.trim() && phone.trim();
+  const canBook = serviceSelected && contactValid;
   const today = new Date().toISOString().split('T')[0];
 
   const handleContinue = () => {
@@ -115,6 +118,11 @@ export default function BookingFlow() {
       }),
       add_ons_total: addOnsTotal,
       total,
+      guest_first_name: firstName.trim(),
+      guest_last_name: lastName.trim(),
+      guest_email: email.trim(),
+      guest_phone: phone.trim(),
+      special_instructions: specialInstructions.trim(),
     };
     localStorage.setItem('pendingBooking', JSON.stringify(bookingData));
     router.push('/checkout');
@@ -151,7 +159,7 @@ export default function BookingFlow() {
     setSelectedAddOns(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   };
 
-  if (authLoading || dataLoading) {
+  if (dataLoading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: brand.bg }}>
         <p style={{ color: brand.textLight }}>Loading...</p>
@@ -300,6 +308,40 @@ export default function BookingFlow() {
             )}
           </div>
         </div>
+
+        {/* Contact Information */}
+        {serviceSelected && (
+          <div style={{ marginTop: 32, background: brand.bgCard, borderRadius: 24, padding: '40px 36px', boxShadow: '0 8px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04)', border: `1px solid ${brand.borderLight}`, animation: 'fadeIn 0.4s ease' }}>
+            <div style={{ marginBottom: 28 }}>
+              <h2 style={{ fontSize: 20, fontWeight: 600, color: brand.text, marginBottom: 4, fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 28, fontWeight: 400 }}>Your Information</h2>
+              <p style={{ fontSize: 14, color: brand.textLight }}>How can we reach you about your booking?</p>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <div>
+                  <label style={labelStyle}>First Name *</label>
+                  <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} onFocus={() => setFocusedField('firstName')} onBlur={() => setFocusedField(null)} placeholder="First name" style={getInputStyle('firstName')} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Last Name *</label>
+                  <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} onFocus={() => setFocusedField('lastName')} onBlur={() => setFocusedField(null)} placeholder="Last name" style={getInputStyle('lastName')} />
+                </div>
+              </div>
+              <div>
+                <label style={labelStyle}>Email *</label>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} onFocus={() => setFocusedField('email')} onBlur={() => setFocusedField(null)} placeholder="you@email.com" style={getInputStyle('email')} />
+              </div>
+              <div>
+                <label style={labelStyle}>Phone Number *</label>
+                <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} onFocus={() => setFocusedField('phone')} onBlur={() => setFocusedField(null)} placeholder="(555) 123-4567" style={getInputStyle('phone')} />
+              </div>
+              <div>
+                <label style={labelStyle}>Special Instructions</label>
+                <textarea value={specialInstructions} onChange={(e) => setSpecialInstructions(e.target.value)} onFocus={() => setFocusedField('specialInstructions')} onBlur={() => setFocusedField(null)} placeholder="Any special requests or access instructions..." rows={3} style={{ ...getInputStyle('specialInstructions'), resize: 'vertical', minHeight: 80, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }} />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Total & Book */}
         {time && (

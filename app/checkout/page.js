@@ -17,12 +17,12 @@ function Logo() {
 
 export default function PaymentFlow() {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { user, signUp } = useAuth();
   const [step, setStep] = useState('payment');
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
   const [cvc, setCvc] = useState('');
-  const [name, setName] = useState('');
+  const [nameOnCard, setNameOnCard] = useState('');
   const [saveCard, setSaveCard] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [booking, setBooking] = useState(null);
@@ -32,25 +32,30 @@ export default function PaymentFlow() {
   const [discountError, setDiscountError] = useState('');
   const [applyingDiscount, setApplyingDiscount] = useState(false);
 
+  // Account creation state
+  const [savedBookingId, setSavedBookingId] = useState(null);
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [accountError, setAccountError] = useState('');
+  const [creatingAccount, setCreatingAccount] = useState(false);
+  const [accountCreated, setAccountCreated] = useState(false);
+
   const brand = {
     primary: '#B8C5F2', text: '#1a1a1a', textLight: '#666',
     border: '#e0e0e0', bg: '#fafafa', white: '#ffffff', success: '#22c55e',
+    gold: '#C9B037', goldDark: '#A69028',
   };
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
-      return;
-    }
     const stored = localStorage.getItem('pendingBooking');
     if (stored) {
       setBooking(JSON.parse(stored));
     } else {
       router.push('/book');
     }
-  }, [authLoading, user]);
+  }, []);
 
-  if (!booking || authLoading) {
+  if (!booking) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: brand.bg }}>
         <p style={{ color: brand.textLight }}>Loading...</p>
@@ -128,9 +133,9 @@ export default function PaymentFlow() {
     setError('');
 
     const bookingRecord = {
-      user_id: user.id,
-      customer_name: user.user_metadata?.full_name || name,
-      customer_email: user.email,
+      user_id: user?.id || null,
+      customer_name: `${booking.guest_first_name} ${booking.guest_last_name}`,
+      customer_email: booking.guest_email,
       neighborhood: booking.neighborhood_name,
       building: booking.building_name,
       building_id: booking.building_id,
@@ -145,6 +150,11 @@ export default function PaymentFlow() {
       add_ons_total: booking.add_ons_total,
       total_price: total,
       status: 'upcoming',
+      guest_first_name: booking.guest_first_name,
+      guest_last_name: booking.guest_last_name,
+      guest_email: booking.guest_email,
+      guest_phone: booking.guest_phone,
+      special_instructions: booking.special_instructions || null,
     };
 
     if (appliedDiscount) {
@@ -152,7 +162,11 @@ export default function PaymentFlow() {
       bookingRecord.discount_amount = discountAmount;
     }
 
-    const { error: insertError } = await supabase.from('bookings').insert(bookingRecord);
+    const { data: insertedBooking, error: insertError } = await supabase
+      .from('bookings')
+      .insert(bookingRecord)
+      .select('id')
+      .single();
 
     if (!insertError && appliedDiscount) {
       await supabase.rpc('decrement_discount_uses', { code_id: appliedDiscount.id });
@@ -164,12 +178,63 @@ export default function PaymentFlow() {
       return;
     }
 
+    setSavedBookingId(insertedBooking?.id || null);
     localStorage.removeItem('pendingBooking');
     setProcessing(false);
     setStep('confirmation');
   };
 
-  const isFormValid = cardNumber.length >= 19 && expiry.length >= 7 && cvc.length >= 3 && name.length > 0;
+  const handleCreateAccount = async () => {
+    setAccountError('');
+
+    if (password.length < 6) {
+      setAccountError('Password must be at least 6 characters');
+      return;
+    }
+    if (password !== confirmPassword) {
+      setAccountError('Passwords do not match');
+      return;
+    }
+
+    setCreatingAccount(true);
+
+    const { data: signUpData, error: signUpError } = await signUp(
+      booking.guest_email,
+      password,
+      `${booking.guest_first_name} ${booking.guest_last_name}`
+    );
+
+    if (signUpError) {
+      setAccountError(signUpError.message);
+      setCreatingAccount(false);
+      return;
+    }
+
+    const newUserId = signUpData?.user?.id;
+
+    if (newUserId) {
+      // Save to user_profiles
+      await supabase.from('user_profiles').insert({
+        user_id: newUserId,
+        first_name: booking.guest_first_name,
+        last_name: booking.guest_last_name,
+        phone: booking.guest_phone,
+      });
+
+      // Link booking to new user
+      if (savedBookingId) {
+        await supabase
+          .from('bookings')
+          .update({ user_id: newUserId })
+          .eq('id', savedBookingId);
+      }
+    }
+
+    setCreatingAccount(false);
+    setAccountCreated(true);
+  };
+
+  const isFormValid = cardNumber.length >= 19 && expiry.length >= 7 && cvc.length >= 3 && nameOnCard.length > 0;
 
   const inputStyle = {
     width: '100%', padding: '16px', fontSize: 16,
@@ -207,7 +272,7 @@ export default function PaymentFlow() {
             <div style={{ background: brand.white, borderRadius: 12, border: `1px solid ${brand.border}`, padding: 24 }}>
               <div style={{ marginBottom: 20 }}>
                 <label style={labelStyle}>Name on card</label>
-                <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="John Smith" style={inputStyle} />
+                <input type="text" value={nameOnCard} onChange={(e) => setNameOnCard(e.target.value)} placeholder="John Smith" style={inputStyle} />
               </div>
               <div style={{ marginBottom: 20 }}>
                 <label style={labelStyle}>Card number</label>
@@ -263,6 +328,14 @@ export default function PaymentFlow() {
                   </p>
                 )}
               </div>
+
+              {/* Guest info summary */}
+              <div style={{ background: brand.bg, borderRadius: 8, padding: 12, marginBottom: 20 }}>
+                <p style={{ fontWeight: 500, color: brand.text, marginBottom: 2 }}>{booking.guest_first_name} {booking.guest_last_name}</p>
+                <p style={{ fontSize: 14, color: brand.textLight }}>{booking.guest_email}</p>
+                <p style={{ fontSize: 14, color: brand.textLight }}>{booking.guest_phone}</p>
+              </div>
+
               <div style={{ borderTop: `1px solid ${brand.border}`, paddingTop: 16 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, fontSize: 14 }}>
                   <span style={{ color: brand.textLight }}>Window cleaning</span>
@@ -354,7 +427,7 @@ export default function PaymentFlow() {
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
           <h1 style={{ fontSize: 28, fontWeight: 600, color: brand.text, marginBottom: 8 }}>Booking Confirmed!</h1>
-          <p style={{ color: brand.textLight, marginBottom: 32 }}>We have sent a confirmation to your email</p>
+          <p style={{ color: brand.textLight, marginBottom: 32 }}>A confirmation has been sent to {booking.guest_email}</p>
 
           <div style={{ background: brand.white, borderRadius: 12, border: `1px solid ${brand.border}`, padding: 24, textAlign: 'left', marginBottom: 32 }}>
             <div style={{ marginBottom: 20 }}>
@@ -379,12 +452,128 @@ export default function PaymentFlow() {
             </div>
           </div>
 
+          {/* Account Creation Prompt */}
+          {!user && !accountCreated && (
+            <div style={{ background: brand.white, borderRadius: 12, border: `1px solid ${brand.border}`, padding: 24, textAlign: 'left', marginBottom: 32 }}>
+              <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={brand.gold} strokeWidth="2" style={{ marginBottom: 8 }}>
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <h3 style={{ fontSize: 18, fontWeight: 600, color: brand.text, marginBottom: 4 }}>Create a password to track your bookings</h3>
+                <p style={{ fontSize: 14, color: brand.textLight }}>Manage, reschedule, and view your booking history</p>
+              </div>
+
+              {accountError && (
+                <div style={{ padding: '10px 14px', background: '#FEE2E2', borderRadius: 8, marginBottom: 16, fontSize: 13, color: '#DC2626' }}>
+                  {accountError}
+                </div>
+              )}
+
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', fontSize: 14, fontWeight: 500, color: brand.text, marginBottom: 6 }}>Password</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Minimum 6 characters"
+                  style={{ width: '100%', padding: '14px 16px', fontSize: 15, border: `1px solid ${brand.border}`, borderRadius: 8, boxSizing: 'border-box', background: brand.white }}
+                />
+              </div>
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', fontSize: 14, fontWeight: 500, color: brand.text, marginBottom: 6 }}>Confirm Password</label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Re-enter your password"
+                  style={{ width: '100%', padding: '14px 16px', fontSize: 15, border: `1px solid ${brand.border}`, borderRadius: 8, boxSizing: 'border-box', background: brand.white }}
+                />
+              </div>
+
+              <button
+                onClick={handleCreateAccount}
+                disabled={creatingAccount || !password || !confirmPassword}
+                style={{
+                  width: '100%', padding: '16px', fontSize: 15, fontWeight: 600,
+                  background: !creatingAccount && password && confirmPassword ? brand.text : brand.border,
+                  color: !creatingAccount && password && confirmPassword ? brand.white : '#999',
+                  border: 'none', borderRadius: 8,
+                  cursor: !creatingAccount && password && confirmPassword ? 'pointer' : 'not-allowed',
+                  marginBottom: 12,
+                }}
+              >
+                {creatingAccount ? 'Creating Account...' : 'Create Account'}
+              </button>
+
+              <div style={{ textAlign: 'center' }}>
+                <button
+                  onClick={() => setStep('done')}
+                  style={{ background: 'none', border: 'none', color: brand.textLight, fontSize: 14, cursor: 'pointer', textDecoration: 'underline', padding: '8px 16px' }}
+                >
+                  Skip for now
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Account Created Success */}
+          {accountCreated && (
+            <div style={{ background: '#F0FDF4', borderRadius: 12, border: '1px solid #BBF7D0', padding: 20, textAlign: 'center', marginBottom: 32 }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2" style={{ marginBottom: 8 }}>
+                <path d="M20 6L9 17l-5-5"/>
+              </svg>
+              <p style={{ fontSize: 15, fontWeight: 600, color: '#16A34A' }}>Account created successfully!</p>
+              <p style={{ fontSize: 13, color: '#15803D', marginTop: 4 }}>You can now track and manage your bookings.</p>
+            </div>
+          )}
+
           <div className="confirmation-buttons" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/dashboard" style={{ padding: '14px 28px', fontSize: 15, fontWeight: 600, background: brand.primary, border: 'none', borderRadius: 8, color: brand.text, textDecoration: 'none' }}>
-              View My Bookings
-            </Link>
+            {(user || accountCreated) && (
+              <Link href="/dashboard" style={{ padding: '14px 28px', fontSize: 15, fontWeight: 600, background: brand.primary, border: 'none', borderRadius: 8, color: brand.text, textDecoration: 'none' }}>
+                View My Bookings
+              </Link>
+            )}
             <Link href="/book" style={{ padding: '14px 28px', fontSize: 15, fontWeight: 600, background: brand.white, border: `1px solid ${brand.border}`, borderRadius: 8, color: brand.text, textDecoration: 'none' }}>
               Book Another
+            </Link>
+          </div>
+          <p style={{ fontSize: 13, color: brand.textLight, marginTop: 32 }}>Questions? Contact us at hello@betterview.com</p>
+        </main>
+      )}
+
+      {step === 'done' && (
+        <main style={{ maxWidth: 500, margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
+          <div style={{ width: 80, height: 80, background: brand.success, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h1 style={{ fontSize: 28, fontWeight: 600, color: brand.text, marginBottom: 8 }}>You're All Set!</h1>
+          <p style={{ color: brand.textLight, marginBottom: 32 }}>Your booking confirmation has been sent to {booking.guest_email}</p>
+
+          <div style={{ background: brand.white, borderRadius: 12, border: `1px solid ${brand.border}`, padding: 24, textAlign: 'left', marginBottom: 32 }}>
+            <div style={{ marginBottom: 20 }}>
+              <p style={{ fontSize: 13, color: brand.textLight, marginBottom: 4 }}>PROPERTY</p>
+              <p style={{ fontWeight: 600, color: brand.text }}>{booking.building_name}</p>
+              <p style={{ fontSize: 14, color: brand.textLight }}>Unit {booking.unit}</p>
+            </div>
+            <div style={{ marginBottom: 20 }}>
+              <p style={{ fontSize: 13, color: brand.textLight, marginBottom: 4 }}>DATE & TIME</p>
+              <p style={{ fontWeight: 600, color: brand.text }}>{formatDate(booking.date)}</p>
+              <p style={{ fontSize: 14, color: brand.textLight }}>{booking.time_slot}</p>
+            </div>
+            <div>
+              <p style={{ fontSize: 13, color: brand.textLight, marginBottom: 4 }}>TOTAL</p>
+              <p style={{ fontSize: 24, fontWeight: 700, color: brand.text }}>${total.toFixed(2)}</p>
+              <p style={{ fontSize: 13, color: brand.textLight }}>Charged after service</p>
+            </div>
+          </div>
+
+          <div className="confirmation-buttons" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link href="/book" style={{ padding: '14px 28px', fontSize: 15, fontWeight: 600, background: brand.primary, border: 'none', borderRadius: 8, color: brand.text, textDecoration: 'none' }}>
+              Book Another Service
+            </Link>
+            <Link href="/" style={{ padding: '14px 28px', fontSize: 15, fontWeight: 600, background: brand.white, border: `1px solid ${brand.border}`, borderRadius: 8, color: brand.text, textDecoration: 'none' }}>
+              Back to Home
             </Link>
           </div>
           <p style={{ fontSize: 13, color: brand.textLight, marginTop: 32 }}>Questions? Contact us at hello@betterview.com</p>

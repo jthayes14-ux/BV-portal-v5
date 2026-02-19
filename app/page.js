@@ -74,7 +74,7 @@ export default function LandingPage() {
     primaryLight: '#E8EDFC',
     text: '#2D3748',
     textLight: '#718096',
-    bg: '#F8FAFF',
+    bg: '#FFFFFF',
   };
 
   return (
@@ -170,7 +170,7 @@ export default function LandingPage() {
         minHeight: '90vh',
         padding: '60px 24px',
         textAlign: 'center',
-        background: `linear-gradient(180deg, ${brand.bg} 0%, ${brand.primaryLight} 100%)`
+        background: '#FFFFFF'
       }}>
         <div style={{ marginBottom: 40 }}>
           <Logo size="large" />

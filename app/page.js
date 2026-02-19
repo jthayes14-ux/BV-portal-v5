@@ -10,19 +10,19 @@ function Logo({ size = 'normal' }) {
         width: isLarge ? 20 : 8,
         height: isLarge ? 56 : 28,
         background: '#B8C5F2',
-        borderRadius: 3
+        borderRadius: 0
       }} />
       <div style={{
         width: isLarge ? 20 : 8,
         height: isLarge ? 56 : 28,
         background: '#B8C5F2',
-        borderRadius: 3
+        borderRadius: 0
       }} />
       <div style={{
         width: isLarge ? 20 : 8,
         height: isLarge ? 56 : 28,
         background: '#B8C5F2',
-        borderRadius: 3
+        borderRadius: 0
       }} />
     </div>
   );
@@ -74,7 +74,7 @@ export default function LandingPage() {
     primaryLight: '#E8EDFC',
     text: '#2D3748',
     textLight: '#718096',
-    bg: '#F8FAFF',
+    bg: '#FFFFFF',
   };
 
   return (
@@ -170,12 +170,8 @@ export default function LandingPage() {
         minHeight: '90vh',
         padding: '60px 24px',
         textAlign: 'center',
-        background: `linear-gradient(180deg, ${brand.bg} 0%, ${brand.primaryLight} 100%)`
+        background: '#FFFFFF'
       }}>
-        <div style={{ marginBottom: 40 }}>
-          <Logo size="large" />
-        </div>
-
         <h1 style={{
           fontSize: 52,
           fontWeight: 600,
@@ -184,9 +180,7 @@ export default function LandingPage() {
           marginBottom: 20,
           maxWidth: 600
         }}>
-          Crystal clear views,
-          <br />
-          one tap away
+          Crystal clear views, one tap away.
         </h1>
 
         <p style={{
@@ -196,41 +190,24 @@ export default function LandingPage() {
           marginBottom: 40,
           maxWidth: 500
         }}>
-          Professional window cleaning for Miami's finest high-rises.
-          <br />
-          No account needed. No quotes. No waiting.
+          Professional window cleaning for Miami&#39;s finest high-rises.
         </p>
 
         <div className="hero-buttons" style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
           <Link href="/book" style={{
-            padding: '20px 56px',
-            fontSize: 20,
-            fontWeight: 700,
-            background: '#1B2B5A',
+            padding: '18px 48px',
+            fontSize: 18,
+            fontWeight: 600,
+            background: '#B8C5F2',
             border: 'none',
-            borderRadius: 12,
-            color: '#FFFFFF',
+            borderRadius: 9999,
+            color: brand.text,
             cursor: 'pointer',
             textDecoration: 'none',
-            boxShadow: '0 4px 20px rgba(27, 43, 90, 0.4)',
-            letterSpacing: '0.03em',
-            textTransform: 'uppercase',
+            letterSpacing: '0.02em',
             transition: 'all 0.3s ease'
           }}>
             Book Now
-          </Link>
-          <Link href="/login" style={{
-            padding: '16px 32px',
-            fontSize: 16,
-            fontWeight: 500,
-            background: 'transparent',
-            border: `1px solid ${brand.primaryDark}`,
-            borderRadius: 10,
-            color: brand.textLight,
-            cursor: 'pointer',
-            textDecoration: 'none'
-          }}>
-            Log In
           </Link>
         </div>
       </section>

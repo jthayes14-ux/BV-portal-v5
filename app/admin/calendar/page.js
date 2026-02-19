@@ -8,9 +8,9 @@ import { useAuth } from '../../../lib/useAuth';
 function Logo() {
   return (
     <div style={{ display: 'flex', gap: 4 }}>
-      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 3 }} />
-      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 3 }} />
-      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 3 }} />
+      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
+      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
+      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
     </div>
   );
 }

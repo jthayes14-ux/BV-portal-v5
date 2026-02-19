@@ -88,64 +88,83 @@ export default function AdminPanel() {
     return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
+  const [crudError, setCrudError] = useState('');
+
   // Generic CRUD
   const handleAdd = async (type) => {
+    setCrudError('');
     let result;
     switch (type) {
       case 'neighborhoods':
         result = await supabase.from('neighborhoods').insert({ name: 'New Neighborhood' }).select().single();
+        if (result.error) { setCrudError('Failed to add: ' + result.error.message); return; }
         if (result.data) { setNeighborhoods([...neighborhoods, result.data]); setEditingId(`neighborhood-${result.data.id}`); setEditValue({ name: 'New Neighborhood' }); }
         break;
       case 'buildings':
         result = await supabase.from('buildings').insert({ name: 'New Building', address: '', neighborhood_id: neighborhoods[0]?.id }).select().single();
+        if (result.error) { setCrudError('Failed to add: ' + result.error.message); return; }
         if (result.data) { setBuildings([...buildings, result.data]); setEditingId(`building-${result.data.id}`); setEditValue({ name: 'New Building', address: '', neighborhood_id: neighborhoods[0]?.id }); }
         break;
       case 'floorplans':
         result = await supabase.from('floor_plans').insert({ name: 'New Floor Plan', price: 0, building_id: buildings[0]?.id }).select().single();
+        if (result.error) { setCrudError('Failed to add: ' + result.error.message); return; }
         if (result.data) { setFloorPlans([...floorPlans, result.data]); setEditingId(`floorplan-${result.data.id}`); setEditValue({ name: 'New Floor Plan', price: 0, building_id: buildings[0]?.id }); }
         break;
       case 'addons':
         result = await supabase.from('add_ons').insert({ name: 'New Add-On', price: 0 }).select().single();
+        if (result.error) { setCrudError('Failed to add: ' + result.error.message); return; }
         if (result.data) { setAddOns([...addOns, result.data]); setEditingId(`addon-${result.data.id}`); setEditValue({ name: 'New Add-On', price: 0 }); }
         break;
       case 'workers':
         result = await supabase.from('workers').insert({ name: 'New Worker', email: '', phone: '' }).select().single();
+        if (result.error) { setCrudError('Failed to add: ' + result.error.message); return; }
         if (result.data) { setWorkers([...workers, result.data]); setEditingId(`worker-${result.data.id}`); setEditValue({ name: 'New Worker', email: '', phone: '' }); }
         break;
-      case 'frequencies':
+      case 'frequencies': {
         const maxSort = frequencies.reduce((max, f) => Math.max(max, f.sort_order || 0), 0);
         result = await supabase.from('frequencies').insert({ name: 'New Frequency', discount_percent: 0, interval_days: 0, sort_order: maxSort + 1 }).select().single();
+        if (result.error) { setCrudError('Failed to add: ' + result.error.message); return; }
         if (result.data) { setFrequencies([...frequencies, result.data]); setEditingId(`frequency-${result.data.id}`); setEditValue({ name: 'New Frequency', discount_percent: 0, interval_days: 0, sort_order: maxSort + 1 }); }
         break;
+      }
     }
   };
 
   const handleSave = async (type, id) => {
+    setCrudError('');
+    let result;
     switch (type) {
       case 'neighborhoods':
-        await supabase.from('neighborhoods').update({ name: editValue.name }).eq('id', id);
-        setNeighborhoods(neighborhoods.map(n => n.id === id ? { ...n, ...editValue } : n));
+        result = await supabase.from('neighborhoods').update({ name: editValue.name }).eq('id', id);
         break;
       case 'buildings':
-        await supabase.from('buildings').update(editValue).eq('id', id);
-        setBuildings(buildings.map(b => b.id === id ? { ...b, ...editValue } : b));
+        result = await supabase.from('buildings').update(editValue).eq('id', id);
         break;
       case 'floorplans':
-        await supabase.from('floor_plans').update(editValue).eq('id', id);
-        setFloorPlans(floorPlans.map(f => f.id === id ? { ...f, ...editValue } : f));
+        result = await supabase.from('floor_plans').update(editValue).eq('id', id);
         break;
       case 'addons':
-        await supabase.from('add_ons').update(editValue).eq('id', id);
-        setAddOns(addOns.map(a => a.id === id ? { ...a, ...editValue } : a));
+        result = await supabase.from('add_ons').update(editValue).eq('id', id);
         break;
       case 'workers':
-        await supabase.from('workers').update(editValue).eq('id', id);
-        setWorkers(workers.map(w => w.id === id ? { ...w, ...editValue } : w));
+        result = await supabase.from('workers').update(editValue).eq('id', id);
         break;
       case 'frequencies':
-        await supabase.from('frequencies').update(editValue).eq('id', id);
-        setFrequencies(frequencies.map(f => f.id === id ? { ...f, ...editValue } : f));
+        result = await supabase.from('frequencies').update(editValue).eq('id', id);
         break;
+    }
+    if (result?.error) {
+      setCrudError('Failed to save: ' + result.error.message);
+      return;
+    }
+    // Update local state only on success
+    switch (type) {
+      case 'neighborhoods': setNeighborhoods(neighborhoods.map(n => n.id === id ? { ...n, ...editValue } : n)); break;
+      case 'buildings': setBuildings(buildings.map(b => b.id === id ? { ...b, ...editValue } : b)); break;
+      case 'floorplans': setFloorPlans(floorPlans.map(f => f.id === id ? { ...f, ...editValue } : f)); break;
+      case 'addons': setAddOns(addOns.map(a => a.id === id ? { ...a, ...editValue } : a)); break;
+      case 'workers': setWorkers(workers.map(w => w.id === id ? { ...w, ...editValue } : w)); break;
+      case 'frequencies': setFrequencies(frequencies.map(f => f.id === id ? { ...f, ...editValue } : f)); break;
     }
     setEditingId(null);
     setEditValue({});
@@ -153,8 +172,13 @@ export default function AdminPanel() {
 
   const handleDelete = async (type, id) => {
     if (!confirm('Are you sure you want to delete this?')) return;
+    setCrudError('');
     const tableMap = { neighborhoods: 'neighborhoods', buildings: 'buildings', floorplans: 'floor_plans', addons: 'add_ons', workers: 'workers', frequencies: 'frequencies' };
-    await supabase.from(tableMap[type]).delete().eq('id', id);
+    const { error: deleteError } = await supabase.from(tableMap[type]).delete().eq('id', id);
+    if (deleteError) {
+      setCrudError('Failed to delete: ' + deleteError.message);
+      return;
+    }
     switch (type) {
       case 'neighborhoods': setNeighborhoods(neighborhoods.filter(n => n.id !== id)); break;
       case 'buildings': setBuildings(buildings.filter(b => b.id !== id)); break;
@@ -265,6 +289,13 @@ export default function AdminPanel() {
         </aside>
 
         <main className="admin-main" style={{ flex: 1, padding: 32 }}>
+
+          {crudError && (
+            <div style={{ padding: '12px 16px', background: '#FEE2E2', borderRadius: 8, marginBottom: 20, fontSize: 14, color: '#DC2626', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>{crudError}</span>
+              <button onClick={() => setCrudError('')} style={{ background: 'none', border: 'none', color: '#DC2626', fontWeight: 600, cursor: 'pointer', fontSize: 16 }}>&times;</button>
+            </div>
+          )}
 
           {/* BOOKINGS TAB */}
           {activeTab === 'bookings' && (

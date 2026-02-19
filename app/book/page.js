@@ -48,6 +48,7 @@ export default function BookingFlow() {
   const [recurrence, setRecurrence] = useState('one-time');
   const [selectedAddOns, setSelectedAddOns] = useState([]);
   const [focusedField, setFocusedField] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const brand = {
     primary: '#B8C5F2', primaryDark: '#9AA8E0', primaryLight: '#E8EDFC',
@@ -160,14 +161,34 @@ export default function BookingFlow() {
 
   return (
     <div style={{ minHeight: '100vh', background: `linear-gradient(180deg, ${brand.bg} 0%, ${brand.primaryLight} 100%)`, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
-      <header style={{ padding: '20px 40px', background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(20px)', borderBottom: `1px solid ${brand.borderLight}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+      <header className="booking-header" style={{ padding: '20px 40px', background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(20px)', borderBottom: `1px solid ${brand.borderLight}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
           <Logo />
           <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
         </Link>
-        <Link href="/dashboard" style={{ padding: '12px 28px', fontSize: 14, fontWeight: 500, background: 'transparent', border: `1px solid ${brand.border}`, borderRadius: 8, textDecoration: 'none', color: brand.text, letterSpacing: '0.02em' }}>
-          My Bookings
-        </Link>
+        <div className="desktop-nav">
+          <Link href="/dashboard" style={{ padding: '12px 28px', fontSize: 14, fontWeight: 500, background: 'transparent', border: `1px solid ${brand.border}`, borderRadius: 8, textDecoration: 'none', color: brand.text, letterSpacing: '0.02em' }}>
+            My Bookings
+          </Link>
+        </div>
+
+        <button className="mobile-nav-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
+          {mobileMenuOpen ? (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          ) : (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          )}
+        </button>
+
+        <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
+          <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} style={{ padding: '14px 16px', fontSize: 16, fontWeight: 500, border: `1px solid ${brand.border}`, borderRadius: 8, textDecoration: 'none', color: brand.text, textAlign: 'center' }}>
+            My Bookings
+          </Link>
+        </div>
       </header>
 
       <main className="booking-main" style={{ maxWidth: 580, margin: '0 auto', padding: '64px 24px 100px' }}>

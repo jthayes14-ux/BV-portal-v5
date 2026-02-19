@@ -10,10 +10,203 @@ html, body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: #fafafa;
   color: #1a1a1a;
+  -webkit-text-size-adjust: 100%;
 }
 
-/* Mobile responsive utilities */
+/* ===== Hamburger Menu System ===== */
+.mobile-nav-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: none;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #2D3748;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.mobile-menu {
+  display: none;
+}
+
+.mobile-menu.open {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  padding: 16px;
+  gap: 8px;
+  z-index: 200;
+  animation: slideDown 0.2s ease;
+}
+
+.mobile-menu.open a,
+.mobile-menu.open button {
+  width: 100%;
+  padding: 14px 16px !important;
+  font-size: 16px !important;
+  text-align: center;
+  border-radius: 8px !important;
+  text-decoration: none;
+  display: block;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Tablet breakpoint (768px) ===== */
 @media (max-width: 768px) {
+  /* --- Hamburger Menu --- */
+  .mobile-nav-toggle {
+    display: flex;
+  }
+  .desktop-nav {
+    display: none !important;
+  }
+
+  /* --- Landing Page --- */
+  .landing-header {
+    padding: 16px !important;
+    position: relative;
+  }
+  .hero-section {
+    min-height: 70vh !important;
+    padding: 40px 20px !important;
+  }
+  .hero-section h1 {
+    font-size: 36px !important;
+  }
+  .hero-section p {
+    font-size: 17px !important;
+  }
+  .hero-buttons {
+    flex-direction: column !important;
+    width: 100%;
+    max-width: 320px;
+  }
+  .hero-buttons a {
+    width: 100% !important;
+    text-align: center;
+  }
+  .features-grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+  .steps-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 24px !important;
+  }
+  .footer-content {
+    flex-direction: column !important;
+    gap: 16px !important;
+    text-align: center;
+  }
+  .footer-links {
+    flex-direction: column !important;
+    gap: 8px !important;
+    text-align: center;
+  }
+  .section-heading {
+    font-size: 28px !important;
+  }
+  .cta-section h2 {
+    font-size: 28px !important;
+  }
+
+  /* --- Auth Pages (Login / Worker Login) --- */
+  .auth-header {
+    padding: 16px !important;
+    position: relative;
+  }
+  .auth-form-card {
+    padding: 32px 24px !important;
+    margin: 0 12px;
+    border-radius: 16px !important;
+  }
+  .header-actions {
+    gap: 8px !important;
+  }
+
+  /* --- Booking Page --- */
+  .booking-header {
+    padding: 16px !important;
+    position: relative;
+  }
+  .booking-main {
+    padding: 32px 16px 60px !important;
+  }
+  .booking-main h1 {
+    font-size: 32px !important;
+  }
+  .booking-form {
+    padding: 24px 20px !important;
+    border-radius: 16px !important;
+  }
+  .trust-indicators {
+    gap: 20px !important;
+  }
+
+  /* --- Checkout Page --- */
+  .checkout-header {
+    padding: 16px !important;
+  }
+  .checkout-grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+    padding: 32px 16px !important;
+  }
+
+  /* --- Dashboard Page --- */
+  .dashboard-header {
+    padding: 12px 16px !important;
+    position: relative;
+  }
+  .dashboard-main {
+    padding: 24px 16px !important;
+  }
+  .booking-details-row {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  .booking-card-actions {
+    justify-content: stretch !important;
+  }
+  .booking-card-actions a,
+  .booking-card-actions button {
+    flex: 1;
+    text-align: center;
+  }
+
+  /* --- Worker Dashboard --- */
+  .worker-header {
+    padding: 12px 16px !important;
+    position: relative;
+  }
+  .worker-card-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .worker-booking-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+  .worker-booking-actions {
+    width: 100%;
+    justify-content: space-between !important;
+  }
+
+  /* --- Admin Panel --- */
   .admin-layout {
     flex-direction: column !important;
   }
@@ -26,18 +219,21 @@ html, body {
     display: flex !important;
     flex-direction: row !important;
     overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
   }
   .admin-sidebar button {
     border-left: none !important;
     border-bottom: 3px solid transparent !important;
     white-space: nowrap;
     padding: 10px 16px !important;
+    flex-shrink: 0;
   }
   .admin-main {
     padding: 16px !important;
   }
   .admin-header {
     padding: 12px 16px !important;
+    position: relative;
   }
   .admin-header-right {
     display: none !important;
@@ -46,28 +242,37 @@ html, body {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
-  .checkout-grid {
-    grid-template-columns: 1fr !important;
-    gap: 24px !important;
+  .admin-tab-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
   }
-  .booking-form {
-    padding: 24px 20px !important;
+  .admin-tab-header h1 {
+    font-size: 20px !important;
   }
-  .booking-main {
-    padding: 32px 16px 60px !important;
+  .admin-filter-controls {
+    flex-direction: column !important;
+    width: 100%;
   }
-  .dashboard-main {
-    padding: 24px 16px !important;
+  .admin-filter-controls select,
+  .admin-filter-controls button {
+    width: 100% !important;
   }
-  .dashboard-header {
+
+  /* --- Admin Calendar --- */
+  .calendar-header {
     padding: 12px 16px !important;
+    position: relative;
   }
-  .auth-form-card {
-    padding: 32px 24px !important;
-    margin: 0 12px;
+  .calendar-nav {
+    margin-bottom: 24px !important;
   }
-  .auth-header {
-    padding: 12px 16px !important;
+  .calendar-nav h1 {
+    font-size: 22px !important;
+  }
+  .calendar-nav button {
+    padding: 8px 14px !important;
+    font-size: 13px !important;
   }
   .calendar-grid {
     font-size: 12px !important;
@@ -76,18 +281,35 @@ html, body {
     min-height: 60px !important;
     padding: 4px !important;
   }
-  .worker-card-grid {
-    grid-template-columns: 1fr !important;
-  }
-  .booking-details-row {
+  .calendar-detail-row {
     flex-direction: column !important;
+    align-items: flex-start !important;
     gap: 8px !important;
   }
-  .trust-indicators {
-    gap: 20px !important;
+  .calendar-detail-meta {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  /* --- Font sizes (ensure minimum 16px for body text) --- */
+  .mobile-text-base {
+    font-size: 16px !important;
+  }
+
+  /* --- Full-width buttons and inputs --- */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="date"],
+  input[type="tel"],
+  select,
+  textarea {
+    font-size: 16px !important;
   }
 }
 
+/* ===== Small mobile breakpoint (480px) ===== */
 @media (max-width: 480px) {
   .admin-sidebar {
     gap: 0 !important;
@@ -97,5 +319,30 @@ html, body {
   }
   .header-actions {
     gap: 8px !important;
+  }
+  .hero-section h1 {
+    font-size: 30px !important;
+  }
+  .steps-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .booking-card-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  .confirmation-buttons {
+    flex-direction: column !important;
+    width: 100%;
+  }
+  .confirmation-buttons a {
+    width: 100% !important;
+    text-align: center;
+  }
+  .calendar-day-cell {
+    min-height: 50px !important;
+    padding: 2px !important;
+  }
+  .calendar-booking-pill {
+    font-size: 9px !important;
   }
 }

@@ -118,13 +118,12 @@ export default function LandingPage() {
             padding: '12px 28px',
             fontSize: 16,
             fontWeight: 600,
-            background: '#1B2B5A',
+            background: '#B8C5F2',
             border: 'none',
-            borderRadius: 8,
-            color: '#FFFFFF',
+            borderRadius: 9999,
+            color: brand.text,
             cursor: 'pointer',
             textDecoration: 'none',
-            boxShadow: '0 2px 8px rgba(27, 43, 90, 0.3)',
             letterSpacing: '0.02em'
           }}>
             Book Now
@@ -146,8 +145,8 @@ export default function LandingPage() {
         <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
           <Link href="/book" onClick={() => setMobileMenuOpen(false)} style={{
             padding: '14px 16px', fontSize: 16, fontWeight: 600,
-            background: '#1B2B5A', color: '#FFFFFF', textDecoration: 'none',
-            textAlign: 'center', borderRadius: 8
+            background: '#B8C5F2', color: '#2D3748', textDecoration: 'none',
+            textAlign: 'center', borderRadius: 9999
           }}>
             Book Now
           </Link>
@@ -172,6 +171,10 @@ export default function LandingPage() {
         textAlign: 'center',
         background: '#FFFFFF'
       }}>
+        <div style={{ marginBottom: 40 }}>
+          <Logo size="large" />
+        </div>
+
         <h1 style={{
           fontSize: 52,
           fontWeight: 600,
@@ -453,17 +456,16 @@ export default function LandingPage() {
             <Link href="/book" style={{
               padding: '18px 48px',
               fontSize: 18,
-              fontWeight: 700,
-              background: '#1B2B5A',
+              fontWeight: 600,
+              background: '#B8C5F2',
               border: 'none',
-              borderRadius: 12,
-              color: '#FFFFFF',
+              borderRadius: 9999,
+              color: brand.text,
               cursor: 'pointer',
               textDecoration: 'none',
               display: 'inline-block',
-              boxShadow: '0 4px 16px rgba(27, 43, 90, 0.35)',
-              letterSpacing: '0.03em',
-              textTransform: 'uppercase'
+              letterSpacing: '0.02em',
+              transition: 'all 0.3s ease'
             }}>
               Book Now
             </Link>
@@ -538,17 +540,16 @@ export default function LandingPage() {
         <Link href="/book" style={{
           padding: '20px 56px',
           fontSize: 20,
-          fontWeight: 700,
-          background: '#1B2B5A',
+          fontWeight: 600,
+          background: '#B8C5F2',
           border: 'none',
-          borderRadius: 12,
-          color: '#FFFFFF',
+          borderRadius: 9999,
+          color: '#2D3748',
           cursor: 'pointer',
           textDecoration: 'none',
           display: 'inline-block',
-          boxShadow: '0 4px 24px rgba(27, 43, 90, 0.4)',
-          letterSpacing: '0.03em',
-          textTransform: 'uppercase'
+          letterSpacing: '0.02em',
+          transition: 'all 0.3s ease'
         }}>
           Book Now
         </Link>
@@ -612,17 +613,15 @@ export default function LandingPage() {
           width: '100%',
           padding: '16px',
           fontSize: 17,
-          fontWeight: 700,
-          background: '#1B2B5A',
+          fontWeight: 600,
+          background: '#B8C5F2',
           border: 'none',
-          borderRadius: 10,
-          color: '#FFFFFF',
+          borderRadius: 9999,
+          color: '#2D3748',
           cursor: 'pointer',
           textDecoration: 'none',
           textAlign: 'center',
-          boxShadow: '0 2px 12px rgba(27, 43, 90, 0.35)',
-          letterSpacing: '0.03em',
-          textTransform: 'uppercase'
+          letterSpacing: '0.02em'
         }}>
           Book Now
         </Link>

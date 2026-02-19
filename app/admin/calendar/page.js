@@ -127,7 +127,7 @@ export default function AdminCalendar() {
 
   return (
     <div style={{ minHeight: '100vh', background: brand.bg }}>
-      <header className="admin-header" style={{ padding: '16px 32px', background: brand.white, borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+      <header className="admin-header calendar-header" style={{ padding: '16px 32px', background: brand.white, borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Logo />
           <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
@@ -140,7 +140,7 @@ export default function AdminCalendar() {
 
       <main style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 24px' }}>
         {/* Month Navigation */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
+        <div className="calendar-nav" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
           <button onClick={prevMonth} style={{ padding: '10px 20px', fontSize: 14, background: brand.white, border: `1px solid ${brand.border}`, borderRadius: 6, cursor: 'pointer', color: brand.text }}>
             Previous
           </button>
@@ -192,7 +192,7 @@ export default function AdminCalendar() {
                     {day}
                   </div>
                   {dayBk.slice(0, 3).map((bk, idx) => (
-                    <div key={idx} style={{
+                    <div key={idx} className="calendar-booking-pill" style={{
                       padding: '2px 6px', marginBottom: 2, borderRadius: 4, fontSize: 11,
                       background: bk.status === 'upcoming' ? brand.primary : '#e8e8e8',
                       color: brand.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
@@ -231,7 +231,7 @@ export default function AdminCalendar() {
             ) : (
               <div>
                 {dayBookings.map((booking, idx) => (
-                  <div key={`${booking.id}-${idx}`} style={{ padding: '16px 24px', borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                  <div key={`${booking.id}-${idx}`} className="calendar-detail-row" style={{ padding: '16px 24px', borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                     <div>
                       <p style={{ fontWeight: 600, color: brand.text }}>{booking.building} - Unit {booking.unit_number}</p>
                       <p style={{ fontSize: 13, color: brand.textLight }}>{booking.booking_time} · {booking.customer_name}</p>
@@ -244,7 +244,7 @@ export default function AdminCalendar() {
                         </p>
                       )}
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div className="calendar-detail-meta" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                       <span style={{ fontSize: 13, color: brand.textLight }}>
                         Worker: <strong>{getWorkerName(booking.worker_id)}</strong>
                       </span>

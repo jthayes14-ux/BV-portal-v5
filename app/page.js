@@ -6,23 +6,23 @@ function Logo({ size = 'normal' }) {
   const isLarge = size === 'large';
   return (
     <div style={{ display: 'flex', gap: isLarge ? 8 : 4 }}>
-      <div style={{ 
-        width: isLarge ? 20 : 8, 
-        height: isLarge ? 56 : 28, 
-        background: '#B8C5F2', 
-        borderRadius: 3 
+      <div style={{
+        width: isLarge ? 20 : 8,
+        height: isLarge ? 56 : 28,
+        background: '#B8C5F2',
+        borderRadius: 3
       }} />
-      <div style={{ 
-        width: isLarge ? 20 : 8, 
-        height: isLarge ? 56 : 28, 
-        background: '#B8C5F2', 
-        borderRadius: 3 
+      <div style={{
+        width: isLarge ? 20 : 8,
+        height: isLarge ? 56 : 28,
+        background: '#B8C5F2',
+        borderRadius: 3
       }} />
-      <div style={{ 
-        width: isLarge ? 20 : 8, 
-        height: isLarge ? 56 : 28, 
-        background: '#B8C5F2', 
-        borderRadius: 3 
+      <div style={{
+        width: isLarge ? 20 : 8,
+        height: isLarge ? 56 : 28,
+        background: '#B8C5F2',
+        borderRadius: 3
       }} />
     </div>
   );
@@ -31,16 +31,16 @@ function Logo({ size = 'normal' }) {
 function FAQItem({ question, answer }) {
   const [open, setOpen] = useState(false);
   return (
-    <div style={{ 
+    <div style={{
       borderBottom: '1px solid #E8EDFC',
       padding: '20px 0'
     }}>
-      <button 
+      <button
         onClick={() => setOpen(!open)}
-        style={{ 
+        style={{
           width: '100%',
-          display: 'flex', 
-          justifyContent: 'space-between', 
+          display: 'flex',
+          justifyContent: 'space-between',
           alignItems: 'center',
           background: 'none',
           border: 'none',
@@ -52,11 +52,11 @@ function FAQItem({ question, answer }) {
         <span style={{ fontSize: 24, color: '#B8C5F2' }}>{open ? '−' : '+'}</span>
       </button>
       {open && (
-        <p style={{ 
-          marginTop: 12, 
-          fontSize: 16, 
+        <p style={{
+          marginTop: 12,
+          fontSize: 16,
           color: '#718096',
-          lineHeight: 1.6 
+          lineHeight: 1.6
         }}>
           {answer}
         </p>
@@ -66,6 +66,8 @@ function FAQItem({ question, answer }) {
 }
 
 export default function LandingPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   const brand = {
     primary: '#B8C5F2',
     primaryDark: '#9AA8E0',
@@ -76,13 +78,13 @@ export default function LandingPage() {
   };
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
+    <div style={{
+      minHeight: '100vh',
       background: brand.bg,
       fontFamily: "'Cormorant Garamond', Georgia, serif"
     }}>
       {/* Header */}
-      <header style={{
+      <header className="landing-header" style={{
         padding: '20px 32px',
         display: 'flex',
         justifyContent: 'space-between',
@@ -98,13 +100,13 @@ export default function LandingPage() {
           <Logo />
           <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
         </div>
-        
-        <div style={{ display: 'flex', gap: 12 }}>
-          <Link href="/login" style={{ 
-            padding: '10px 24px', 
+
+        <div className="desktop-nav" style={{ display: 'flex', gap: 12 }}>
+          <Link href="/login" style={{
+            padding: '10px 24px',
             fontSize: 16,
             fontWeight: 500,
-            background: 'transparent', 
+            background: 'transparent',
             border: 'none',
             color: brand.text,
             cursor: 'pointer',
@@ -112,11 +114,11 @@ export default function LandingPage() {
           }}>
             Log in
           </Link>
-          <Link href="/login" style={{ 
-            padding: '10px 24px', 
+          <Link href="/login" style={{
+            padding: '10px 24px',
             fontSize: 16,
             fontWeight: 500,
-            background: brand.primary, 
+            background: brand.primary,
             border: 'none',
             borderRadius: 8,
             color: brand.text,
@@ -126,13 +128,42 @@ export default function LandingPage() {
             Get Started
           </Link>
         </div>
+
+        <button className="mobile-nav-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
+          {mobileMenuOpen ? (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          ) : (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          )}
+        </button>
+
+        <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
+          <Link href="/login" onClick={() => setMobileMenuOpen(false)} style={{
+            padding: '14px 16px', fontSize: 16, fontWeight: 500,
+            color: brand.text, textDecoration: 'none', textAlign: 'center',
+            borderRadius: 8
+          }}>
+            Log in
+          </Link>
+          <Link href="/login" onClick={() => setMobileMenuOpen(false)} style={{
+            padding: '14px 16px', fontSize: 16, fontWeight: 500,
+            background: brand.primary, color: brand.text, textDecoration: 'none',
+            textAlign: 'center', borderRadius: 8
+          }}>
+            Get Started
+          </Link>
+        </div>
       </header>
 
       {/* Hero Section */}
-      <section style={{ 
-        display: 'flex', 
+      <section className="hero-section" style={{
+        display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center', 
+        alignItems: 'center',
         justifyContent: 'center',
         minHeight: '90vh',
         padding: '60px 24px',
@@ -142,10 +173,10 @@ export default function LandingPage() {
         <div style={{ marginBottom: 40 }}>
           <Logo size="large" />
         </div>
-        
-        <h1 style={{ 
-          fontSize: 52, 
-          fontWeight: 600, 
+
+        <h1 style={{
+          fontSize: 52,
+          fontWeight: 600,
           color: brand.text,
           lineHeight: 1.2,
           marginBottom: 20,
@@ -155,9 +186,9 @@ export default function LandingPage() {
           <br />
           one tap away
         </h1>
-        
-        <p style={{ 
-          fontSize: 20, 
+
+        <p style={{
+          fontSize: 20,
           color: brand.textLight,
           lineHeight: 1.6,
           marginBottom: 40,
@@ -167,13 +198,13 @@ export default function LandingPage() {
           <br />
           Book instantly. No quotes. No waiting.
         </p>
-        
-        <div style={{ display: 'flex', gap: 16 }}>
-          <Link href="/login" style={{ 
-            padding: '16px 40px', 
+
+        <div className="hero-buttons" style={{ display: 'flex', gap: 16 }}>
+          <Link href="/login" style={{
+            padding: '16px 40px',
             fontSize: 18,
             fontWeight: 600,
-            background: brand.primary, 
+            background: brand.primary,
             border: 'none',
             borderRadius: 10,
             color: brand.text,
@@ -182,11 +213,11 @@ export default function LandingPage() {
           }}>
             Get Started
           </Link>
-          <Link href="/login" style={{ 
-            padding: '16px 40px', 
+          <Link href="/login" style={{
+            padding: '16px 40px',
             fontSize: 18,
             fontWeight: 600,
-            background: 'transparent', 
+            background: 'transparent',
             border: `2px solid ${brand.primary}`,
             borderRadius: 10,
             color: brand.text,
@@ -199,21 +230,21 @@ export default function LandingPage() {
       </section>
 
       {/* What We Do */}
-      <section style={{ 
+      <section style={{
         padding: '80px 24px',
         background: 'white'
       }}>
         <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
-          <h2 style={{ 
-            fontSize: 36, 
-            fontWeight: 600, 
+          <h2 className="section-heading" style={{
+            fontSize: 36,
+            fontWeight: 600,
             color: brand.text,
             marginBottom: 16
           }}>
             What We Do
           </h2>
-          <p style={{ 
-            fontSize: 18, 
+          <p style={{
+            fontSize: 18,
             color: brand.textLight,
             marginBottom: 48,
             maxWidth: 600,
@@ -221,11 +252,11 @@ export default function LandingPage() {
           }}>
             We specialize in professional window cleaning for luxury high-rise condominiums throughout Miami.
           </p>
-          
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(3, 1fr)', 
-            gap: 32 
+
+          <div className="features-grid" style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: 32
           }}>
             <div style={{ padding: 24 }}>
               <div style={{
@@ -310,39 +341,39 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works */}
-      <section style={{ 
+      <section style={{
         padding: '80px 24px',
         background: brand.bg
       }}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
-          <h2 style={{ 
-            fontSize: 36, 
-            fontWeight: 600, 
+          <h2 className="section-heading" style={{
+            fontSize: 36,
+            fontWeight: 600,
             color: brand.text,
             marginBottom: 16,
             textAlign: 'center'
           }}>
             How It Works
           </h2>
-          <p style={{ 
-            fontSize: 18, 
+          <p style={{
+            fontSize: 18,
             color: brand.textLight,
             marginBottom: 48,
             textAlign: 'center'
           }}>
             Book your window cleaning in 60 seconds
           </p>
-          
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(4, 1fr)', 
-            gap: 24 
+
+          <div className="steps-grid" style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: 24
           }}>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ 
-                width: 48, 
-                height: 48, 
-                background: brand.primary, 
+              <div style={{
+                width: 48,
+                height: 48,
+                background: brand.primary,
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
@@ -357,16 +388,16 @@ export default function LandingPage() {
               <h3 style={{ fontSize: 18, fontWeight: 600, color: brand.text, marginBottom: 8 }}>
                 Select Building
               </h3>
-              <p style={{ fontSize: 14, color: brand.textLight, lineHeight: 1.5 }}>
+              <p style={{ fontSize: 16, color: brand.textLight, lineHeight: 1.5 }}>
                 Choose your building and floor plan from our list
               </p>
             </div>
-            
+
             <div style={{ textAlign: 'center' }}>
-              <div style={{ 
-                width: 48, 
-                height: 48, 
-                background: brand.primary, 
+              <div style={{
+                width: 48,
+                height: 48,
+                background: brand.primary,
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
@@ -381,16 +412,16 @@ export default function LandingPage() {
               <h3 style={{ fontSize: 18, fontWeight: 600, color: brand.text, marginBottom: 8 }}>
                 See Your Price
               </h3>
-              <p style={{ fontSize: 14, color: brand.textLight, lineHeight: 1.5 }}>
+              <p style={{ fontSize: 16, color: brand.textLight, lineHeight: 1.5 }}>
                 Get instant pricing based on your unit - no surprises
               </p>
             </div>
-            
+
             <div style={{ textAlign: 'center' }}>
-              <div style={{ 
-                width: 48, 
-                height: 48, 
-                background: brand.primary, 
+              <div style={{
+                width: 48,
+                height: 48,
+                background: brand.primary,
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
@@ -405,16 +436,16 @@ export default function LandingPage() {
               <h3 style={{ fontSize: 18, fontWeight: 600, color: brand.text, marginBottom: 8 }}>
                 Pick a Time
               </h3>
-              <p style={{ fontSize: 14, color: brand.textLight, lineHeight: 1.5 }}>
+              <p style={{ fontSize: 16, color: brand.textLight, lineHeight: 1.5 }}>
                 Choose a date and time that works for you
               </p>
             </div>
-            
+
             <div style={{ textAlign: 'center' }}>
-              <div style={{ 
-                width: 48, 
-                height: 48, 
-                background: brand.primary, 
+              <div style={{
+                width: 48,
+                height: 48,
+                background: brand.primary,
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
@@ -429,7 +460,7 @@ export default function LandingPage() {
               <h3 style={{ fontSize: 18, fontWeight: 600, color: brand.text, marginBottom: 8 }}>
                 We Handle the Rest
               </h3>
-              <p style={{ fontSize: 14, color: brand.textLight, lineHeight: 1.5 }}>
+              <p style={{ fontSize: 16, color: brand.textLight, lineHeight: 1.5 }}>
                 Our pros arrive on time and leave your windows sparkling
               </p>
             </div>
@@ -438,42 +469,42 @@ export default function LandingPage() {
       </section>
 
       {/* FAQs */}
-      <section style={{ 
+      <section style={{
         padding: '80px 24px',
         background: 'white'
       }}>
         <div style={{ maxWidth: 700, margin: '0 auto' }}>
-          <h2 style={{
+          <h2 className="section-heading" style={{
             fontSize: 36,
-            fontWeight: 600, 
+            fontWeight: 600,
             color: brand.text,
             marginBottom: 40,
             textAlign: 'center'
           }}>
             Frequently Asked Questions
           </h2>
-          
-          <FAQItem 
+
+          <FAQItem
             question="How long does a cleaning take?"
             answer="Most units take 30-60 minutes depending on the number of windows and their condition. We'll give you a more accurate estimate when you book based on your floor plan."
           />
-          <FAQItem 
+          <FAQItem
             question="Do I need to be home?"
             answer="You don't need to be home, but someone needs to let us in. Many of our clients leave a key with the front desk or have their building management grant us access."
           />
-          <FAQItem 
+          <FAQItem
             question="What's included in the cleaning?"
             answer="We clean all interior window surfaces, window sills, and tracks. We use professional-grade, eco-friendly cleaning solutions that leave no streaks or residue."
           />
-          <FAQItem 
+          <FAQItem
             question="How do you access my building?"
             answer="We're familiar with most luxury buildings in Miami and their access procedures. We coordinate with building management and follow all security protocols."
           />
-          <FAQItem 
+          <FAQItem
             question="When am I charged?"
             answer="Your card is saved when you book but you're only charged after the cleaning is complete. Free cancellation up to 24 hours before your appointment."
           />
-          <FAQItem 
+          <FAQItem
             question="Do you clean balcony windows?"
             answer="Yes! Interior balcony windows and doors are included. Exterior high-rise windows require specialized equipment - contact us for a custom quote."
           />
@@ -481,50 +512,51 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section style={{ 
+      <section className="cta-section" style={{
         padding: '80px 24px',
         background: brand.primary,
         textAlign: 'center'
       }}>
-        <h2 style={{ 
-          fontSize: 36, 
-          fontWeight: 600, 
+        <h2 style={{
+          fontSize: 36,
+          fontWeight: 600,
           color: brand.text,
           marginBottom: 16
         }}>
           Ready for crystal clear views?
         </h2>
-        <p style={{ 
-          fontSize: 18, 
+        <p style={{
+          fontSize: 18,
           color: brand.text,
           marginBottom: 32,
           opacity: 0.8
         }}>
           Book your first cleaning in 60 seconds
         </p>
-        <Link href="/login" style={{ 
-          padding: '16px 48px', 
+        <Link href="/login" style={{
+          padding: '16px 48px',
           fontSize: 18,
           fontWeight: 600,
-          background: 'white', 
+          background: 'white',
           border: 'none',
           borderRadius: 10,
           color: brand.text,
           cursor: 'pointer',
-          textDecoration: 'none'
+          textDecoration: 'none',
+          display: 'inline-block'
         }}>
           Get Started Now
         </Link>
       </section>
 
       {/* Footer */}
-      <footer style={{ 
+      <footer style={{
         padding: '40px 24px',
         background: brand.text,
         color: 'white'
       }}>
-        <div style={{ 
-          maxWidth: 900, 
+        <div className="footer-content" style={{
+          maxWidth: 900,
           margin: '0 auto',
           display: 'flex',
           justifyContent: 'space-between',
@@ -534,16 +566,16 @@ export default function LandingPage() {
             <Logo />
             <span style={{ fontSize: 20, fontWeight: 600 }}>BetterView</span>
           </div>
-          
-          <div style={{ display: 'flex', gap: 32, fontSize: 14, opacity: 0.8 }}>
+
+          <div className="footer-links" style={{ display: 'flex', gap: 32, fontSize: 14, opacity: 0.8 }}>
             <span>Miami, FL</span>
             <span>hello@betterview.com</span>
             <span>(305) 555-0123</span>
           </div>
         </div>
-        
-        <div style={{ 
-          maxWidth: 900, 
+
+        <div style={{
+          maxWidth: 900,
           margin: '24px auto 0',
           paddingTop: 24,
           borderTop: '1px solid rgba(255,255,255,0.1)',
@@ -551,7 +583,7 @@ export default function LandingPage() {
           fontSize: 14,
           opacity: 0.6
         }}>
-          © 2025 BetterView Window Cleaning. All rights reserved.
+          &copy; 2025 BetterView Window Cleaning. All rights reserved.
         </div>
       </footer>
     </div>

@@ -184,7 +184,7 @@ export default function PaymentFlow() {
 
   return (
     <div style={{ minHeight: '100vh', background: brand.bg }}>
-      <header style={{ padding: '16px 32px', background: brand.white, borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+      <header className="checkout-header" style={{ padding: '16px 32px', background: brand.white, borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
           <Logo />
           <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
@@ -379,7 +379,7 @@ export default function PaymentFlow() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div className="confirmation-buttons" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/dashboard" style={{ padding: '14px 28px', fontSize: 15, fontWeight: 600, background: brand.primary, border: 'none', borderRadius: 8, color: brand.text, textDecoration: 'none' }}>
               View My Bookings
             </Link>

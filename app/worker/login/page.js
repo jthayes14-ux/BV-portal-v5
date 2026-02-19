@@ -24,6 +24,7 @@ export default function WorkerLogin() {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const brand = {
     primary: '#C9B037',
@@ -107,7 +108,7 @@ export default function WorkerLogin() {
       background: `linear-gradient(180deg, ${brand.bg} 0%, ${brand.primaryLight} 100%)`,
       fontFamily: "'Cormorant Garamond', Georgia, serif"
     }}>
-      <header style={{
+      <header className="auth-header" style={{
         padding: '20px 32px',
         display: 'flex',
         justifyContent: 'space-between',
@@ -125,13 +126,37 @@ export default function WorkerLogin() {
             borderRadius: 4, fontSize: 12, fontWeight: 600
           }}>WORKER</span>
         </Link>
-        <Link href="/login" style={{
-          padding: '10px 24px', fontSize: 16, fontWeight: 500,
-          background: 'transparent', border: 'none', color: brand.text,
-          cursor: 'pointer', textDecoration: 'none'
-        }}>
-          Customer Login
-        </Link>
+        <div className="desktop-nav">
+          <Link href="/login" style={{
+            padding: '10px 24px', fontSize: 16, fontWeight: 500,
+            background: 'transparent', border: 'none', color: brand.text,
+            cursor: 'pointer', textDecoration: 'none'
+          }}>
+            Customer Login
+          </Link>
+        </div>
+
+        <button className="mobile-nav-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
+          {mobileMenuOpen ? (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          ) : (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          )}
+        </button>
+
+        <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
+          <Link href="/login" onClick={() => setMobileMenuOpen(false)} style={{
+            padding: '14px 16px', fontSize: 16, fontWeight: 500,
+            color: brand.text, textDecoration: 'none', textAlign: 'center',
+            borderRadius: 8, border: `1px solid ${brand.primaryLight}`
+          }}>
+            Customer Login
+          </Link>
+        </div>
       </header>
 
       <main style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 80px)', padding: '40px 24px' }}>

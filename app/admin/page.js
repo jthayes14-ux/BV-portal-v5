@@ -36,6 +36,7 @@ export default function AdminPanel() {
   const [editValue, setEditValue] = useState({});
   const [selectedNeighborhood, setSelectedNeighborhood] = useState('');
   const [selectedBuilding, setSelectedBuilding] = useState('');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const brand = {
     primary: '#B8C5F2', text: '#1a1a1a', textLight: '#666',
@@ -184,6 +185,28 @@ export default function AdminPanel() {
           <span style={{ fontSize: 14, color: brand.textLight }}>{user?.email}</span>
           <button onClick={handleLogout} style={{ ...buttonStyle, background: 'transparent', border: `1px solid ${brand.border}`, color: brand.text }}>Log Out</button>
         </div>
+
+        <button className="mobile-nav-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
+          {mobileMenuOpen ? (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          ) : (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          )}
+        </button>
+
+        <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
+          <Link href="/admin/calendar" onClick={() => setMobileMenuOpen(false)} style={{ padding: '14px 16px', fontSize: 16, fontWeight: 500, color: brand.primary, textDecoration: 'none', textAlign: 'center', borderRadius: 8, border: `1px solid ${brand.border}` }}>
+            Calendar View
+          </Link>
+          <span style={{ padding: '14px 16px', fontSize: 14, color: brand.textLight, textAlign: 'center' }}>{user?.email}</span>
+          <button onClick={() => { handleLogout(); setMobileMenuOpen(false); }} style={{ padding: '14px 16px', fontSize: 16, fontWeight: 500, background: 'transparent', border: `1px solid ${brand.border}`, borderRadius: 8, color: brand.text, cursor: 'pointer' }}>
+            Log Out
+          </button>
+        </div>
       </header>
 
       <div className="admin-layout" style={{ display: 'flex' }}>
@@ -320,9 +343,9 @@ export default function AdminPanel() {
           {/* BUILDINGS TAB */}
           {activeTab === 'buildings' && (
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
+              <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
                 <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>Buildings</h1>
-                <div style={{ display: 'flex', gap: 12 }}>
+                <div className="admin-filter-controls" style={{ display: 'flex', gap: 12 }}>
                   <select value={selectedNeighborhood} onChange={(e) => setSelectedNeighborhood(e.target.value)} style={{ ...inputStyle, width: 180 }}>
                     <option value="">All Neighborhoods</option>
                     {neighborhoods.map(n => <option key={n.id} value={n.id}>{n.name}</option>)}
@@ -387,9 +410,9 @@ export default function AdminPanel() {
           {/* FLOOR PLANS TAB */}
           {activeTab === 'floorplans' && (
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
+              <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
                 <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>Floor Plans</h1>
-                <div style={{ display: 'flex', gap: 12 }}>
+                <div className="admin-filter-controls" style={{ display: 'flex', gap: 12 }}>
                   <select value={selectedBuilding} onChange={(e) => setSelectedBuilding(e.target.value)} style={{ ...inputStyle, width: 200 }}>
                     <option value="">All Buildings</option>
                     {buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}

@@ -24,6 +24,7 @@ export default function AuthPages() {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const brand = {
     primary: '#B8C5F2',
@@ -108,7 +109,7 @@ export default function AuthPages() {
           <Logo />
           <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
         </Link>
-        <div className="header-actions" style={{ display: 'flex', gap: 12 }}>
+        <div className="header-actions desktop-nav" style={{ display: 'flex', gap: 12 }}>
           <button
             onClick={() => { setView('login'); setError(''); setMessage(''); }}
             style={{ padding: '10px 24px', fontSize: 16, fontWeight: 500, background: 'transparent', border: 'none', color: brand.text, cursor: 'pointer' }}
@@ -118,6 +119,33 @@ export default function AuthPages() {
           <button
             onClick={() => { setView('signup'); setError(''); setMessage(''); }}
             style={{ padding: '10px 24px', fontSize: 16, fontWeight: 500, background: brand.primary, border: 'none', borderRadius: 8, color: brand.text, cursor: 'pointer' }}
+          >
+            Get Started
+          </button>
+        </div>
+
+        <button className="mobile-nav-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
+          {mobileMenuOpen ? (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          ) : (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          )}
+        </button>
+
+        <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
+          <button
+            onClick={() => { setView('login'); setError(''); setMessage(''); setMobileMenuOpen(false); }}
+            style={{ padding: '14px 16px', fontSize: 16, fontWeight: 500, background: 'transparent', border: 'none', color: brand.text, cursor: 'pointer', borderRadius: 8 }}
+          >
+            Log in
+          </button>
+          <button
+            onClick={() => { setView('signup'); setError(''); setMessage(''); setMobileMenuOpen(false); }}
+            style={{ padding: '14px 16px', fontSize: 16, fontWeight: 500, background: brand.primary, border: 'none', color: brand.text, cursor: 'pointer', borderRadius: 8 }}
           >
             Get Started
           </button>

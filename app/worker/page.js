@@ -22,6 +22,7 @@ export default function WorkerDashboard() {
   const [worker, setWorker] = useState(null);
   const [dataLoading, setDataLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('upcoming');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const brand = {
     primary: '#B8C5F2', text: '#1a1a1a', textLight: '#666',
@@ -103,15 +104,34 @@ export default function WorkerDashboard() {
 
   return (
     <div style={{ minHeight: '100vh', background: brand.bg }}>
-      <header style={{ padding: '16px 32px', background: brand.white, borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+      <header className="worker-header" style={{ padding: '16px 32px', background: brand.white, borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Logo />
           <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
           <span style={{ marginLeft: 12, padding: '4px 10px', background: brand.gold, color: brand.white, borderRadius: 4, fontSize: 12, fontWeight: 600 }}>WORKER</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <span style={{ fontSize: 14, color: brand.textLight }}>{worker.name}</span>
           <button onClick={handleLogout} style={{ padding: '8px 16px', fontSize: 14, background: 'transparent', border: `1px solid ${brand.border}`, borderRadius: 6, cursor: 'pointer', color: brand.text }}>Log Out</button>
+        </div>
+
+        <button className="mobile-nav-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
+          {mobileMenuOpen ? (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          ) : (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          )}
+        </button>
+
+        <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
+          <span style={{ padding: '14px 16px', fontSize: 16, color: brand.textLight, textAlign: 'center' }}>{worker.name}</span>
+          <button onClick={() => { handleLogout(); setMobileMenuOpen(false); }} style={{ padding: '14px 16px', fontSize: 16, fontWeight: 500, background: 'transparent', border: `1px solid ${brand.border}`, borderRadius: 8, color: brand.text, cursor: 'pointer' }}>
+            Log Out
+          </button>
         </div>
       </header>
 
@@ -162,7 +182,7 @@ export default function WorkerDashboard() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {groupedByDate[dateKey].map(booking => (
                   <div key={booking.id} style={{ background: brand.white, borderRadius: 12, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
-                    <div style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                    <div className="worker-booking-row" style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
                       <div>
                         <h4 style={{ fontSize: 16, fontWeight: 600, color: brand.text, marginBottom: 4 }}>
                           {booking.building} - Unit {booking.unit_number}
@@ -174,7 +194,7 @@ export default function WorkerDashboard() {
                           </p>
                         )}
                       </div>
-                      <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div className="worker-booking-actions" style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: 12 }}>
                         <span style={{ fontSize: 16, fontWeight: 600, color: brand.text }}>${booking.total_price}</span>
                         {booking.status === 'upcoming' && (
                           <button onClick={() => handleMarkComplete(booking.id)} style={{

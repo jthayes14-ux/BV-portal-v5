@@ -22,21 +22,17 @@ ALTER TABLE bookings
   ADD COLUMN IF NOT EXISTS recurring_group_id UUID,
   ADD COLUMN IF NOT EXISTS frequency_discount NUMERIC DEFAULT 0;
 
--- Allow public read access to frequencies
-ALTER TABLE frequencies ENABLE ROW LEVEL SECURITY;
+-- Disable RLS on frequencies so admin CRUD works with the anon key
+-- (matches behavior of neighborhoods, buildings, floor_plans, add_ons, workers)
+ALTER TABLE frequencies DISABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Allow public read access to frequencies"
-  ON frequencies FOR SELECT
-  USING (true);
-
-CREATE POLICY "Allow authenticated insert to frequencies"
-  ON frequencies FOR INSERT
-  WITH CHECK (true);
-
-CREATE POLICY "Allow authenticated update to frequencies"
-  ON frequencies FOR UPDATE
-  USING (true);
-
-CREATE POLICY "Allow authenticated delete to frequencies"
-  ON frequencies FOR DELETE
-  USING (true);
+-- If RLS was previously enabled, drop the old restrictive policies and re-disable
+DO $$
+BEGIN
+  -- Drop policies if they exist (safe no-op if they don't)
+  DROP POLICY IF EXISTS "Allow public read access to frequencies" ON frequencies;
+  DROP POLICY IF EXISTS "Allow authenticated insert to frequencies" ON frequencies;
+  DROP POLICY IF EXISTS "Allow authenticated update to frequencies" ON frequencies;
+  DROP POLICY IF EXISTS "Allow authenticated delete to frequencies" ON frequencies;
+END
+$$;

@@ -228,18 +228,28 @@ export default function LandingPage() {
             gap: 32 
           }}>
             <div style={{ padding: 24 }}>
-              <div style={{ 
-                width: 64, 
-                height: 64, 
-                background: brand.primaryLight, 
+              <div style={{
+                width: 64,
+                height: 64,
+                background: '#8E9FD9',
                 borderRadius: 16,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                margin: '0 auto 20px',
-                fontSize: 28
+                margin: '0 auto 20px'
               }}>
-                🏢
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="4" y="2" width="16" height="20" rx="1" />
+                  <line x1="8" y1="6" x2="10" y2="6" />
+                  <line x1="14" y1="6" x2="16" y2="6" />
+                  <line x1="8" y1="10" x2="10" y2="10" />
+                  <line x1="14" y1="10" x2="16" y2="10" />
+                  <line x1="8" y1="14" x2="10" y2="14" />
+                  <line x1="14" y1="14" x2="16" y2="14" />
+                  <line x1="10" y1="18" x2="14" y2="18" />
+                  <line x1="10" y1="18" x2="10" y2="22" />
+                  <line x1="14" y1="18" x2="14" y2="22" />
+                </svg>
               </div>
               <h3 style={{ fontSize: 20, fontWeight: 600, color: brand.text, marginBottom: 8 }}>
                 High-Rise Experts
@@ -248,20 +258,21 @@ export default function LandingPage() {
                 We know Miami's luxury buildings inside and out. From Brickell to Edgewater, we've got you covered.
               </p>
             </div>
-            
+
             <div style={{ padding: 24 }}>
-              <div style={{ 
-                width: 64, 
-                height: 64, 
-                background: brand.primaryLight, 
+              <div style={{
+                width: 64,
+                height: 64,
+                background: '#8E9FD9',
                 borderRadius: 16,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                margin: '0 auto 20px',
-                fontSize: 28
+                margin: '0 auto 20px'
               }}>
-                ✨
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2L13.5 8.5L20 7L15 12L20 17L13.5 15.5L12 22L10.5 15.5L4 17L9 12L4 7L10.5 8.5L12 2Z" />
+                </svg>
               </div>
               <h3 style={{ fontSize: 20, fontWeight: 600, color: brand.text, marginBottom: 8 }}>
                 Spotless Results
@@ -270,20 +281,22 @@ export default function LandingPage() {
                 Professional-grade equipment and eco-friendly solutions for streak-free, crystal clear windows.
               </p>
             </div>
-            
+
             <div style={{ padding: 24 }}>
-              <div style={{ 
-                width: 64, 
-                height: 64, 
-                background: brand.primaryLight, 
+              <div style={{
+                width: 64,
+                height: 64,
+                background: '#8E9FD9',
                 borderRadius: 16,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                margin: '0 auto 20px',
-                fontSize: 28
+                margin: '0 auto 20px'
               }}>
-                🛡️
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  <polyline points="9 12 11 14 15 10" />
+                </svg>
               </div>
               <h3 style={{ fontSize: 20, fontWeight: 600, color: brand.text, marginBottom: 8 }}>
                 Fully Insured

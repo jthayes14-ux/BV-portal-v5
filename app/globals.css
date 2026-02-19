@@ -291,8 +291,8 @@ html, body {
     gap: 8px !important;
   }
 
-  /* --- Sticky Book Now bar on mobile --- */
-  .sticky-book-bar {
+  /* --- Sticky Book Now bar on mobile (only when scrolled past hero) --- */
+  .sticky-book-bar.visible {
     display: block !important;
   }
 

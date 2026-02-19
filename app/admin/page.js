@@ -192,24 +192,28 @@ export default function AdminPanel() {
   };
 
   const handleWorkerAssign = async (bookingId, workerId) => {
-    await supabase.from('bookings').update({ worker_id: workerId || null }).eq('id', bookingId);
+    const { error } = await supabase.from('bookings').update({ worker_id: workerId || null }).eq('id', bookingId);
+    if (error) { setCrudError('Failed to assign worker: ' + error.message); return; }
     setBookings(bookings.map(b => b.id === bookingId ? { ...b, worker_id: workerId || null } : b));
   };
 
   const handleMarkComplete = async (bookingId) => {
-    await supabase.from('bookings').update({ status: 'completed' }).eq('id', bookingId);
+    const { error } = await supabase.from('bookings').update({ status: 'completed' }).eq('id', bookingId);
+    if (error) { setCrudError('Failed to mark complete: ' + error.message); return; }
     setBookings(bookings.map(b => b.id === bookingId ? { ...b, status: 'completed' } : b));
   };
 
   const handleSkipBooking = async (bookingId) => {
     if (!confirm('Skip this booking? It will be marked as skipped.')) return;
-    await supabase.from('bookings').update({ status: 'skipped' }).eq('id', bookingId);
+    const { error } = await supabase.from('bookings').update({ status: 'skipped' }).eq('id', bookingId);
+    if (error) { setCrudError('Failed to skip booking: ' + error.message); return; }
     setBookings(bookings.map(b => b.id === bookingId ? { ...b, status: 'skipped' } : b));
   };
 
   const handleCancelBooking = async (bookingId) => {
     if (!confirm('Cancel this booking? This cannot be undone.')) return;
-    await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', bookingId);
+    const { error } = await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', bookingId);
+    if (error) { setCrudError('Failed to cancel booking: ' + error.message); return; }
     setBookings(bookings.map(b => b.id === bookingId ? { ...b, status: 'cancelled' } : b));
   };
 

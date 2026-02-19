@@ -440,11 +440,11 @@ export default function LandingPage() {
       {/* FAQs */}
       <section style={{ 
         padding: '80px 24px',
-        background: brand.bg
+        background: 'white'
       }}>
         <div style={{ maxWidth: 700, margin: '0 auto' }}>
-          <h2 style={{ 
-            fontSize: 36, 
+          <h2 style={{
+            fontSize: 36,
             fontWeight: 600, 
             color: brand.text,
             marginBottom: 40,

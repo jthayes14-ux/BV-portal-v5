@@ -101,31 +101,33 @@ export default function LandingPage() {
           <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
         </div>
 
-        <div className="desktop-nav" style={{ display: 'flex', gap: 12 }}>
+        <div className="desktop-nav" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           <Link href="/login" style={{
             padding: '10px 24px',
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: 500,
             background: 'transparent',
             border: 'none',
-            color: brand.text,
+            color: brand.textLight,
             cursor: 'pointer',
             textDecoration: 'none'
           }}>
             Log in
           </Link>
-          <Link href="/login" style={{
-            padding: '10px 24px',
+          <Link href="/book" style={{
+            padding: '12px 28px',
             fontSize: 16,
-            fontWeight: 500,
-            background: brand.primary,
+            fontWeight: 600,
+            background: '#C9B037',
             border: 'none',
             borderRadius: 8,
-            color: brand.text,
+            color: '#FFFFFF',
             cursor: 'pointer',
-            textDecoration: 'none'
+            textDecoration: 'none',
+            boxShadow: '0 2px 8px rgba(201, 176, 55, 0.3)',
+            letterSpacing: '0.02em'
           }}>
-            Get Started
+            Book Now
           </Link>
         </div>
 
@@ -142,19 +144,19 @@ export default function LandingPage() {
         </button>
 
         <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
-          <Link href="/login" onClick={() => setMobileMenuOpen(false)} style={{
-            padding: '14px 16px', fontSize: 16, fontWeight: 500,
-            color: brand.text, textDecoration: 'none', textAlign: 'center',
-            borderRadius: 8
+          <Link href="/book" onClick={() => setMobileMenuOpen(false)} style={{
+            padding: '14px 16px', fontSize: 16, fontWeight: 600,
+            background: '#C9B037', color: '#FFFFFF', textDecoration: 'none',
+            textAlign: 'center', borderRadius: 8
           }}>
-            Log in
+            Book Now
           </Link>
           <Link href="/login" onClick={() => setMobileMenuOpen(false)} style={{
             padding: '14px 16px', fontSize: 16, fontWeight: 500,
-            background: brand.primary, color: brand.text, textDecoration: 'none',
-            textAlign: 'center', borderRadius: 8
+            color: brand.textLight, textDecoration: 'none', textAlign: 'center',
+            borderRadius: 8
           }}>
-            Get Started
+            Log in
           </Link>
         </div>
       </header>
@@ -196,31 +198,35 @@ export default function LandingPage() {
         }}>
           Professional window cleaning for Miami's finest high-rises.
           <br />
-          Book instantly. No quotes. No waiting.
+          No account needed. No quotes. No waiting.
         </p>
 
-        <div className="hero-buttons" style={{ display: 'flex', gap: 16 }}>
-          <Link href="/login" style={{
-            padding: '16px 40px',
-            fontSize: 18,
-            fontWeight: 600,
-            background: brand.primary,
+        <div className="hero-buttons" style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+          <Link href="/book" style={{
+            padding: '20px 56px',
+            fontSize: 20,
+            fontWeight: 700,
+            background: 'linear-gradient(135deg, #C9B037 0%, #A69028 100%)',
             border: 'none',
-            borderRadius: 10,
-            color: brand.text,
+            borderRadius: 12,
+            color: '#FFFFFF',
             cursor: 'pointer',
-            textDecoration: 'none'
+            textDecoration: 'none',
+            boxShadow: '0 4px 20px rgba(201, 176, 55, 0.4)',
+            letterSpacing: '0.03em',
+            textTransform: 'uppercase',
+            transition: 'all 0.3s ease'
           }}>
-            Get Started
+            Book Now
           </Link>
           <Link href="/login" style={{
-            padding: '16px 40px',
-            fontSize: 18,
-            fontWeight: 600,
+            padding: '16px 32px',
+            fontSize: 16,
+            fontWeight: 500,
             background: 'transparent',
-            border: `2px solid ${brand.primary}`,
+            border: `1px solid ${brand.primaryDark}`,
             borderRadius: 10,
-            color: brand.text,
+            color: brand.textLight,
             cursor: 'pointer',
             textDecoration: 'none'
           }}>
@@ -361,7 +367,7 @@ export default function LandingPage() {
             marginBottom: 48,
             textAlign: 'center'
           }}>
-            Book your window cleaning in 60 seconds
+            No account required. Book your window cleaning in 60 seconds.
           </p>
 
           <div className="steps-grid" style={{
@@ -465,6 +471,26 @@ export default function LandingPage() {
               </p>
             </div>
           </div>
+
+          <div style={{ textAlign: 'center', marginTop: 48 }}>
+            <Link href="/book" style={{
+              padding: '18px 48px',
+              fontSize: 18,
+              fontWeight: 700,
+              background: 'linear-gradient(135deg, #C9B037 0%, #A69028 100%)',
+              border: 'none',
+              borderRadius: 12,
+              color: '#FFFFFF',
+              cursor: 'pointer',
+              textDecoration: 'none',
+              display: 'inline-block',
+              boxShadow: '0 4px 16px rgba(201, 176, 55, 0.35)',
+              letterSpacing: '0.03em',
+              textTransform: 'uppercase'
+            }}>
+              Book Now
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -514,38 +540,40 @@ export default function LandingPage() {
       {/* CTA Section */}
       <section className="cta-section" style={{
         padding: '80px 24px',
-        background: brand.primary,
+        background: 'linear-gradient(135deg, #2D3748 0%, #1a202c 100%)',
         textAlign: 'center'
       }}>
         <h2 style={{
           fontSize: 36,
           fontWeight: 600,
-          color: brand.text,
+          color: '#FFFFFF',
           marginBottom: 16
         }}>
           Ready for crystal clear views?
         </h2>
         <p style={{
           fontSize: 18,
-          color: brand.text,
-          marginBottom: 32,
-          opacity: 0.8
+          color: 'rgba(255,255,255,0.7)',
+          marginBottom: 40
         }}>
-          Book your first cleaning in 60 seconds
+          No account needed. Book your cleaning in 60 seconds.
         </p>
-        <Link href="/login" style={{
-          padding: '16px 48px',
-          fontSize: 18,
-          fontWeight: 600,
-          background: 'white',
+        <Link href="/book" style={{
+          padding: '20px 56px',
+          fontSize: 20,
+          fontWeight: 700,
+          background: 'linear-gradient(135deg, #C9B037 0%, #A69028 100%)',
           border: 'none',
-          borderRadius: 10,
-          color: brand.text,
+          borderRadius: 12,
+          color: '#FFFFFF',
           cursor: 'pointer',
           textDecoration: 'none',
-          display: 'inline-block'
+          display: 'inline-block',
+          boxShadow: '0 4px 24px rgba(201, 176, 55, 0.4)',
+          letterSpacing: '0.03em',
+          textTransform: 'uppercase'
         }}>
-          Get Started Now
+          Book Now
         </Link>
       </section>
 
@@ -586,6 +614,42 @@ export default function LandingPage() {
           &copy; 2025 BetterView Window Cleaning. All rights reserved.
         </div>
       </footer>
+
+      {/* Sticky mobile Book Now bar */}
+      <div className="sticky-book-bar" style={{
+        display: 'none',
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        padding: '12px 16px',
+        paddingBottom: 'max(12px, env(safe-area-inset-bottom))',
+        background: 'rgba(255, 255, 255, 0.97)',
+        backdropFilter: 'blur(12px)',
+        borderTop: '1px solid #E5E7EB',
+        zIndex: 999,
+        boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.08)'
+      }}>
+        <Link href="/book" style={{
+          display: 'block',
+          width: '100%',
+          padding: '16px',
+          fontSize: 17,
+          fontWeight: 700,
+          background: 'linear-gradient(135deg, #C9B037 0%, #A69028 100%)',
+          border: 'none',
+          borderRadius: 10,
+          color: '#FFFFFF',
+          cursor: 'pointer',
+          textDecoration: 'none',
+          textAlign: 'center',
+          boxShadow: '0 2px 12px rgba(201, 176, 55, 0.35)',
+          letterSpacing: '0.03em',
+          textTransform: 'uppercase'
+        }}>
+          Book Now
+        </Link>
+      </div>
     </div>
   );
 }

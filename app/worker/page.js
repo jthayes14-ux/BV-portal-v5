@@ -47,7 +47,7 @@ export default function WorkerDashboard() {
     if (workerData) {
       setWorker(workerData);
       const [bkRes, fqRes] = await Promise.all([
-        supabase.from('bookings').select('*').eq('worker_id', workerData.id).order('booking_date', { ascending: true }),
+        supabase.from('bookings').select('*').eq('worker_id', workerData.id).order('booking_date', { ascending: true }).limit(10000),
         supabase.from('frequencies').select('*').order('sort_order'),
       ]);
       setBookings(bkRes.data || []);

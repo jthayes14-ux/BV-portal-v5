@@ -2,38 +2,14 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 
-function Logo({ size = 'normal' }) {
-  const isLarge = size === 'large';
-  return (
-    <div style={{ display: 'flex', gap: isLarge ? 8 : 4 }}>
-      <div style={{
-        width: isLarge ? 20 : 8,
-        height: isLarge ? 56 : 28,
-        background: '#B8C5F2',
-        borderRadius: 3
-      }} />
-      <div style={{
-        width: isLarge ? 20 : 8,
-        height: isLarge ? 56 : 28,
-        background: '#B8C5F2',
-        borderRadius: 3
-      }} />
-      <div style={{
-        width: isLarge ? 20 : 8,
-        height: isLarge ? 56 : 28,
-        background: '#B8C5F2',
-        borderRadius: 3
-      }} />
-    </div>
-  );
-}
+const font = "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif";
 
 function FAQItem({ question, answer }) {
   const [open, setOpen] = useState(false);
   return (
     <div style={{
-      borderBottom: '1px solid #E8EDFC',
-      padding: '20px 0'
+      borderBottom: '1px solid #E5E5E5',
+      padding: '24px 0'
     }}>
       <button
         onClick={() => setOpen(!open)}
@@ -45,18 +21,20 @@ function FAQItem({ question, answer }) {
           background: 'none',
           border: 'none',
           cursor: 'pointer',
-          textAlign: 'left'
+          textAlign: 'left',
+          fontFamily: font
         }}
       >
-        <span style={{ fontSize: 18, fontWeight: 600, color: '#2D3748' }}>{question}</span>
-        <span style={{ fontSize: 24, color: '#B8C5F2' }}>{open ? '−' : '+'}</span>
+        <span style={{ fontSize: 18, fontWeight: 600, color: '#111111', letterSpacing: '-0.01em' }}>{question}</span>
+        <span style={{ fontSize: 20, color: '#111111', fontWeight: 300, marginLeft: 24, flexShrink: 0 }}>{open ? '\u2212' : '+'}</span>
       </button>
       {open && (
         <p style={{
-          marginTop: 12,
+          marginTop: 16,
           fontSize: 16,
-          color: '#718096',
-          lineHeight: 1.6
+          color: '#666666',
+          lineHeight: 1.7,
+          fontWeight: 400
         }}>
           {answer}
         </p>
@@ -68,64 +46,53 @@ function FAQItem({ question, answer }) {
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const brand = {
-    primary: '#B8C5F2',
-    primaryDark: '#9AA8E0',
-    primaryLight: '#E8EDFC',
-    text: '#2D3748',
-    textLight: '#718096',
-    bg: '#F8FAFF',
-  };
-
   return (
     <div style={{
       minHeight: '100vh',
-      background: brand.bg,
-      fontFamily: "'Cormorant Garamond', Georgia, serif"
+      background: '#FFFFFF',
+      fontFamily: font
     }}>
       {/* Header */}
       <header className="landing-header" style={{
-        padding: '20px 32px',
+        padding: '20px 48px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        background: 'white',
-        borderBottom: `1px solid ${brand.primaryLight}`,
+        background: '#FFFFFF',
         position: 'sticky',
         top: 0,
-        zIndex: 100,
-        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+        zIndex: 100
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Logo />
-          <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
-        </div>
+        <Link href="/" style={{ textDecoration: 'none' }}>
+          <span style={{
+            fontSize: 20,
+            fontWeight: 600,
+            color: '#111111',
+            letterSpacing: '-0.02em'
+          }}>
+            BetterView
+          </span>
+        </Link>
 
-        <div className="desktop-nav" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div className="desktop-nav" style={{ display: 'flex', gap: 32, alignItems: 'center' }}>
           <Link href="/login" style={{
-            padding: '10px 24px',
             fontSize: 15,
-            fontWeight: 500,
-            background: 'transparent',
-            border: 'none',
-            color: brand.textLight,
-            cursor: 'pointer',
+            fontWeight: 400,
+            color: '#666666',
             textDecoration: 'none'
           }}>
             Log in
           </Link>
-          <Link href="/book" style={{
-            padding: '12px 28px',
-            fontSize: 16,
-            fontWeight: 600,
-            background: '#1B2B5A',
+          <Link href="/book" className="btn-primary" style={{
+            padding: '10px 24px',
+            fontSize: 15,
+            fontWeight: 500,
+            background: '#B8C5F2',
             border: 'none',
-            borderRadius: 8,
-            color: '#FFFFFF',
-            cursor: 'pointer',
+            borderRadius: 100,
+            color: '#111111',
             textDecoration: 'none',
-            boxShadow: '0 2px 8px rgba(27, 43, 90, 0.3)',
-            letterSpacing: '0.02em'
+            letterSpacing: '-0.01em'
           }}>
             Book Now
           </Link>
@@ -133,28 +100,27 @@ export default function LandingPage() {
 
         <button className="mobile-nav-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
           {mobileMenuOpen ? (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           ) : (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="17" x2="20" y2="17"/>
             </svg>
           )}
         </button>
 
         <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
           <Link href="/book" onClick={() => setMobileMenuOpen(false)} style={{
-            padding: '14px 16px', fontSize: 16, fontWeight: 600,
-            background: '#1B2B5A', color: '#FFFFFF', textDecoration: 'none',
-            textAlign: 'center', borderRadius: 8
+            padding: '14px 16px', fontSize: 16, fontWeight: 500,
+            background: '#B8C5F2', color: '#111111', textDecoration: 'none',
+            textAlign: 'center', borderRadius: 100
           }}>
             Book Now
           </Link>
           <Link href="/login" onClick={() => setMobileMenuOpen(false)} style={{
-            padding: '14px 16px', fontSize: 16, fontWeight: 500,
-            color: brand.textLight, textDecoration: 'none', textAlign: 'center',
-            borderRadius: 8
+            padding: '14px 16px', fontSize: 16, fontWeight: 400,
+            color: '#666666', textDecoration: 'none', textAlign: 'center'
           }}>
             Log in
           </Link>
@@ -163,182 +129,114 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <section className="hero-section" style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '90vh',
-        padding: '60px 24px',
-        textAlign: 'center',
-        background: `linear-gradient(180deg, ${brand.bg} 0%, ${brand.primaryLight} 100%)`
+        padding: '120px 48px 160px',
+        background: '#FFFFFF',
+        maxWidth: 900,
+        marginLeft: 48
       }}>
-        <div style={{ marginBottom: 40 }}>
-          <Logo size="large" />
-        </div>
-
-        <h1 style={{
-          fontSize: 52,
-          fontWeight: 600,
-          color: brand.text,
-          lineHeight: 1.2,
-          marginBottom: 20,
-          maxWidth: 600
+        <h1 className="hero-headline" style={{
+          fontSize: 64,
+          fontWeight: 700,
+          color: '#111111',
+          lineHeight: 1.05,
+          letterSpacing: '-0.03em',
+          marginBottom: 24
         }}>
-          Crystal clear views,
-          <br />
-          one tap away
+          Crystal clear views,<br />
+          one tap away.
         </h1>
 
         <p style={{
           fontSize: 20,
-          color: brand.textLight,
-          lineHeight: 1.6,
-          marginBottom: 40,
-          maxWidth: 500
+          color: '#666666',
+          lineHeight: 1.5,
+          fontWeight: 400,
+          marginBottom: 48,
+          maxWidth: 480
         }}>
           Professional window cleaning for Miami's finest high-rises.
-          <br />
-          No account needed. No quotes. No waiting.
         </p>
 
-        <div className="hero-buttons" style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          <Link href="/book" style={{
-            padding: '20px 56px',
-            fontSize: 20,
-            fontWeight: 700,
-            background: '#1B2B5A',
-            border: 'none',
-            borderRadius: 12,
-            color: '#FFFFFF',
-            cursor: 'pointer',
-            textDecoration: 'none',
-            boxShadow: '0 4px 20px rgba(27, 43, 90, 0.4)',
-            letterSpacing: '0.03em',
-            textTransform: 'uppercase',
-            transition: 'all 0.3s ease'
-          }}>
-            Book Now
-          </Link>
-          <Link href="/login" style={{
-            padding: '16px 32px',
-            fontSize: 16,
-            fontWeight: 500,
-            background: 'transparent',
-            border: `1px solid ${brand.primaryDark}`,
-            borderRadius: 10,
-            color: brand.textLight,
-            cursor: 'pointer',
-            textDecoration: 'none'
-          }}>
-            Log In
-          </Link>
-        </div>
+        <Link href="/book" className="btn-primary" style={{
+          padding: '16px 40px',
+          fontSize: 17,
+          fontWeight: 500,
+          background: '#B8C5F2',
+          border: 'none',
+          borderRadius: 100,
+          color: '#111111',
+          textDecoration: 'none',
+          display: 'inline-block',
+          letterSpacing: '-0.01em'
+        }}>
+          Book Now
+        </Link>
       </section>
 
       {/* What We Do */}
       <section style={{
-        padding: '80px 24px',
-        background: 'white'
+        padding: '120px 48px',
+        background: '#FFFFFF',
+        borderTop: '1px solid #F0F0F0'
       }}>
-        <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
+        <div style={{ maxWidth: 960, margin: '0 auto' }}>
           <h2 className="section-heading" style={{
-            fontSize: 36,
-            fontWeight: 600,
-            color: brand.text,
-            marginBottom: 16
+            fontSize: 48,
+            fontWeight: 700,
+            color: '#111111',
+            marginBottom: 64,
+            letterSpacing: '-0.03em',
+            lineHeight: 1.1
           }}>
-            What We Do
+            What we do
           </h2>
-          <p style={{
-            fontSize: 18,
-            color: brand.textLight,
-            marginBottom: 48,
-            maxWidth: 600,
-            margin: '0 auto 48px'
-          }}>
-            We specialize in professional window cleaning for luxury high-rise condominiums throughout Miami.
-          </p>
 
           <div className="features-grid" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 32
+            gap: 48
           }}>
-            <div style={{ padding: 24 }}>
-              <div style={{
-                width: 64,
-                height: 64,
-                background: '#8E9FD9',
-                borderRadius: 16,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 20px'
+            <div>
+              <h3 style={{
+                fontSize: 20,
+                fontWeight: 600,
+                color: '#111111',
+                marginBottom: 12,
+                letterSpacing: '-0.01em'
               }}>
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="4" y="2" width="16" height="20" rx="1" />
-                  <line x1="8" y1="6" x2="10" y2="6" />
-                  <line x1="14" y1="6" x2="16" y2="6" />
-                  <line x1="8" y1="10" x2="10" y2="10" />
-                  <line x1="14" y1="10" x2="16" y2="10" />
-                  <line x1="8" y1="14" x2="10" y2="14" />
-                  <line x1="14" y1="14" x2="16" y2="14" />
-                  <line x1="10" y1="18" x2="14" y2="18" />
-                  <line x1="10" y1="18" x2="10" y2="22" />
-                  <line x1="14" y1="18" x2="14" y2="22" />
-                </svg>
-              </div>
-              <h3 style={{ fontSize: 20, fontWeight: 600, color: brand.text, marginBottom: 8 }}>
-                High-Rise Experts
+                High-rise experts
               </h3>
-              <p style={{ fontSize: 16, color: brand.textLight, lineHeight: 1.6 }}>
+              <p style={{ fontSize: 16, color: '#666666', lineHeight: 1.7, fontWeight: 400 }}>
                 We know Miami's luxury buildings inside and out. From Brickell to Edgewater, we've got you covered.
               </p>
             </div>
 
-            <div style={{ padding: 24 }}>
-              <div style={{
-                width: 64,
-                height: 64,
-                background: '#8E9FD9',
-                borderRadius: 16,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 20px'
+            <div>
+              <h3 style={{
+                fontSize: 20,
+                fontWeight: 600,
+                color: '#111111',
+                marginBottom: 12,
+                letterSpacing: '-0.01em'
               }}>
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2L13.5 8.5L20 7L15 12L20 17L13.5 15.5L12 22L10.5 15.5L4 17L9 12L4 7L10.5 8.5L12 2Z" />
-                </svg>
-              </div>
-              <h3 style={{ fontSize: 20, fontWeight: 600, color: brand.text, marginBottom: 8 }}>
-                Spotless Results
+                Spotless results
               </h3>
-              <p style={{ fontSize: 16, color: brand.textLight, lineHeight: 1.6 }}>
+              <p style={{ fontSize: 16, color: '#666666', lineHeight: 1.7, fontWeight: 400 }}>
                 Professional-grade equipment and eco-friendly solutions for streak-free, crystal clear windows.
               </p>
             </div>
 
-            <div style={{ padding: 24 }}>
-              <div style={{
-                width: 64,
-                height: 64,
-                background: '#8E9FD9',
-                borderRadius: 16,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 20px'
+            <div>
+              <h3 style={{
+                fontSize: 20,
+                fontWeight: 600,
+                color: '#111111',
+                marginBottom: 12,
+                letterSpacing: '-0.01em'
               }}>
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                  <polyline points="9 12 11 14 15 10" />
-                </svg>
-              </div>
-              <h3 style={{ fontSize: 20, fontWeight: 600, color: brand.text, marginBottom: 8 }}>
-                Fully Insured
+                Fully insured
               </h3>
-              <p style={{ fontSize: 16, color: brand.textLight, lineHeight: 1.6 }}>
+              <p style={{ fontSize: 16, color: '#666666', lineHeight: 1.7, fontWeight: 400 }}>
                 Licensed, bonded, and insured. Your home is protected while we work.
               </p>
             </div>
@@ -348,166 +246,142 @@ export default function LandingPage() {
 
       {/* How It Works */}
       <section style={{
-        padding: '80px 24px',
-        background: brand.bg
+        padding: '120px 48px',
+        background: '#FFFFFF',
+        borderTop: '1px solid #F0F0F0'
       }}>
-        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+        <div style={{ maxWidth: 960, margin: '0 auto' }}>
           <h2 className="section-heading" style={{
-            fontSize: 36,
-            fontWeight: 600,
-            color: brand.text,
-            marginBottom: 16,
-            textAlign: 'center'
+            fontSize: 48,
+            fontWeight: 700,
+            color: '#111111',
+            marginBottom: 64,
+            letterSpacing: '-0.03em',
+            lineHeight: 1.1
           }}>
-            How It Works
+            How it works
           </h2>
-          <p style={{
-            fontSize: 18,
-            color: brand.textLight,
-            marginBottom: 48,
-            textAlign: 'center'
-          }}>
-            No account required. Book your window cleaning in 60 seconds.
-          </p>
 
           <div className="steps-grid" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: 24
+            gap: 48
           }}>
-            <div style={{ textAlign: 'center' }}>
+            <div>
               <div style={{
-                width: 48,
-                height: 48,
-                background: brand.primary,
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 16px',
+                fontSize: 14,
+                fontWeight: 500,
+                color: '#999999',
+                marginBottom: 16,
+                letterSpacing: '0.02em'
+              }}>
+                01
+              </div>
+              <h3 style={{
                 fontSize: 20,
                 fontWeight: 600,
-                color: brand.text
+                color: '#111111',
+                marginBottom: 12,
+                letterSpacing: '-0.01em'
               }}>
-                1
-              </div>
-              <h3 style={{ fontSize: 18, fontWeight: 600, color: brand.text, marginBottom: 8 }}>
-                Select Building
+                Select building
               </h3>
-              <p style={{ fontSize: 16, color: brand.textLight, lineHeight: 1.5 }}>
-                Choose your building and floor plan from our list
+              <p style={{ fontSize: 16, color: '#666666', lineHeight: 1.7, fontWeight: 400 }}>
+                Choose your building and floor plan from our list.
               </p>
             </div>
 
-            <div style={{ textAlign: 'center' }}>
+            <div>
               <div style={{
-                width: 48,
-                height: 48,
-                background: brand.primary,
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 16px',
+                fontSize: 14,
+                fontWeight: 500,
+                color: '#999999',
+                marginBottom: 16,
+                letterSpacing: '0.02em'
+              }}>
+                02
+              </div>
+              <h3 style={{
                 fontSize: 20,
                 fontWeight: 600,
-                color: brand.text
+                color: '#111111',
+                marginBottom: 12,
+                letterSpacing: '-0.01em'
               }}>
-                2
-              </div>
-              <h3 style={{ fontSize: 18, fontWeight: 600, color: brand.text, marginBottom: 8 }}>
-                See Your Price
+                See your price
               </h3>
-              <p style={{ fontSize: 16, color: brand.textLight, lineHeight: 1.5 }}>
-                Get instant pricing based on your unit - no surprises
+              <p style={{ fontSize: 16, color: '#666666', lineHeight: 1.7, fontWeight: 400 }}>
+                Get instant pricing based on your unit. No surprises.
               </p>
             </div>
 
-            <div style={{ textAlign: 'center' }}>
+            <div>
               <div style={{
-                width: 48,
-                height: 48,
-                background: brand.primary,
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 16px',
+                fontSize: 14,
+                fontWeight: 500,
+                color: '#999999',
+                marginBottom: 16,
+                letterSpacing: '0.02em'
+              }}>
+                03
+              </div>
+              <h3 style={{
                 fontSize: 20,
                 fontWeight: 600,
-                color: brand.text
+                color: '#111111',
+                marginBottom: 12,
+                letterSpacing: '-0.01em'
               }}>
-                3
-              </div>
-              <h3 style={{ fontSize: 18, fontWeight: 600, color: brand.text, marginBottom: 8 }}>
-                Pick a Time
+                Pick a time
               </h3>
-              <p style={{ fontSize: 16, color: brand.textLight, lineHeight: 1.5 }}>
-                Choose a date and time that works for you
+              <p style={{ fontSize: 16, color: '#666666', lineHeight: 1.7, fontWeight: 400 }}>
+                Choose a date and time that works for you.
               </p>
             </div>
 
-            <div style={{ textAlign: 'center' }}>
+            <div>
               <div style={{
-                width: 48,
-                height: 48,
-                background: brand.primary,
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 16px',
+                fontSize: 14,
+                fontWeight: 500,
+                color: '#999999',
+                marginBottom: 16,
+                letterSpacing: '0.02em'
+              }}>
+                04
+              </div>
+              <h3 style={{
                 fontSize: 20,
                 fontWeight: 600,
-                color: brand.text
+                color: '#111111',
+                marginBottom: 12,
+                letterSpacing: '-0.01em'
               }}>
-                4
-              </div>
-              <h3 style={{ fontSize: 18, fontWeight: 600, color: brand.text, marginBottom: 8 }}>
-                We Handle the Rest
+                We handle the rest
               </h3>
-              <p style={{ fontSize: 16, color: brand.textLight, lineHeight: 1.5 }}>
-                Our pros arrive on time and leave your windows sparkling
+              <p style={{ fontSize: 16, color: '#666666', lineHeight: 1.7, fontWeight: 400 }}>
+                Our pros arrive on time and leave your windows sparkling.
               </p>
             </div>
-          </div>
-
-          <div style={{ textAlign: 'center', marginTop: 48 }}>
-            <Link href="/book" style={{
-              padding: '18px 48px',
-              fontSize: 18,
-              fontWeight: 700,
-              background: '#1B2B5A',
-              border: 'none',
-              borderRadius: 12,
-              color: '#FFFFFF',
-              cursor: 'pointer',
-              textDecoration: 'none',
-              display: 'inline-block',
-              boxShadow: '0 4px 16px rgba(27, 43, 90, 0.35)',
-              letterSpacing: '0.03em',
-              textTransform: 'uppercase'
-            }}>
-              Book Now
-            </Link>
           </div>
         </div>
       </section>
 
       {/* FAQs */}
       <section style={{
-        padding: '80px 24px',
-        background: 'white'
+        padding: '120px 48px',
+        background: '#FFFFFF',
+        borderTop: '1px solid #F0F0F0'
       }}>
-        <div style={{ maxWidth: 700, margin: '0 auto' }}>
+        <div style={{ maxWidth: 640, margin: '0 auto' }}>
           <h2 className="section-heading" style={{
-            fontSize: 36,
-            fontWeight: 600,
-            color: brand.text,
-            marginBottom: 40,
-            textAlign: 'center'
+            fontSize: 48,
+            fontWeight: 700,
+            color: '#111111',
+            marginBottom: 64,
+            letterSpacing: '-0.03em',
+            lineHeight: 1.1
           }}>
-            Frequently Asked Questions
+            Questions
           </h2>
 
           <FAQItem
@@ -532,70 +406,40 @@ export default function LandingPage() {
           />
           <FAQItem
             question="Do you clean balcony windows?"
-            answer="Yes! Interior balcony windows and doors are included. Exterior high-rise windows require specialized equipment - contact us for a custom quote."
+            answer="Yes. Interior balcony windows and doors are included. Exterior high-rise windows require specialized equipment — contact us for a custom quote."
           />
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="cta-section" style={{
-        padding: '80px 24px',
-        background: 'linear-gradient(135deg, #2D3748 0%, #1a202c 100%)',
-        textAlign: 'center'
-      }}>
-        <h2 style={{
-          fontSize: 36,
-          fontWeight: 600,
-          color: '#FFFFFF',
-          marginBottom: 16
-        }}>
-          Ready for crystal clear views?
-        </h2>
-        <p style={{
-          fontSize: 18,
-          color: 'rgba(255,255,255,0.7)',
-          marginBottom: 40
-        }}>
-          No account needed. Book your cleaning in 60 seconds.
-        </p>
-        <Link href="/book" style={{
-          padding: '20px 56px',
-          fontSize: 20,
-          fontWeight: 700,
-          background: '#1B2B5A',
-          border: 'none',
-          borderRadius: 12,
-          color: '#FFFFFF',
-          cursor: 'pointer',
-          textDecoration: 'none',
-          display: 'inline-block',
-          boxShadow: '0 4px 24px rgba(27, 43, 90, 0.4)',
-          letterSpacing: '0.03em',
-          textTransform: 'uppercase'
-        }}>
-          Book Now
-        </Link>
-      </section>
-
       {/* Footer */}
       <footer style={{
-        padding: '40px 24px',
-        background: brand.text,
-        color: 'white'
+        padding: '48px 48px',
+        background: '#FFFFFF',
+        borderTop: '1px solid #F0F0F0'
       }}>
         <div className="footer-content" style={{
-          maxWidth: 900,
+          maxWidth: 960,
           margin: '0 auto',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <Logo />
-            <span style={{ fontSize: 20, fontWeight: 600 }}>BetterView</span>
-          </div>
+          <span style={{
+            fontSize: 15,
+            fontWeight: 500,
+            color: '#111111',
+            letterSpacing: '-0.01em'
+          }}>
+            BetterView
+          </span>
 
-          <div className="footer-links" style={{ display: 'flex', gap: 32, fontSize: 14, opacity: 0.8 }}>
+          <div className="footer-links" style={{
+            display: 'flex',
+            gap: 32,
+            fontSize: 14,
+            color: '#999999',
+            fontWeight: 400
+          }}>
             <span>Miami, FL</span>
             <span>hello@betterview.com</span>
             <span>(305) 555-0123</span>
@@ -603,15 +447,13 @@ export default function LandingPage() {
         </div>
 
         <div style={{
-          maxWidth: 900,
-          margin: '24px auto 0',
-          paddingTop: 24,
-          borderTop: '1px solid rgba(255,255,255,0.1)',
-          textAlign: 'center',
-          fontSize: 14,
-          opacity: 0.6
+          maxWidth: 960,
+          margin: '32px auto 0',
+          fontSize: 13,
+          color: '#CCCCCC',
+          fontWeight: 400
         }}>
-          &copy; 2025 BetterView Window Cleaning. All rights reserved.
+          &copy; 2025 BetterView Window Cleaning
         </div>
       </footer>
 
@@ -624,28 +466,23 @@ export default function LandingPage() {
         right: 0,
         padding: '12px 16px',
         paddingBottom: 'max(12px, env(safe-area-inset-bottom))',
-        background: 'rgba(255, 255, 255, 0.97)',
-        backdropFilter: 'blur(12px)',
-        borderTop: '1px solid #E5E7EB',
-        zIndex: 999,
-        boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.08)'
+        background: '#FFFFFF',
+        borderTop: '1px solid #F0F0F0',
+        zIndex: 999
       }}>
         <Link href="/book" style={{
           display: 'block',
           width: '100%',
-          padding: '16px',
-          fontSize: 17,
-          fontWeight: 700,
-          background: '#1B2B5A',
+          padding: '14px',
+          fontSize: 16,
+          fontWeight: 500,
+          background: '#B8C5F2',
           border: 'none',
-          borderRadius: 10,
-          color: '#FFFFFF',
-          cursor: 'pointer',
+          borderRadius: 100,
+          color: '#111111',
           textDecoration: 'none',
           textAlign: 'center',
-          boxShadow: '0 2px 12px rgba(27, 43, 90, 0.35)',
-          letterSpacing: '0.03em',
-          textTransform: 'uppercase'
+          letterSpacing: '-0.01em'
         }}>
           Book Now
         </Link>

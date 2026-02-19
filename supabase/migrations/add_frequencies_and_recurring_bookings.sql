@@ -29,10 +29,25 @@ ALTER TABLE frequencies DISABLE ROW LEVEL SECURITY;
 -- If RLS was previously enabled, drop the old restrictive policies and re-disable
 DO $$
 BEGIN
-  -- Drop policies if they exist (safe no-op if they don't)
   DROP POLICY IF EXISTS "Allow public read access to frequencies" ON frequencies;
   DROP POLICY IF EXISTS "Allow authenticated insert to frequencies" ON frequencies;
   DROP POLICY IF EXISTS "Allow authenticated update to frequencies" ON frequencies;
   DROP POLICY IF EXISTS "Allow authenticated delete to frequencies" ON frequencies;
 END
 $$;
+
+-- Fix bookings table: the guest_booking migration added an INSERT policy which
+-- implicitly enabled RLS, but never added SELECT/UPDATE/DELETE policies.
+-- This caused silent failures for admin operations (assign worker, mark complete,
+-- skip, cancel, read all bookings, etc.)
+CREATE POLICY IF NOT EXISTS "Allow public read access to bookings"
+  ON bookings FOR SELECT
+  USING (true);
+
+CREATE POLICY IF NOT EXISTS "Allow public update access to bookings"
+  ON bookings FOR UPDATE
+  USING (true);
+
+CREATE POLICY IF NOT EXISTS "Allow public delete access to bookings"
+  ON bookings FOR DELETE
+  USING (true);

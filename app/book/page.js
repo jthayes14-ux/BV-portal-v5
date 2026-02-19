@@ -21,13 +21,6 @@ const timeSlots = [
   '5:00 PM – 8:00 PM',
 ];
 
-const recurrenceOptions = [
-  { value: 'one-time', label: 'One-Time' },
-  { value: 'weekly', label: 'Weekly' },
-  { value: 'biweekly', label: 'Biweekly' },
-  { value: 'monthly', label: 'Monthly' },
-];
-
 export default function BookingFlow() {
   const router = useRouter();
 
@@ -35,6 +28,7 @@ export default function BookingFlow() {
   const [buildings, setBuildings] = useState([]);
   const [floorPlans, setFloorPlans] = useState([]);
   const [addOns, setAddOns] = useState([]);
+  const [frequencies, setFrequencies] = useState([]);
   const [dataLoading, setDataLoading] = useState(true);
 
   const [neighborhood, setNeighborhood] = useState('');
@@ -43,7 +37,7 @@ export default function BookingFlow() {
   const [unit, setUnit] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
-  const [recurrence, setRecurrence] = useState('one-time');
+  const [frequencyId, setFrequencyId] = useState('');
   const [selectedAddOns, setSelectedAddOns] = useState([]);
   const [focusedField, setFocusedField] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -67,12 +61,18 @@ export default function BookingFlow() {
   }, []);
 
   const loadData = async () => {
-    const [nRes, aoRes] = await Promise.all([
+    const [nRes, aoRes, freqRes] = await Promise.all([
       supabase.from('neighborhoods').select('*').order('name'),
       supabase.from('add_ons').select('*').order('name'),
+      supabase.from('frequencies').select('*').order('sort_order'),
     ]);
     setNeighborhoods(nRes.data || []);
     setAddOns(aoRes.data || []);
+    const freqData = freqRes.data || [];
+    setFrequencies(freqData);
+    // Default to the first frequency (One-Time) if available
+    const oneTime = freqData.find(f => f.interval_days === 0);
+    if (oneTime) setFrequencyId(oneTime.id);
     setDataLoading(false);
   };
 
@@ -89,13 +89,19 @@ export default function BookingFlow() {
   const selectedPlan = floorPlans.find(p => String(p.id) === String(floorPlanId));
   const selectedBuilding = buildings.find(b => String(b.id) === String(buildingId));
   const selectedNeighborhood = neighborhoods.find(n => String(n.id) === String(neighborhood));
+  const selectedFrequency = frequencies.find(f => String(f.id) === String(frequencyId));
 
   const addOnsTotal = selectedAddOns.reduce((sum, id) => {
     const addon = addOns.find(a => a.id === id);
     return sum + (Number(addon?.price) || 0);
   }, 0);
 
-  const total = (Number(selectedPlan?.price) || 0) + addOnsTotal;
+  const subtotal = (Number(selectedPlan?.price) || 0) + addOnsTotal;
+  const frequencyDiscount = selectedFrequency && Number(selectedFrequency.discount_percent) > 0
+    ? Math.round(subtotal * Number(selectedFrequency.discount_percent) / 100 * 100) / 100
+    : 0;
+  const total = Math.max(0, subtotal - frequencyDiscount);
+
   const serviceSelected = neighborhood && buildingId && floorPlanId && unit && date && time;
   const contactValid = firstName.trim() && lastName.trim() && email.trim() && phone.trim();
   const canBook = serviceSelected && contactValid;
@@ -110,13 +116,19 @@ export default function BookingFlow() {
       building_name: selectedBuilding?.name || '',
       floor_plan_id: floorPlanId,
       floor_plan_name: selectedPlan?.name || '',
-      unit, date, time_slot: time, recurrence,
+      unit, date, time_slot: time,
+      frequency_id: frequencyId,
+      frequency_name: selectedFrequency?.name || 'One-Time',
+      frequency_discount_percent: Number(selectedFrequency?.discount_percent) || 0,
+      frequency_interval_days: Number(selectedFrequency?.interval_days) || 0,
+      frequency_discount: frequencyDiscount,
       base_price: selectedPlan?.price || 0,
       selected_add_ons: selectedAddOns.map(id => {
         const a = addOns.find(x => x.id === id);
         return { id: a.id, name: a.name, price: a.price };
       }),
       add_ons_total: addOnsTotal,
+      subtotal,
       total,
       guest_first_name: firstName.trim(),
       guest_last_name: lastName.trim(),
@@ -264,13 +276,22 @@ export default function BookingFlow() {
               </div>
             )}
 
-            {/* Recurrence */}
+            {/* Frequency */}
             {time && (
               <div style={{ animation: 'fadeIn 0.4s ease' }}>
-                <label style={labelStyle}>Recurrence</label>
-                <select value={recurrence} onChange={(e) => setRecurrence(e.target.value)} onFocus={() => setFocusedField('recurrence')} onBlur={() => setFocusedField(null)} style={getSelectStyle('recurrence')}>
-                  {recurrenceOptions.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+                <label style={labelStyle}>Frequency</label>
+                <select value={frequencyId} onChange={(e) => setFrequencyId(e.target.value)} onFocus={() => setFocusedField('frequency')} onBlur={() => setFocusedField(null)} style={getSelectStyle('frequency')}>
+                  {frequencies.map(f => (
+                    <option key={f.id} value={f.id}>
+                      {f.name}{Number(f.discount_percent) > 0 ? ` - ${f.discount_percent}% off` : ''}
+                    </option>
+                  ))}
                 </select>
+                {selectedFrequency && Number(selectedFrequency.discount_percent) > 0 && (
+                  <p style={{ fontSize: 13, color: brand.gold, fontWeight: 600, marginTop: 8 }}>
+                    Save {selectedFrequency.discount_percent}% with {selectedFrequency.name.toLowerCase()} service
+                  </p>
+                )}
               </div>
             )}
 
@@ -357,16 +378,21 @@ export default function BookingFlow() {
                   <span>${addOnsTotal}</span>
                 </div>
               )}
-              {recurrence !== 'one-time' && (
+              {selectedFrequency && Number(selectedFrequency.interval_days) > 0 && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, fontSize: 15, color: brand.gold, fontWeight: 500 }}>
-                  <span>Recurrence</span>
-                  <span>{recurrenceOptions.find(r => r.value === recurrence)?.label}</span>
+                  <span>Frequency: {selectedFrequency.name}</span>
+                  <span>-{selectedFrequency.discount_percent}% (−${frequencyDiscount.toFixed(2)})</span>
                 </div>
               )}
               <div style={{ height: 1, background: `linear-gradient(90deg, transparent, ${brand.border}, transparent)`, margin: '16px 0' }} />
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                 <span style={{ fontSize: 14, fontWeight: 600, color: brand.textLight, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Total</span>
-                <span style={{ fontSize: 36, fontWeight: 300, color: brand.text, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>${total}</span>
+                <div style={{ textAlign: 'right' }}>
+                  {frequencyDiscount > 0 && (
+                    <span style={{ fontSize: 16, color: brand.textMuted, textDecoration: 'line-through', marginRight: 12 }}>${subtotal}</span>
+                  )}
+                  <span style={{ fontSize: 36, fontWeight: 300, color: brand.text, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>${total.toFixed(2)}</span>
+                </div>
               </div>
             </div>
 

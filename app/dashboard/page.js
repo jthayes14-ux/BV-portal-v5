@@ -20,12 +20,13 @@ export default function CustomerDashboard() {
   const { user, loading: authLoading, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState('upcoming');
   const [bookings, setBookings] = useState([]);
+  const [frequencies, setFrequencies] = useState([]);
   const [dataLoading, setDataLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const brand = {
     primary: '#B8C5F2', text: '#1a1a1a', textLight: '#666',
-    border: '#e0e0e0', bg: '#fafafa', success: '#22c55e',
+    border: '#e0e0e0', bg: '#fafafa', success: '#22c55e', gold: '#C9B037',
   };
 
   useEffect(() => {
@@ -33,17 +34,21 @@ export default function CustomerDashboard() {
       router.push('/login');
       return;
     }
-    if (!authLoading && user) loadBookings();
+    if (!authLoading && user) loadData();
   }, [authLoading, user]);
 
-  const loadBookings = async () => {
-    const { data } = await supabase
-      .from('bookings')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('booking_date', { ascending: false });
-    setBookings(data || []);
+  const loadData = async () => {
+    const [bkRes, fqRes] = await Promise.all([
+      supabase.from('bookings').select('*').eq('user_id', user.id).order('booking_date', { ascending: false }),
+      supabase.from('frequencies').select('*').order('sort_order'),
+    ]);
+    setBookings(bkRes.data || []);
+    setFrequencies(fqRes.data || []);
     setDataLoading(false);
+  };
+
+  const getFrequencyName = (frequencyId) => {
+    return frequencies.find(f => f.id === frequencyId)?.name || '';
   };
 
   const handleLogout = async () => {
@@ -51,8 +56,8 @@ export default function CustomerDashboard() {
     router.push('/login');
   };
 
-  const upcomingBookings = bookings.filter(b => b.status === 'upcoming');
-  const pastBookings = bookings.filter(b => b.status === 'completed');
+  const upcomingBookings = bookings.filter(b => b.status === 'upcoming' || b.status === 'scheduled');
+  const pastBookings = bookings.filter(b => b.status === 'completed' || b.status === 'skipped' || b.status === 'cancelled');
   const displayedBookings = activeTab === 'upcoming' ? upcomingBookings : pastBookings;
 
   const formatDate = (dateStr) => {
@@ -63,6 +68,37 @@ export default function CustomerDashboard() {
 
   const userInitial = (user?.user_metadata?.full_name || user?.email || 'U').charAt(0).toUpperCase();
 
+  const getStatusStyle = (status) => {
+    switch (status) {
+      case 'upcoming': return { background: brand.primary, color: brand.text };
+      case 'scheduled': return { background: '#DBEAFE', color: '#1E40AF' };
+      case 'completed': return { background: '#e8e8e8', color: brand.text };
+      case 'skipped': return { background: '#FEF3C7', color: '#92400E' };
+      case 'cancelled': return { background: '#FEE2E2', color: '#DC2626' };
+      default: return { background: '#e8e8e8', color: brand.text };
+    }
+  };
+
+  // Group bookings by recurring_group_id
+  const groupRecurring = (bks) => {
+    const groups = {};
+    const standalone = [];
+    for (const b of bks) {
+      if (b.recurring_group_id) {
+        if (!groups[b.recurring_group_id]) groups[b.recurring_group_id] = [];
+        groups[b.recurring_group_id].push(b);
+      } else {
+        standalone.push(b);
+      }
+    }
+    for (const gid of Object.keys(groups)) {
+      groups[gid].sort((a, b) => a.booking_date.localeCompare(b.booking_date));
+    }
+    return { groups, standalone };
+  };
+
+  const { groups, standalone } = groupRecurring(displayedBookings);
+
   if (authLoading || dataLoading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: brand.bg }}>
@@ -70,6 +106,68 @@ export default function CustomerDashboard() {
       </div>
     );
   }
+
+  const renderBookingCard = (booking) => {
+    const freqName = getFrequencyName(booking.frequency_id);
+    const statusStyle = getStatusStyle(booking.status);
+
+    return (
+      <div key={booking.id} style={{ background: 'white', borderRadius: 12, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
+        <div className="booking-card-header" style={{ padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
+          <div>
+            <h3 style={{ fontSize: 18, fontWeight: 600, color: brand.text, marginBottom: 4 }}>{booking.building}</h3>
+            <p style={{ fontSize: 14, color: brand.textLight }}>Unit {booking.unit_number} · {booking.floor_plan}</p>
+          </div>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            {freqName && freqName !== 'One-Time' && (
+              <span style={{ padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 600, background: '#F5F0DC', color: '#A69028' }}>
+                {freqName}
+              </span>
+            )}
+            <span style={{ padding: '6px 12px', borderRadius: 100, fontSize: 13, fontWeight: 500, ...statusStyle }}>
+              {booking.status}
+            </span>
+          </div>
+        </div>
+
+        <div className="booking-details-row" style={{ padding: '16px 24px', background: brand.bg, borderTop: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <p style={{ fontSize: 15, fontWeight: 500, color: brand.text }}>{formatDate(booking.booking_date)}</p>
+            <p style={{ fontSize: 14, color: brand.textLight }}>{booking.booking_time}</p>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <p style={{ fontSize: 18, fontWeight: 600, color: brand.text }}>${booking.total_price}</p>
+            {booking.frequency_discount > 0 && (
+              <p style={{ fontSize: 11, color: brand.gold }}>Freq. discount: -${booking.frequency_discount}</p>
+            )}
+            {booking.add_ons && booking.add_ons.length > 0 && (
+              <p style={{ fontSize: 13, color: brand.textLight }}>+{booking.add_ons.map(a => a.name).join(', ')}</p>
+            )}
+          </div>
+        </div>
+
+        <div className="booking-card-actions" style={{ padding: '16px 24px', borderTop: `1px solid ${brand.border}`, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          {(booking.status === 'upcoming' || booking.status === 'scheduled') && (
+            <>
+              <button style={{ padding: '10px 20px', fontSize: 14, fontWeight: 500, background: 'white', border: `1px solid ${brand.border}`, borderRadius: 6, cursor: 'pointer', color: brand.text }}>Reschedule</button>
+              <button onClick={async () => {
+                if (confirm('Cancel this booking?')) {
+                  await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', booking.id);
+                  setBookings(bookings.map(b => b.id === booking.id ? { ...b, status: 'cancelled' } : b));
+                }
+              }} style={{ padding: '10px 20px', fontSize: 14, fontWeight: 500, background: 'white', border: `1px solid ${brand.border}`, borderRadius: 6, cursor: 'pointer', color: '#dc2626' }}>Cancel</button>
+            </>
+          )}
+          {(booking.status === 'completed' || booking.status === 'skipped' || booking.status === 'cancelled') && (
+            <>
+              <Link href="/book" style={{ padding: '10px 20px', fontSize: 14, fontWeight: 500, background: brand.primary, border: 'none', borderRadius: 6, color: brand.text, textDecoration: 'none' }}>Book Again</Link>
+              <button style={{ padding: '10px 20px', fontSize: 14, fontWeight: 500, background: 'white', border: `1px solid ${brand.border}`, borderRadius: 6, cursor: 'pointer', color: brand.text }}>View Receipt</button>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div style={{ minHeight: '100vh', background: brand.bg }}>
@@ -134,54 +232,22 @@ export default function CustomerDashboard() {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {displayedBookings.map(booking => (
-              <div key={booking.id} style={{ background: 'white', borderRadius: 12, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
-                <div className="booking-card-header" style={{ padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
-                  <div>
-                    <h3 style={{ fontSize: 18, fontWeight: 600, color: brand.text, marginBottom: 4 }}>{booking.building}</h3>
-                    <p style={{ fontSize: 14, color: brand.textLight }}>Unit {booking.unit_number} · {booking.floor_plan}</p>
-                  </div>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    {booking.recurrence && booking.recurrence !== 'one-time' && (
-                      <span style={{ padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 600, background: '#F5F0DC', color: '#A69028' }}>
-                        {booking.recurrence}
-                      </span>
-                    )}
-                    <span style={{ padding: '6px 12px', borderRadius: 100, fontSize: 13, fontWeight: 500, background: booking.status === 'upcoming' ? brand.primary : '#e8e8e8', color: brand.text }}>
-                      {booking.status === 'upcoming' ? 'Upcoming' : 'Completed'}
-                    </span>
-                  </div>
+            {/* Recurring groups */}
+            {Object.entries(groups).map(([groupId, groupBookings]) => (
+              <div key={groupId} style={{ border: `2px solid ${brand.gold}`, borderRadius: 14, overflow: 'hidden' }}>
+                <div style={{ padding: '10px 20px', background: '#FFFBEB', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 14 }}>&#x21BB;</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: '#92400E' }}>
+                    Recurring Series ({groupBookings.length} bookings)
+                  </span>
                 </div>
-
-                <div className="booking-details-row" style={{ padding: '16px 24px', background: brand.bg, borderTop: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <p style={{ fontSize: 15, fontWeight: 500, color: brand.text }}>{formatDate(booking.booking_date)}</p>
-                    <p style={{ fontSize: 14, color: brand.textLight }}>{booking.booking_time}</p>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <p style={{ fontSize: 18, fontWeight: 600, color: brand.text }}>${booking.total_price}</p>
-                    {booking.add_ons && booking.add_ons.length > 0 && (
-                      <p style={{ fontSize: 13, color: brand.textLight }}>+{booking.add_ons.map(a => a.name).join(', ')}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="booking-card-actions" style={{ padding: '16px 24px', borderTop: `1px solid ${brand.border}`, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                  {booking.status === 'upcoming' && (
-                    <>
-                      <button style={{ padding: '10px 20px', fontSize: 14, fontWeight: 500, background: 'white', border: `1px solid ${brand.border}`, borderRadius: 6, cursor: 'pointer', color: brand.text }}>Reschedule</button>
-                      <button style={{ padding: '10px 20px', fontSize: 14, fontWeight: 500, background: 'white', border: `1px solid ${brand.border}`, borderRadius: 6, cursor: 'pointer', color: '#dc2626' }}>Cancel</button>
-                    </>
-                  )}
-                  {booking.status === 'completed' && (
-                    <>
-                      <Link href="/book" style={{ padding: '10px 20px', fontSize: 14, fontWeight: 500, background: brand.primary, border: 'none', borderRadius: 6, color: brand.text, textDecoration: 'none' }}>Book Again</Link>
-                      <button style={{ padding: '10px 20px', fontSize: 14, fontWeight: 500, background: 'white', border: `1px solid ${brand.border}`, borderRadius: 6, cursor: 'pointer', color: brand.text }}>View Receipt</button>
-                    </>
-                  )}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                  {groupBookings.map(b => renderBookingCard(b))}
                 </div>
               </div>
             ))}
+            {/* Standalone bookings */}
+            {standalone.map(b => renderBookingCard(b))}
           </div>
         )}
       </main>

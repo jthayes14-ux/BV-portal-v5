@@ -64,14 +64,16 @@ export default function PaymentFlow() {
   }
 
   const addOnsTotal = booking.add_ons_total || 0;
-  const subtotal = booking.total || 0;
+  const baseSubtotal = booking.subtotal || booking.total || 0;
+  const frequencyDiscountAmount = Number(booking.frequency_discount) || 0;
+  const afterFreqDiscount = Math.max(0, baseSubtotal - frequencyDiscountAmount);
 
-  const discountAmount = appliedDiscount
+  const codeDiscountAmount = appliedDiscount
     ? appliedDiscount.type === 'percent'
-      ? Math.round(subtotal * appliedDiscount.value / 100 * 100) / 100
-      : Math.min(appliedDiscount.value, subtotal)
+      ? Math.round(afterFreqDiscount * appliedDiscount.value / 100 * 100) / 100
+      : Math.min(appliedDiscount.value, afterFreqDiscount)
     : 0;
-  const total = Math.max(0, subtotal - discountAmount);
+  const total = Math.max(0, afterFreqDiscount - codeDiscountAmount);
 
   const handleApplyDiscount = async () => {
     if (!discountCode.trim()) return;
@@ -132,6 +134,10 @@ export default function PaymentFlow() {
     setProcessing(true);
     setError('');
 
+    const recurringGroupId = (booking.frequency_interval_days > 0)
+      ? crypto.randomUUID()
+      : null;
+
     const bookingRecord = {
       user_id: user?.id || null,
       customer_name: `${booking.guest_first_name} ${booking.guest_last_name}`,
@@ -144,7 +150,9 @@ export default function PaymentFlow() {
       unit_number: booking.unit,
       booking_date: booking.date,
       booking_time: booking.time_slot,
-      recurrence: booking.recurrence,
+      frequency_id: booking.frequency_id || null,
+      frequency_discount: frequencyDiscountAmount,
+      recurring_group_id: recurringGroupId,
       base_price: booking.base_price,
       add_ons: booking.selected_add_ons,
       add_ons_total: booking.add_ons_total,
@@ -159,7 +167,7 @@ export default function PaymentFlow() {
 
     if (appliedDiscount) {
       bookingRecord.discount_code = appliedDiscount.code;
-      bookingRecord.discount_amount = discountAmount;
+      bookingRecord.discount_amount = codeDiscountAmount;
     }
 
     const { data: insertedBooking, error: insertError } = await supabase
@@ -176,6 +184,30 @@ export default function PaymentFlow() {
       setError('Failed to save booking: ' + insertError.message);
       setProcessing(false);
       return;
+    }
+
+    // Auto-generate next 4 recurring bookings if interval_days > 0
+    if (booking.frequency_interval_days > 0 && recurringGroupId) {
+      const futureBookings = [];
+      const startDate = new Date(booking.date + 'T00:00:00');
+
+      for (let i = 1; i <= 4; i++) {
+        const nextDate = new Date(startDate);
+        nextDate.setDate(nextDate.getDate() + (booking.frequency_interval_days * i));
+        const y = nextDate.getFullYear();
+        const m = String(nextDate.getMonth() + 1).padStart(2, '0');
+        const d = String(nextDate.getDate()).padStart(2, '0');
+
+        futureBookings.push({
+          ...bookingRecord,
+          booking_date: `${y}-${m}-${d}`,
+          status: 'scheduled',
+        });
+      }
+
+      if (futureBookings.length > 0) {
+        await supabase.from('bookings').insert(futureBookings);
+      }
     }
 
     setSavedBookingId(insertedBooking?.id || null);
@@ -246,6 +278,8 @@ export default function PaymentFlow() {
   const formatDate = (dateStr) => {
     return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
   };
+
+  const hasFrequencyDiscount = frequencyDiscountAmount > 0;
 
   return (
     <div style={{ minHeight: '100vh', background: brand.bg }}>
@@ -322,9 +356,15 @@ export default function PaymentFlow() {
               <div style={{ background: brand.bg, borderRadius: 8, padding: 12, marginBottom: 20 }}>
                 <p style={{ fontWeight: 500, color: brand.text, marginBottom: 2 }}>{formatDate(booking.date)}</p>
                 <p style={{ fontSize: 14, color: brand.textLight }}>{booking.time_slot}</p>
-                {booking.recurrence !== 'one-time' && (
+                {booking.frequency_name && booking.frequency_name !== 'One-Time' && (
                   <p style={{ fontSize: 13, color: '#C9B037', fontWeight: 600, marginTop: 4 }}>
-                    Recurring: {booking.recurrence}
+                    Frequency: {booking.frequency_name}
+                    {booking.frequency_discount_percent > 0 && ` (${booking.frequency_discount_percent}% off)`}
+                  </p>
+                )}
+                {booking.frequency_interval_days > 0 && (
+                  <p style={{ fontSize: 12, color: brand.textLight, marginTop: 2 }}>
+                    + 4 future bookings every {booking.frequency_interval_days} days
                   </p>
                 )}
               </div>
@@ -347,6 +387,14 @@ export default function PaymentFlow() {
                     <span style={{ color: brand.text }}>${addon.price}</span>
                   </div>
                 ))}
+
+                {/* Frequency Discount */}
+                {hasFrequencyDiscount && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, fontSize: 14 }}>
+                    <span style={{ color: '#C9B037' }}>{booking.frequency_name} discount ({booking.frequency_discount_percent}%)</span>
+                    <span style={{ color: '#C9B037', fontWeight: 600 }}>-${frequencyDiscountAmount.toFixed(2)}</span>
+                  </div>
+                )}
 
                 {/* Discount Code */}
                 <div style={{ marginTop: 16, marginBottom: 16, paddingTop: 16, borderTop: `1px solid ${brand.border}` }}>
@@ -398,16 +446,16 @@ export default function PaymentFlow() {
 
                 {appliedDiscount && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, fontSize: 14 }}>
-                    <span style={{ color: '#16A34A' }}>Discount</span>
-                    <span style={{ color: '#16A34A', fontWeight: 600 }}>-${discountAmount.toFixed(2)}</span>
+                    <span style={{ color: '#16A34A' }}>Discount code</span>
+                    <span style={{ color: '#16A34A', fontWeight: 600 }}>-${codeDiscountAmount.toFixed(2)}</span>
                   </div>
                 )}
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 16, marginTop: 8, borderTop: `1px solid ${brand.border}` }}>
                   <span style={{ fontSize: 16, fontWeight: 600, color: brand.text }}>Total</span>
                   <div style={{ textAlign: 'right' }}>
-                    {appliedDiscount && (
-                      <span style={{ fontSize: 14, color: brand.textLight, textDecoration: 'line-through', marginRight: 8 }}>${subtotal}</span>
+                    {(hasFrequencyDiscount || appliedDiscount) && (
+                      <span style={{ fontSize: 14, color: brand.textLight, textDecoration: 'line-through', marginRight: 8 }}>${baseSubtotal}</span>
                     )}
                     <span style={{ fontSize: 20, fontWeight: 700, color: brand.text }}>${total.toFixed(2)}</span>
                   </div>
@@ -439,12 +487,30 @@ export default function PaymentFlow() {
               <p style={{ fontSize: 13, color: brand.textLight, marginBottom: 4 }}>DATE & TIME</p>
               <p style={{ fontWeight: 600, color: brand.text }}>{formatDate(booking.date)}</p>
               <p style={{ fontSize: 14, color: brand.textLight }}>{booking.time_slot}</p>
+              {booking.frequency_name && booking.frequency_name !== 'One-Time' && (
+                <p style={{ fontSize: 13, color: '#C9B037', fontWeight: 600, marginTop: 4 }}>
+                  {booking.frequency_name} frequency
+                </p>
+              )}
             </div>
+            {booking.frequency_interval_days > 0 && (
+              <div style={{ marginBottom: 20, padding: 12, background: '#FFFBEB', borderRadius: 8, border: '1px solid #FEF3C7' }}>
+                <p style={{ fontSize: 13, color: '#92400E', fontWeight: 600, marginBottom: 4 }}>Recurring Service</p>
+                <p style={{ fontSize: 13, color: '#78350F' }}>
+                  4 additional bookings have been scheduled every {booking.frequency_interval_days} days.
+                </p>
+              </div>
+            )}
             <div>
               <p style={{ fontSize: 13, color: brand.textLight, marginBottom: 4 }}>TOTAL</p>
+              {hasFrequencyDiscount && (
+                <p style={{ fontSize: 14, color: '#C9B037', marginBottom: 4 }}>
+                  {booking.frequency_name} discount ({booking.frequency_discount_percent}%): -${frequencyDiscountAmount.toFixed(2)}
+                </p>
+              )}
               {appliedDiscount && (
                 <p style={{ fontSize: 14, color: '#16A34A', marginBottom: 4 }}>
-                  Discount ({appliedDiscount.code}): -${discountAmount.toFixed(2)}
+                  Discount ({appliedDiscount.code}): -${codeDiscountAmount.toFixed(2)}
                 </p>
               )}
               <p style={{ fontSize: 24, fontWeight: 700, color: brand.text }}>${total.toFixed(2)}</p>
@@ -560,9 +626,27 @@ export default function PaymentFlow() {
               <p style={{ fontSize: 13, color: brand.textLight, marginBottom: 4 }}>DATE & TIME</p>
               <p style={{ fontWeight: 600, color: brand.text }}>{formatDate(booking.date)}</p>
               <p style={{ fontSize: 14, color: brand.textLight }}>{booking.time_slot}</p>
+              {booking.frequency_name && booking.frequency_name !== 'One-Time' && (
+                <p style={{ fontSize: 13, color: '#C9B037', fontWeight: 600, marginTop: 4 }}>
+                  {booking.frequency_name} frequency
+                </p>
+              )}
             </div>
+            {booking.frequency_interval_days > 0 && (
+              <div style={{ marginBottom: 20, padding: 12, background: '#FFFBEB', borderRadius: 8, border: '1px solid #FEF3C7' }}>
+                <p style={{ fontSize: 13, color: '#92400E', fontWeight: 600, marginBottom: 4 }}>Recurring Service</p>
+                <p style={{ fontSize: 13, color: '#78350F' }}>
+                  4 additional bookings have been scheduled every {booking.frequency_interval_days} days.
+                </p>
+              </div>
+            )}
             <div>
               <p style={{ fontSize: 13, color: brand.textLight, marginBottom: 4 }}>TOTAL</p>
+              {hasFrequencyDiscount && (
+                <p style={{ fontSize: 14, color: '#C9B037', marginBottom: 4 }}>
+                  {booking.frequency_name} discount: -${frequencyDiscountAmount.toFixed(2)}
+                </p>
+              )}
               <p style={{ fontSize: 24, fontWeight: 700, color: brand.text }}>${total.toFixed(2)}</p>
               <p style={{ fontSize: 13, color: brand.textLight }}>Charged after service</p>
             </div>

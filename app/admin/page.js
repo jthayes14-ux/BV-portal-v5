@@ -30,6 +30,7 @@ export default function AdminPanel() {
   const [addOns, setAddOns] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [workers, setWorkers] = useState([]);
+  const [frequencies, setFrequencies] = useState([]);
   const [dataLoading, setDataLoading] = useState(true);
 
   const [editingId, setEditingId] = useState(null);
@@ -41,11 +42,12 @@ export default function AdminPanel() {
   const brand = {
     primary: '#B8C5F2', text: '#1a1a1a', textLight: '#666',
     border: '#e0e0e0', bg: '#fafafa', white: '#ffffff',
-    danger: '#dc2626', success: '#22c55e',
+    danger: '#dc2626', success: '#22c55e', gold: '#C9B037',
   };
 
   const tabs = [
     { id: 'bookings', label: 'Bookings' },
+    { id: 'frequencies', label: 'Frequencies' },
     { id: 'neighborhoods', label: 'Neighborhoods' },
     { id: 'buildings', label: 'Buildings' },
     { id: 'floorplans', label: 'Floor Plans' },
@@ -63,13 +65,14 @@ export default function AdminPanel() {
   }, [authLoading, user]);
 
   const loadAll = async () => {
-    const [nRes, bRes, fpRes, aoRes, bkRes, wRes] = await Promise.all([
+    const [nRes, bRes, fpRes, aoRes, bkRes, wRes, fqRes] = await Promise.all([
       supabase.from('neighborhoods').select('*').order('name'),
       supabase.from('buildings').select('*').order('name'),
       supabase.from('floor_plans').select('*').order('name'),
       supabase.from('add_ons').select('*').order('name'),
       supabase.from('bookings').select('*').order('booking_date', { ascending: false }),
       supabase.from('workers').select('*').order('name'),
+      supabase.from('frequencies').select('*').order('sort_order'),
     ]);
     setNeighborhoods(nRes.data || []);
     setBuildings(bRes.data || []);
@@ -77,6 +80,7 @@ export default function AdminPanel() {
     setAddOns(aoRes.data || []);
     setBookings(bkRes.data || []);
     setWorkers(wRes.data || []);
+    setFrequencies(fqRes.data || []);
     setDataLoading(false);
   };
 
@@ -108,6 +112,11 @@ export default function AdminPanel() {
         result = await supabase.from('workers').insert({ name: 'New Worker', email: '', phone: '' }).select().single();
         if (result.data) { setWorkers([...workers, result.data]); setEditingId(`worker-${result.data.id}`); setEditValue({ name: 'New Worker', email: '', phone: '' }); }
         break;
+      case 'frequencies':
+        const maxSort = frequencies.reduce((max, f) => Math.max(max, f.sort_order || 0), 0);
+        result = await supabase.from('frequencies').insert({ name: 'New Frequency', discount_percent: 0, interval_days: 0, sort_order: maxSort + 1 }).select().single();
+        if (result.data) { setFrequencies([...frequencies, result.data]); setEditingId(`frequency-${result.data.id}`); setEditValue({ name: 'New Frequency', discount_percent: 0, interval_days: 0, sort_order: maxSort + 1 }); }
+        break;
     }
   };
 
@@ -133,6 +142,10 @@ export default function AdminPanel() {
         await supabase.from('workers').update(editValue).eq('id', id);
         setWorkers(workers.map(w => w.id === id ? { ...w, ...editValue } : w));
         break;
+      case 'frequencies':
+        await supabase.from('frequencies').update(editValue).eq('id', id);
+        setFrequencies(frequencies.map(f => f.id === id ? { ...f, ...editValue } : f));
+        break;
     }
     setEditingId(null);
     setEditValue({});
@@ -140,7 +153,7 @@ export default function AdminPanel() {
 
   const handleDelete = async (type, id) => {
     if (!confirm('Are you sure you want to delete this?')) return;
-    const tableMap = { neighborhoods: 'neighborhoods', buildings: 'buildings', floorplans: 'floor_plans', addons: 'add_ons', workers: 'workers' };
+    const tableMap = { neighborhoods: 'neighborhoods', buildings: 'buildings', floorplans: 'floor_plans', addons: 'add_ons', workers: 'workers', frequencies: 'frequencies' };
     await supabase.from(tableMap[type]).delete().eq('id', id);
     switch (type) {
       case 'neighborhoods': setNeighborhoods(neighborhoods.filter(n => n.id !== id)); break;
@@ -148,6 +161,7 @@ export default function AdminPanel() {
       case 'floorplans': setFloorPlans(floorPlans.filter(f => f.id !== id)); break;
       case 'addons': setAddOns(addOns.filter(a => a.id !== id)); break;
       case 'workers': setWorkers(workers.filter(w => w.id !== id)); break;
+      case 'frequencies': setFrequencies(frequencies.filter(f => f.id !== id)); break;
     }
   };
 
@@ -161,10 +175,37 @@ export default function AdminPanel() {
     setBookings(bookings.map(b => b.id === bookingId ? { ...b, status: 'completed' } : b));
   };
 
+  const handleSkipBooking = async (bookingId) => {
+    if (!confirm('Skip this booking? It will be marked as skipped.')) return;
+    await supabase.from('bookings').update({ status: 'skipped' }).eq('id', bookingId);
+    setBookings(bookings.map(b => b.id === bookingId ? { ...b, status: 'skipped' } : b));
+  };
+
+  const handleCancelBooking = async (bookingId) => {
+    if (!confirm('Cancel this booking? This cannot be undone.')) return;
+    await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', bookingId);
+    setBookings(bookings.map(b => b.id === bookingId ? { ...b, status: 'cancelled' } : b));
+  };
+
+  const getFrequencyName = (frequencyId) => {
+    return frequencies.find(f => f.id === frequencyId)?.name || '';
+  };
+
   const filteredBuildings = selectedNeighborhood ? buildings.filter(b => b.neighborhood_id === selectedNeighborhood) : buildings;
   const filteredFloorPlans = selectedBuilding ? floorPlans.filter(f => f.building_id === selectedBuilding) : floorPlans;
 
   const handleLogout = async () => { await signOut(); router.push('/login'); };
+
+  const getStatusStyle = (status) => {
+    switch (status) {
+      case 'upcoming': return { background: brand.primary, color: brand.text };
+      case 'scheduled': return { background: '#DBEAFE', color: '#1E40AF' };
+      case 'completed': return { background: '#e8e8e8', color: brand.text };
+      case 'skipped': return { background: '#FEF3C7', color: '#92400E' };
+      case 'cancelled': return { background: '#FEE2E2', color: '#DC2626' };
+      default: return { background: '#e8e8e8', color: brand.text };
+    }
+  };
 
   if (authLoading || dataLoading) {
     return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: brand.bg }}><p style={{ color: brand.textLight }}>Loading...</p></div>;
@@ -246,45 +287,139 @@ export default function AdminPanel() {
                       </tr>
                     </thead>
                     <tbody>
-                      {bookings.map(booking => (
-                        <tr key={booking.id} style={{ borderTop: `1px solid ${brand.border}` }}>
+                      {bookings.map(booking => {
+                        const freqName = getFrequencyName(booking.frequency_id);
+                        const statusStyle = getStatusStyle(booking.status);
+                        const isRecurring = !!booking.recurring_group_id;
+                        const isActionable = booking.status === 'upcoming' || booking.status === 'scheduled';
+
+                        return (
+                          <tr key={booking.id} style={{ borderTop: `1px solid ${brand.border}` }}>
+                            <td style={{ padding: '16px' }}>
+                              <p style={{ fontWeight: 500, color: brand.text }}>{booking.customer_name}</p>
+                              <p style={{ fontSize: 13, color: brand.textLight }}>{booking.customer_email}</p>
+                            </td>
+                            <td style={{ padding: '16px' }}>
+                              <p style={{ fontWeight: 500, color: brand.text }}>{booking.building}</p>
+                              <p style={{ fontSize: 13, color: brand.textLight }}>Unit {booking.unit_number} · {booking.floor_plan}</p>
+                            </td>
+                            <td style={{ padding: '16px' }}>
+                              <p style={{ fontWeight: 500, color: brand.text }}>{formatDate(booking.booking_date)}</p>
+                              <p style={{ fontSize: 13, color: brand.textLight }}>{booking.booking_time}</p>
+                              {freqName && freqName !== 'One-Time' && (
+                                <p style={{ fontSize: 12, color: brand.gold, fontWeight: 600 }}>{freqName}</p>
+                              )}
+                              {isRecurring && (
+                                <p style={{ fontSize: 11, color: brand.textLight }}>Recurring group</p>
+                              )}
+                            </td>
+                            <td style={{ padding: '16px' }}>
+                              <span style={{ fontWeight: 600, color: brand.text }}>${booking.total_price}</span>
+                              {booking.frequency_discount > 0 && (
+                                <p style={{ fontSize: 11, color: brand.gold }}>-${booking.frequency_discount} freq.</p>
+                              )}
+                            </td>
+                            <td style={{ padding: '16px' }}>
+                              <span style={{ padding: '4px 10px', borderRadius: 100, fontSize: 13, fontWeight: 500, ...statusStyle }}>
+                                {booking.status}
+                              </span>
+                            </td>
+                            <td style={{ padding: '16px' }}>
+                              <select
+                                value={booking.worker_id || ''}
+                                onChange={(e) => handleWorkerAssign(booking.id, e.target.value)}
+                                style={{ ...inputStyle, width: 140, fontSize: 13 }}
+                              >
+                                <option value="">Unassigned</option>
+                                {workers.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                              </select>
+                            </td>
+                            <td style={{ padding: '16px', textAlign: 'right' }}>
+                              <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                                {isActionable && (
+                                  <button onClick={() => handleMarkComplete(booking.id)} style={{ ...buttonStyle, background: brand.success, color: brand.white, fontSize: 12, padding: '6px 12px' }}>
+                                    Complete
+                                  </button>
+                                )}
+                                {isActionable && isRecurring && (
+                                  <>
+                                    <button onClick={() => handleSkipBooking(booking.id)} style={{ ...buttonStyle, background: '#FEF3C7', color: '#92400E', fontSize: 12, padding: '6px 12px' }}>
+                                      Skip
+                                    </button>
+                                    <button onClick={() => handleCancelBooking(booking.id)} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger, fontSize: 12, padding: '6px 12px' }}>
+                                      Cancel
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* FREQUENCIES TAB */}
+          {activeTab === 'frequencies' && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>Frequencies</h1>
+                <button onClick={() => handleAdd('frequencies')} style={{ ...buttonStyle, background: brand.text, color: brand.white }}>+ Add Frequency</button>
+              </div>
+              <div className="table-wrapper">
+                <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ background: brand.bg }}>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Name</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Discount %</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Interval (days)</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Sort Order</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {frequencies.map(f => (
+                        <tr key={f.id} style={{ borderTop: `1px solid ${brand.border}` }}>
                           <td style={{ padding: '16px' }}>
-                            <p style={{ fontWeight: 500, color: brand.text }}>{booking.customer_name}</p>
-                            <p style={{ fontSize: 13, color: brand.textLight }}>{booking.customer_email}</p>
-                          </td>
-                          <td style={{ padding: '16px' }}>
-                            <p style={{ fontWeight: 500, color: brand.text }}>{booking.building}</p>
-                            <p style={{ fontSize: 13, color: brand.textLight }}>Unit {booking.unit_number} · {booking.floor_plan}</p>
-                          </td>
-                          <td style={{ padding: '16px' }}>
-                            <p style={{ fontWeight: 500, color: brand.text }}>{formatDate(booking.booking_date)}</p>
-                            <p style={{ fontSize: 13, color: brand.textLight }}>{booking.booking_time}</p>
-                            {booking.recurrence && booking.recurrence !== 'one-time' && (
-                              <p style={{ fontSize: 12, color: '#C9B037', fontWeight: 600 }}>{booking.recurrence}</p>
+                            {editingId === `frequency-${f.id}` ? (
+                              <input style={inputStyle} value={editValue.name || ''} onChange={(e) => setEditValue({ ...editValue, name: e.target.value })} />
+                            ) : (
+                              <span style={{ fontWeight: 500, color: brand.text }}>{f.name}</span>
                             )}
                           </td>
-                          <td style={{ padding: '16px', fontWeight: 600, color: brand.text }}>${booking.total_price}</td>
                           <td style={{ padding: '16px' }}>
-                            <span style={{ padding: '4px 10px', borderRadius: 100, fontSize: 13, fontWeight: 500, background: booking.status === 'upcoming' ? brand.primary : '#e8e8e8', color: brand.text }}>
-                              {booking.status}
-                            </span>
+                            {editingId === `frequency-${f.id}` ? (
+                              <input style={{ ...inputStyle, width: 100 }} type="number" value={editValue.discount_percent ?? 0} onChange={(e) => setEditValue({ ...editValue, discount_percent: Number(e.target.value) })} />
+                            ) : (
+                              <span style={{ fontWeight: 600, color: Number(f.discount_percent) > 0 ? brand.gold : brand.text }}>{f.discount_percent}%</span>
+                            )}
                           </td>
                           <td style={{ padding: '16px' }}>
-                            <select
-                              value={booking.worker_id || ''}
-                              onChange={(e) => handleWorkerAssign(booking.id, e.target.value)}
-                              style={{ ...inputStyle, width: 140, fontSize: 13 }}
-                            >
-                              <option value="">Unassigned</option>
-                              {workers.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
-                            </select>
+                            {editingId === `frequency-${f.id}` ? (
+                              <input style={{ ...inputStyle, width: 100 }} type="number" value={editValue.interval_days ?? 0} onChange={(e) => setEditValue({ ...editValue, interval_days: Number(e.target.value) })} />
+                            ) : (
+                              <span style={{ color: brand.text }}>{f.interval_days} days</span>
+                            )}
+                          </td>
+                          <td style={{ padding: '16px' }}>
+                            {editingId === `frequency-${f.id}` ? (
+                              <input style={{ ...inputStyle, width: 80 }} type="number" value={editValue.sort_order ?? 0} onChange={(e) => setEditValue({ ...editValue, sort_order: Number(e.target.value) })} />
+                            ) : (
+                              <span style={{ color: brand.textLight }}>{f.sort_order}</span>
+                            )}
                           </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
-                            {booking.status === 'upcoming' && (
-                              <button onClick={() => handleMarkComplete(booking.id)} style={{ ...buttonStyle, background: brand.success, color: brand.white }}>
-                                Mark Complete
-                              </button>
+                            {editingId === `frequency-${f.id}` ? (
+                              <button onClick={() => handleSave('frequencies', f.id)} style={{ ...buttonStyle, background: brand.success, color: brand.white, marginRight: 8 }}>Save</button>
+                            ) : (
+                              <button onClick={() => { setEditingId(`frequency-${f.id}`); setEditValue({ name: f.name, discount_percent: f.discount_percent, interval_days: f.interval_days, sort_order: f.sort_order }); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, marginRight: 8 }}>Edit</button>
                             )}
+                            <button onClick={() => handleDelete('frequencies', f.id)} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger }}>Delete</button>
                           </td>
                         </tr>
                       ))}

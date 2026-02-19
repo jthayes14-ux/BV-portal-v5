@@ -18,7 +18,7 @@ ON CONFLICT DO NOTHING;
 
 -- Add frequency_id, recurring_group_id, and frequency_discount columns to bookings
 ALTER TABLE bookings
-  ADD COLUMN IF NOT EXISTS frequency_id UUID REFERENCES frequencies(id),
+  ADD COLUMN IF NOT EXISTS frequency_id UUID REFERENCES frequencies(id) ON DELETE SET NULL,
   ADD COLUMN IF NOT EXISTS recurring_group_id UUID,
   ADD COLUMN IF NOT EXISTS frequency_discount NUMERIC DEFAULT 0;
 

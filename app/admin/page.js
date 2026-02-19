@@ -38,6 +38,8 @@ export default function AdminPanel() {
   const [selectedNeighborhood, setSelectedNeighborhood] = useState('');
   const [selectedBuilding, setSelectedBuilding] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sortField, setSortField] = useState('booking_date');
+  const [sortDirection, setSortDirection] = useState('desc');
 
   const brand = {
     primary: '#B8C5F2', text: '#1a1a1a', textLight: '#666',
@@ -215,6 +217,50 @@ export default function AdminPanel() {
     return frequencies.find(f => f.id === frequencyId)?.name || '';
   };
 
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const sortedBookings = [...bookings].sort((a, b) => {
+    const dir = sortDirection === 'asc' ? 1 : -1;
+    let aVal, bVal;
+    switch (sortField) {
+      case 'customer_name':
+        aVal = (a.customer_name || '').toLowerCase();
+        bVal = (b.customer_name || '').toLowerCase();
+        return aVal < bVal ? -dir : aVal > bVal ? dir : 0;
+      case 'building':
+        aVal = (a.building || '').toLowerCase();
+        bVal = (b.building || '').toLowerCase();
+        return aVal < bVal ? -dir : aVal > bVal ? dir : 0;
+      case 'booking_date':
+        aVal = a.booking_date || '';
+        bVal = b.booking_date || '';
+        return aVal < bVal ? -dir : aVal > bVal ? dir : 0;
+      case 'total_price':
+        aVal = Number(a.total_price) || 0;
+        bVal = Number(b.total_price) || 0;
+        return (aVal - bVal) * dir;
+      case 'status':
+        aVal = (a.status || '').toLowerCase();
+        bVal = (b.status || '').toLowerCase();
+        return aVal < bVal ? -dir : aVal > bVal ? dir : 0;
+      case 'worker_id':
+        aVal = (workers.find(w => w.id === a.worker_id)?.name || 'zzz').toLowerCase();
+        bVal = (workers.find(w => w.id === b.worker_id)?.name || 'zzz').toLowerCase();
+        return aVal < bVal ? -dir : aVal > bVal ? dir : 0;
+      default:
+        return 0;
+    }
+  });
+
+  const sortIndicator = (field) => sortField === field ? (sortDirection === 'asc' ? ' \u25B2' : ' \u25BC') : '';
+
   const filteredBuildings = selectedNeighborhood ? buildings.filter(b => b.neighborhood_id === selectedNeighborhood) : buildings;
   const filteredFloorPlans = selectedBuilding ? floorPlans.filter(f => f.building_id === selectedBuilding) : floorPlans;
 
@@ -308,21 +354,27 @@ export default function AdminPanel() {
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                       <tr style={{ background: brand.bg }}>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Customer</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Property</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Date & Time</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Total</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Status</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Worker</th>
+                        {[
+                          { field: 'customer_name', label: 'Customer' },
+                          { field: 'building', label: 'Property' },
+                          { field: 'booking_date', label: 'Date & Time' },
+                          { field: 'total_price', label: 'Total' },
+                          { field: 'status', label: 'Status' },
+                          { field: 'worker_id', label: 'Worker' },
+                        ].map(col => (
+                          <th key={col.field} onClick={() => handleSort(col.field)} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight, cursor: 'pointer', userSelect: 'none' }}>
+                            {col.label}{sortIndicator(col.field)}
+                          </th>
+                        ))}
                         <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {bookings.map(booking => {
+                      {sortedBookings.map(booking => {
                         const freqName = getFrequencyName(booking.frequency_id);
                         const statusStyle = getStatusStyle(booking.status);
                         const isRecurring = !!booking.recurring_group_id;
-                        const isActionable = booking.status === 'upcoming' || booking.status === 'scheduled';
+                        const isActionable = ['upcoming', 'scheduled'].includes(booking.status);
 
                         return (
                           <tr key={booking.id} style={{ borderTop: `1px solid ${brand.border}` }}>
@@ -368,12 +420,10 @@ export default function AdminPanel() {
                             <td style={{ padding: '16px', textAlign: 'right' }}>
                               <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                                 {isActionable && (
-                                  <button onClick={() => handleMarkComplete(booking.id)} style={{ ...buttonStyle, background: brand.success, color: brand.white, fontSize: 12, padding: '6px 12px' }}>
-                                    Complete
-                                  </button>
-                                )}
-                                {isActionable && isRecurring && (
                                   <>
+                                    <button onClick={() => handleMarkComplete(booking.id)} style={{ ...buttonStyle, background: brand.success, color: brand.white, fontSize: 12, padding: '6px 12px' }}>
+                                      Complete
+                                    </button>
                                     <button onClick={() => handleSkipBooking(booking.id)} style={{ ...buttonStyle, background: '#FEF3C7', color: '#92400E', fontSize: 12, padding: '6px 12px' }}>
                                       Skip
                                     </button>

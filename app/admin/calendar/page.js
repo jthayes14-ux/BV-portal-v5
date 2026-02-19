@@ -25,6 +25,7 @@ export default function AdminCalendar() {
   const { user, loading: authLoading } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [workers, setWorkers] = useState([]);
+  const [frequencies, setFrequencies] = useState([]);
   const [dataLoading, setDataLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(null);
@@ -41,58 +42,17 @@ export default function AdminCalendar() {
     if (!authLoading && user) loadData();
   }, [authLoading, user]);
 
-  const expandRecurringBookings = (rawBookings) => {
-    const expanded = [];
-    const horizon = new Date();
-    horizon.setFullYear(horizon.getFullYear() + 1);
-
-    for (const booking of rawBookings) {
-      expanded.push(booking);
-
-      if (!booking.recurrence || booking.recurrence === 'one-time') continue;
-
-      const start = new Date(booking.booking_date + 'T00:00:00');
-      let next = new Date(start);
-
-      while (true) {
-        if (booking.recurrence === 'weekly') {
-          next = new Date(next);
-          next.setDate(next.getDate() + 7);
-        } else if (booking.recurrence === 'biweekly') {
-          next = new Date(next);
-          next.setDate(next.getDate() + 14);
-        } else if (booking.recurrence === 'monthly') {
-          next = new Date(next);
-          next.setMonth(next.getMonth() + 1);
-        } else {
-          break;
-        }
-
-        if (next > horizon) break;
-
-        const y = next.getFullYear();
-        const m = String(next.getMonth() + 1).padStart(2, '0');
-        const d = String(next.getDate()).padStart(2, '0');
-
-        expanded.push({
-          ...booking,
-          booking_date: `${y}-${m}-${d}`,
-          _isRecurringInstance: true,
-          _originalDate: booking.booking_date,
-          status: next > new Date() ? 'upcoming' : booking.status,
-        });
-      }
-    }
-
-    return expanded;
-  };
+  const getFrequencyById = (id) => frequencies.find(f => f.id === id);
 
   const loadData = async () => {
-    const [bkRes, wRes] = await Promise.all([
+    const [bkRes, wRes, fqRes] = await Promise.all([
       supabase.from('bookings').select('*').order('booking_date'),
       supabase.from('workers').select('*').order('name'),
+      supabase.from('frequencies').select('*').order('sort_order'),
     ]);
-    setBookings(expandRecurringBookings(bkRes.data || []));
+    const freqData = fqRes.data || [];
+    setFrequencies(freqData);
+    setBookings(bkRes.data || []);
     setWorkers(wRes.data || []);
     setDataLoading(false);
   };
@@ -119,6 +79,17 @@ export default function AdminCalendar() {
 
   const formatDate = (dateStr) => {
     return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  };
+
+  const getStatusStyle = (status) => {
+    switch (status) {
+      case 'upcoming': return { background: brand.primary, color: brand.text };
+      case 'scheduled': return { background: '#DBEAFE', color: '#1E40AF' };
+      case 'completed': return { background: '#e8e8e8', color: brand.text };
+      case 'skipped': return { background: '#FEF3C7', color: '#92400E' };
+      case 'cancelled': return { background: '#FEE2E2', color: '#DC2626' };
+      default: return { background: '#e8e8e8', color: brand.text };
+    }
   };
 
   if (authLoading || dataLoading) {
@@ -191,19 +162,22 @@ export default function AdminCalendar() {
                   <div style={{ fontSize: 14, fontWeight: isToday ? 700 : 500, color: isToday ? brand.gold : brand.text, marginBottom: 4 }}>
                     {day}
                   </div>
-                  {dayBk.slice(0, 3).map((bk, idx) => (
-                    <div key={idx} className="calendar-booking-pill" style={{
-                      padding: '2px 6px', marginBottom: 2, borderRadius: 4, fontSize: 11,
-                      background: bk.status === 'upcoming' ? brand.primary : '#e8e8e8',
-                      color: brand.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                      display: 'flex', alignItems: 'center', gap: 3,
-                    }}>
-                      {(bk._isRecurringInstance || (bk.recurrence && bk.recurrence !== 'one-time')) && (
-                        <span style={{ fontSize: 10, flexShrink: 0 }} title={bk.recurrence}>&#x21BB;</span>
-                      )}
-                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{bk.building} - {bk.unit_number}</span>
-                    </div>
-                  ))}
+                  {dayBk.slice(0, 3).map((bk, idx) => {
+                    const isRecurring = !!bk.recurring_group_id;
+                    return (
+                      <div key={idx} className="calendar-booking-pill" style={{
+                        padding: '2px 6px', marginBottom: 2, borderRadius: 4, fontSize: 11,
+                        background: bk.status === 'upcoming' ? brand.primary : bk.status === 'scheduled' ? '#DBEAFE' : '#e8e8e8',
+                        color: brand.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        display: 'flex', alignItems: 'center', gap: 3,
+                      }}>
+                        {isRecurring && (
+                          <span style={{ fontSize: 10, flexShrink: 0 }} title="Recurring">&#x21BB;</span>
+                        )}
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{bk.building} - {bk.unit_number}</span>
+                      </div>
+                    );
+                  })}
                   {dayBk.length > 3 && (
                     <div style={{ fontSize: 11, color: brand.textLight, padding: '2px 6px' }}>
                       +{dayBk.length - 3} more
@@ -230,42 +204,47 @@ export default function AdminCalendar() {
               </div>
             ) : (
               <div>
-                {dayBookings.map((booking, idx) => (
-                  <div key={`${booking.id}-${idx}`} className="calendar-detail-row" style={{ padding: '16px 24px', borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-                    <div>
-                      <p style={{ fontWeight: 600, color: brand.text }}>{booking.building} - Unit {booking.unit_number}</p>
-                      <p style={{ fontSize: 13, color: brand.textLight }}>{booking.booking_time} · {booking.customer_name}</p>
-                      {booking.recurrence && booking.recurrence !== 'one-time' && (
-                        <p style={{ fontSize: 12, color: brand.gold, marginTop: 2 }}>
-                          &#x21BB; {booking.recurrence.charAt(0).toUpperCase() + booking.recurrence.slice(1)} recurring
-                          {booking._isRecurringInstance && (
-                            <span style={{ color: brand.textLight }}> (originally {formatDate(booking._originalDate)})</span>
-                          )}
-                        </p>
-                      )}
-                    </div>
-                    <div className="calendar-detail-meta" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <span style={{ fontSize: 13, color: brand.textLight }}>
-                        Worker: <strong>{getWorkerName(booking.worker_id)}</strong>
-                      </span>
-                      {booking.recurrence && booking.recurrence !== 'one-time' && (
-                        <span style={{
-                          padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 600,
-                          background: '#F5F0DC', color: '#A69028'
-                        }}>
-                          {booking.recurrence}
+                {dayBookings.map((booking, idx) => {
+                  const freq = getFrequencyById(booking.frequency_id);
+                  const freqName = freq?.name || '';
+                  const isRecurring = !!booking.recurring_group_id;
+                  const statusStyle = getStatusStyle(booking.status);
+
+                  return (
+                    <div key={`${booking.id}-${idx}`} className="calendar-detail-row" style={{ padding: '16px 24px', borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                      <div>
+                        <p style={{ fontWeight: 600, color: brand.text }}>{booking.building} - Unit {booking.unit_number}</p>
+                        <p style={{ fontSize: 13, color: brand.textLight }}>{booking.booking_time} · {booking.customer_name}</p>
+                        {freqName && freqName !== 'One-Time' && (
+                          <p style={{ fontSize: 12, color: brand.gold, marginTop: 2 }}>
+                            &#x21BB; {freqName} frequency
+                            {isRecurring && <span style={{ color: brand.textLight }}> (recurring series)</span>}
+                          </p>
+                        )}
+                      </div>
+                      <div className="calendar-detail-meta" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <span style={{ fontSize: 13, color: brand.textLight }}>
+                          Worker: <strong>{getWorkerName(booking.worker_id)}</strong>
                         </span>
-                      )}
-                      <span style={{
-                        padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 500,
-                        background: booking.status === 'upcoming' ? brand.primary : '#e8e8e8', color: brand.text
-                      }}>
-                        {booking.status}
-                      </span>
-                      <span style={{ fontWeight: 600, color: brand.text }}>${booking.total_price}</span>
+                        {freqName && freqName !== 'One-Time' && (
+                          <span style={{
+                            padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 600,
+                            background: '#F5F0DC', color: '#A69028'
+                          }}>
+                            {freqName}
+                          </span>
+                        )}
+                        <span style={{
+                          padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 500,
+                          ...statusStyle
+                        }}>
+                          {booking.status}
+                        </span>
+                        <span style={{ fontWeight: 600, color: brand.text }}>${booking.total_price}</span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

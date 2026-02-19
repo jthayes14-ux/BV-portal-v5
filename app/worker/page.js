@@ -20,6 +20,7 @@ export default function WorkerDashboard() {
   const { user, loading: authLoading, signOut } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [worker, setWorker] = useState(null);
+  const [frequencies, setFrequencies] = useState([]);
   const [dataLoading, setDataLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('upcoming');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -45,14 +46,18 @@ export default function WorkerDashboard() {
 
     if (workerData) {
       setWorker(workerData);
-      const { data: bkData } = await supabase
-        .from('bookings')
-        .select('*')
-        .eq('worker_id', workerData.id)
-        .order('booking_date', { ascending: true });
-      setBookings(bkData || []);
+      const [bkRes, fqRes] = await Promise.all([
+        supabase.from('bookings').select('*').eq('worker_id', workerData.id).order('booking_date', { ascending: true }),
+        supabase.from('frequencies').select('*').order('sort_order'),
+      ]);
+      setBookings(bkRes.data || []);
+      setFrequencies(fqRes.data || []);
     }
     setDataLoading(false);
+  };
+
+  const getFrequencyName = (frequencyId) => {
+    return frequencies.find(f => f.id === frequencyId)?.name || '';
   };
 
   const handleMarkComplete = async (bookingId) => {
@@ -62,7 +67,7 @@ export default function WorkerDashboard() {
 
   const handleLogout = async () => { await signOut(); router.push('/worker/login'); };
 
-  const upcomingBookings = bookings.filter(b => b.status === 'upcoming');
+  const upcomingBookings = bookings.filter(b => b.status === 'upcoming' || b.status === 'scheduled');
   const completedBookings = bookings.filter(b => b.status === 'completed');
   const displayedBookings = activeTab === 'upcoming' ? upcomingBookings : completedBookings;
 
@@ -70,6 +75,15 @@ export default function WorkerDashboard() {
     return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', {
       weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
     });
+  };
+
+  const getStatusStyle = (status) => {
+    switch (status) {
+      case 'upcoming': return { background: brand.primary, color: brand.text };
+      case 'scheduled': return { background: '#DBEAFE', color: '#1E40AF' };
+      case 'completed': return { background: '#e8e8e8', color: brand.text };
+      default: return { background: '#e8e8e8', color: brand.text };
+    }
   };
 
   // Group upcoming bookings by date
@@ -180,48 +194,58 @@ export default function WorkerDashboard() {
                 {formatDate(dateKey)}
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {groupedByDate[dateKey].map(booking => (
-                  <div key={booking.id} style={{ background: brand.white, borderRadius: 12, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
-                    <div className="worker-booking-row" style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-                      <div>
-                        <h4 style={{ fontSize: 16, fontWeight: 600, color: brand.text, marginBottom: 4 }}>
-                          {booking.building} - Unit {booking.unit_number}
-                        </h4>
-                        <p style={{ fontSize: 14, color: brand.textLight }}>{booking.booking_time} · {booking.floor_plan}</p>
-                        {booking.add_ons && booking.add_ons.length > 0 && (
-                          <p style={{ fontSize: 13, color: brand.gold, marginTop: 4 }}>
-                            Add-Ons: {booking.add_ons.map(a => a.name).join(', ')}
-                          </p>
-                        )}
+                {groupedByDate[dateKey].map(booking => {
+                  const freqName = getFrequencyName(booking.frequency_id);
+                  const statusStyle = getStatusStyle(booking.status);
+
+                  return (
+                    <div key={booking.id} style={{ background: brand.white, borderRadius: 12, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
+                      <div className="worker-booking-row" style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                        <div>
+                          <h4 style={{ fontSize: 16, fontWeight: 600, color: brand.text, marginBottom: 4 }}>
+                            {booking.building} - Unit {booking.unit_number}
+                          </h4>
+                          <p style={{ fontSize: 14, color: brand.textLight }}>{booking.booking_time} · {booking.floor_plan}</p>
+                          {booking.add_ons && booking.add_ons.length > 0 && (
+                            <p style={{ fontSize: 13, color: brand.gold, marginTop: 4 }}>
+                              Add-Ons: {booking.add_ons.map(a => a.name).join(', ')}
+                            </p>
+                          )}
+                        </div>
+                        <div className="worker-booking-actions" style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: 12 }}>
+                          <span style={{ fontSize: 16, fontWeight: 600, color: brand.text }}>${booking.total_price}</span>
+                          {(booking.status === 'upcoming' || booking.status === 'scheduled') && (
+                            <button onClick={() => handleMarkComplete(booking.id)} style={{
+                              padding: '8px 16px', fontSize: 13, fontWeight: 600,
+                              background: brand.success, color: brand.white,
+                              border: 'none', borderRadius: 6, cursor: 'pointer'
+                            }}>
+                              Mark Done
+                            </button>
+                          )}
+                          {booking.status === 'completed' && (
+                            <span style={{ padding: '6px 12px', borderRadius: 100, fontSize: 12, fontWeight: 500, ...statusStyle }}>
+                              Done
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <div className="worker-booking-actions" style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <span style={{ fontSize: 16, fontWeight: 600, color: brand.text }}>${booking.total_price}</span>
-                        {booking.status === 'upcoming' && (
-                          <button onClick={() => handleMarkComplete(booking.id)} style={{
-                            padding: '8px 16px', fontSize: 13, fontWeight: 600,
-                            background: brand.success, color: brand.white,
-                            border: 'none', borderRadius: 6, cursor: 'pointer'
-                          }}>
-                            Mark Done
-                          </button>
+                      <div style={{ padding: '10px 20px', background: brand.bg, borderTop: `1px solid ${brand.border}`, fontSize: 13, color: brand.textLight }}>
+                        Customer: {booking.customer_name} · {booking.neighborhood}
+                        {freqName && freqName !== 'One-Time' && (
+                          <span style={{ marginLeft: 12, padding: '2px 8px', borderRadius: 4, background: '#F5F0DC', color: '#A69028', fontWeight: 600 }}>
+                            {freqName}
+                          </span>
                         )}
-                        {booking.status === 'completed' && (
-                          <span style={{ padding: '6px 12px', borderRadius: 100, fontSize: 12, fontWeight: 500, background: '#e8e8e8', color: brand.text }}>
-                            Done
+                        {booking.status === 'scheduled' && (
+                          <span style={{ marginLeft: 8, padding: '2px 8px', borderRadius: 4, background: '#DBEAFE', color: '#1E40AF', fontWeight: 600 }}>
+                            scheduled
                           </span>
                         )}
                       </div>
                     </div>
-                    <div style={{ padding: '10px 20px', background: brand.bg, borderTop: `1px solid ${brand.border}`, fontSize: 13, color: brand.textLight }}>
-                      Customer: {booking.customer_name} · {booking.neighborhood}
-                      {booking.recurrence && booking.recurrence !== 'one-time' && (
-                        <span style={{ marginLeft: 12, padding: '2px 8px', borderRadius: 4, background: '#F5F0DC', color: '#A69028', fontWeight: 600 }}>
-                          {booking.recurrence}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))

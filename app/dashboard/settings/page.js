@@ -51,7 +51,7 @@ export default function SettingsPage() {
 
   const loadProfile = async () => {
     const { data } = await supabase
-      .from('customer_profiles')
+      .from('user_profiles')
       .select('*')
       .eq('user_id', user.id)
       .single();
@@ -72,7 +72,7 @@ export default function SettingsPage() {
     setMessage('');
 
     const { error: upsertError } = await supabase
-      .from('customer_profiles')
+      .from('user_profiles')
       .upsert({
         user_id: user.id,
         address,

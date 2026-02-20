@@ -210,10 +210,10 @@ export default function PaymentFlow() {
       }
     }
 
-    // Auto-populate customer profile address from booking for logged-in users
+    // Auto-populate profile address from booking for logged-in users
     if (user?.id && booking.building_address) {
       const { data: existingProfile } = await supabase
-        .from('customer_profiles')
+        .from('user_profiles')
         .select('address')
         .eq('user_id', user.id)
         .single();
@@ -223,11 +223,9 @@ export default function PaymentFlow() {
           ? `${booking.building_address}, Unit ${booking.unit}`
           : booking.building_address;
 
-        await supabase.from('customer_profiles').upsert({
-          user_id: user.id,
-          address: profileAddress,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: 'user_id' });
+        await supabase.from('user_profiles')
+          .update({ address: profileAddress, updated_at: new Date().toISOString() })
+          .eq('user_id', user.id);
       }
     }
 
@@ -266,13 +264,21 @@ export default function PaymentFlow() {
     const newUserId = signUpData?.user?.id;
 
     if (newUserId) {
-      // Save to user_profiles
-      await supabase.from('user_profiles').insert({
+      // Save to user_profiles with address from booking
+      const profileData = {
         user_id: newUserId,
         first_name: booking.guest_first_name,
         last_name: booking.guest_last_name,
         phone: booking.guest_phone,
-      });
+      };
+
+      if (booking.building_address) {
+        profileData.address = booking.unit
+          ? `${booking.building_address}, Unit ${booking.unit}`
+          : booking.building_address;
+      }
+
+      await supabase.from('user_profiles').insert(profileData);
 
       // Link booking to new user
       if (savedBookingId) {
@@ -280,19 +286,6 @@ export default function PaymentFlow() {
           .from('bookings')
           .update({ user_id: newUserId })
           .eq('id', savedBookingId);
-      }
-
-      // Auto-populate customer profile address from booking
-      if (booking.building_address) {
-        const profileAddress = booking.unit
-          ? `${booking.building_address}, Unit ${booking.unit}`
-          : booking.building_address;
-
-        await supabase.from('customer_profiles').upsert({
-          user_id: newUserId,
-          address: profileAddress,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: 'user_id' });
       }
     }
 

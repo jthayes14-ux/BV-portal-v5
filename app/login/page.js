@@ -37,7 +37,7 @@ export default function AuthPages() {
 
   useEffect(() => {
     if (!loading && user) {
-      router.push('/book');
+      router.push('/dashboard');
     }
   }, [user, loading, router]);
 

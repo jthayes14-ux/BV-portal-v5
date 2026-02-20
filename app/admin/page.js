@@ -40,6 +40,8 @@ export default function AdminPanel() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sortField, setSortField] = useState('booking_date');
   const [sortDirection, setSortDirection] = useState('desc');
+  const [showCancelled, setShowCancelled] = useState(false);
+  const [showSkipped, setShowSkipped] = useState(false);
 
   const brand = {
     primary: '#B8C5F2', text: '#1a1a1a', textLight: '#666',
@@ -72,7 +74,7 @@ export default function AdminPanel() {
       supabase.from('buildings').select('*').order('name'),
       supabase.from('floor_plans').select('*').order('name'),
       supabase.from('add_ons').select('*').order('name'),
-      supabase.from('bookings').select('*').order('booking_date', { ascending: false }),
+      supabase.from('bookings').select('*').order('booking_date', { ascending: false }).limit(10000),
       supabase.from('workers').select('*').order('name'),
       supabase.from('frequencies').select('*').order('sort_order'),
     ]);
@@ -226,7 +228,13 @@ export default function AdminPanel() {
     }
   };
 
-  const sortedBookings = [...bookings].sort((a, b) => {
+  const filteredBookings = bookings.filter(b => {
+    if (b.status === 'cancelled' && !showCancelled) return false;
+    if (b.status === 'skipped' && !showSkipped) return false;
+    return true;
+  });
+
+  const sortedBookings = [...filteredBookings].sort((a, b) => {
     const dir = sortDirection === 'asc' ? 1 : -1;
     let aVal, bVal;
     switch (sortField) {
@@ -346,8 +354,18 @@ export default function AdminPanel() {
           {/* BOOKINGS TAB */}
           {activeTab === 'bookings' && (
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
                 <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>Bookings</h1>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
+                    <input type="checkbox" checked={showCancelled} onChange={(e) => setShowCancelled(e.target.checked)} style={{ cursor: 'pointer' }} />
+                    Show Cancelled
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
+                    <input type="checkbox" checked={showSkipped} onChange={(e) => setShowSkipped(e.target.checked)} style={{ cursor: 'pointer' }} />
+                    Show Skipped
+                  </label>
+                </div>
               </div>
               <div className="table-wrapper">
                 <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden', minWidth: 800 }}>

@@ -29,6 +29,8 @@ export default function AdminCalendar() {
   const [dataLoading, setDataLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(null);
+  const [showCancelled, setShowCancelled] = useState(false);
+  const [showSkipped, setShowSkipped] = useState(false);
 
   const brand = {
     primary: '#B8C5F2', text: '#1a1a1a', textLight: '#666',
@@ -46,7 +48,7 @@ export default function AdminCalendar() {
 
   const loadData = async () => {
     const [bkRes, wRes, fqRes] = await Promise.all([
-      supabase.from('bookings').select('*').order('booking_date'),
+      supabase.from('bookings').select('*').order('booking_date').limit(10000),
       supabase.from('workers').select('*').order('name'),
       supabase.from('frequencies').select('*').order('sort_order'),
     ]);
@@ -66,9 +68,15 @@ export default function AdminCalendar() {
   const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
   const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
 
+  const visibleBookings = bookings.filter(b => {
+    if (b.status === 'cancelled' && !showCancelled) return false;
+    if (b.status === 'skipped' && !showSkipped) return false;
+    return true;
+  });
+
   const getBookingsForDay = (day) => {
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    return bookings.filter(b => b.booking_date === dateStr);
+    return visibleBookings.filter(b => b.booking_date === dateStr);
   };
 
   const getWorkerName = (workerId) => {
@@ -119,6 +127,18 @@ export default function AdminCalendar() {
           <button onClick={nextMonth} style={{ padding: '10px 20px', fontSize: 14, background: brand.white, border: `1px solid ${brand.border}`, borderRadius: 6, cursor: 'pointer', color: brand.text }}>
             Next
           </button>
+        </div>
+
+        {/* Filters */}
+        <div style={{ display: 'flex', gap: 16, marginBottom: 16, alignItems: 'center' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
+            <input type="checkbox" checked={showCancelled} onChange={(e) => setShowCancelled(e.target.checked)} style={{ cursor: 'pointer' }} />
+            Show Cancelled
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
+            <input type="checkbox" checked={showSkipped} onChange={(e) => setShowSkipped(e.target.checked)} style={{ cursor: 'pointer' }} />
+            Show Skipped
+          </label>
         </div>
 
         {/* Calendar Grid */}

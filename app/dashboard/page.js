@@ -23,6 +23,7 @@ export default function CustomerDashboard() {
   const [frequencies, setFrequencies] = useState([]);
   const [dataLoading, setDataLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showCancelledSkipped, setShowCancelledSkipped] = useState(false);
 
   const brand = {
     primary: '#B8C5F2', text: '#1a1a1a', textLight: '#666',
@@ -39,7 +40,7 @@ export default function CustomerDashboard() {
 
   const loadData = async () => {
     const [bkRes, fqRes] = await Promise.all([
-      supabase.from('bookings').select('*').eq('user_id', user.id).order('booking_date', { ascending: false }),
+      supabase.from('bookings').select('*').eq('user_id', user.id).order('booking_date', { ascending: false }).limit(10000),
       supabase.from('frequencies').select('*').order('sort_order'),
     ]);
     setBookings(bkRes.data || []);
@@ -57,7 +58,12 @@ export default function CustomerDashboard() {
   };
 
   const upcomingBookings = bookings.filter(b => b.status === 'upcoming' || b.status === 'scheduled');
-  const pastBookings = bookings.filter(b => b.status === 'completed' || b.status === 'skipped' || b.status === 'cancelled');
+  const pastBookings = bookings.filter(b => {
+    if (b.status === 'completed') return true;
+    if ((b.status === 'skipped' || b.status === 'cancelled') && showCancelledSkipped) return true;
+    return false;
+  });
+  const cancelledSkippedCount = bookings.filter(b => b.status === 'skipped' || b.status === 'cancelled').length;
   const displayedBookings = activeTab === 'upcoming' ? upcomingBookings : pastBookings;
 
   const formatDate = (dateStr) => {
@@ -218,6 +224,15 @@ export default function CustomerDashboard() {
             Past ({pastBookings.length})
           </button>
         </div>
+
+        {activeTab === 'past' && cancelledSkippedCount > 0 && (
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: brand.textLight, cursor: 'pointer' }}>
+              <input type="checkbox" checked={showCancelledSkipped} onChange={(e) => setShowCancelledSkipped(e.target.checked)} style={{ cursor: 'pointer' }} />
+              Show cancelled &amp; skipped ({cancelledSkippedCount})
+            </label>
+          </div>
+        )}
 
         {displayedBookings.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '64px 24px', background: 'white', borderRadius: 12, border: `1px solid ${brand.border}` }}>

@@ -31,8 +31,11 @@ export default function AdminPanel() {
   const [bookings, setBookings] = useState([]);
   const [workers, setWorkers] = useState([]);
   const [frequencies, setFrequencies] = useState([]);
+  const [userProfiles, setUserProfiles] = useState([]);
   const [dataLoading, setDataLoading] = useState(true);
 
+  const [expandedCustomer, setExpandedCustomer] = useState(null);
+  const [customerSearch, setCustomerSearch] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState({});
   const [selectedNeighborhood, setSelectedNeighborhood] = useState('');
@@ -51,6 +54,7 @@ export default function AdminPanel() {
 
   const tabs = [
     { id: 'bookings', label: 'Bookings' },
+    { id: 'customers', label: 'Customers' },
     { id: 'frequencies', label: 'Frequencies' },
     { id: 'neighborhoods', label: 'Neighborhoods' },
     { id: 'buildings', label: 'Buildings' },
@@ -69,7 +73,7 @@ export default function AdminPanel() {
   }, [authLoading, user]);
 
   const loadAll = async () => {
-    const [nRes, bRes, fpRes, aoRes, bkRes, wRes, fqRes] = await Promise.all([
+    const [nRes, bRes, fpRes, aoRes, bkRes, wRes, fqRes, upRes] = await Promise.all([
       supabase.from('neighborhoods').select('*').order('name'),
       supabase.from('buildings').select('*').order('name'),
       supabase.from('floor_plans').select('*').order('name'),
@@ -77,6 +81,7 @@ export default function AdminPanel() {
       supabase.from('bookings').select('*').order('booking_date', { ascending: false }).limit(10000),
       supabase.from('workers').select('*').order('name'),
       supabase.from('frequencies').select('*').order('sort_order'),
+      supabase.from('user_profiles').select('*').order('created_at', { ascending: false }),
     ]);
     setNeighborhoods(nRes.data || []);
     setBuildings(bRes.data || []);
@@ -85,6 +90,7 @@ export default function AdminPanel() {
     setBookings(bkRes.data || []);
     setWorkers(wRes.data || []);
     setFrequencies(fqRes.data || []);
+    setUserProfiles(upRes.data || []);
     setDataLoading(false);
   };
 
@@ -461,6 +467,223 @@ export default function AdminPanel() {
               </div>
             </div>
           )}
+
+          {/* CUSTOMERS TAB */}
+          {activeTab === 'customers' && (() => {
+            // Build unique customer list from bookings + user_profiles
+            const customerMap = {};
+            bookings.forEach(b => {
+              const email = (b.customer_email || b.guest_email || '').toLowerCase().trim();
+              if (!email) return;
+              if (!customerMap[email]) {
+                customerMap[email] = {
+                  email,
+                  name: b.customer_name || [b.guest_first_name, b.guest_last_name].filter(Boolean).join(' ') || '',
+                  user_id: b.user_id || null,
+                  bookings: [],
+                  totalSpent: 0,
+                  firstBooking: b.booking_date,
+                  lastBooking: b.booking_date,
+                };
+              }
+              const c = customerMap[email];
+              c.bookings.push(b);
+              if (!c.name && (b.customer_name || b.guest_first_name)) {
+                c.name = b.customer_name || [b.guest_first_name, b.guest_last_name].filter(Boolean).join(' ');
+              }
+              if (!c.user_id && b.user_id) c.user_id = b.user_id;
+              c.totalSpent += Number(b.total_price) || 0;
+              if (b.booking_date < c.firstBooking) c.firstBooking = b.booking_date;
+              if (b.booking_date > c.lastBooking) c.lastBooking = b.booking_date;
+            });
+
+            // Enrich with user_profiles data
+            userProfiles.forEach(up => {
+              const profileName = [up.first_name, up.last_name].filter(Boolean).join(' ');
+              // Match by user_id
+              Object.values(customerMap).forEach(c => {
+                if (c.user_id && c.user_id === up.user_id) {
+                  if (profileName && !c.name) c.name = profileName;
+                  c.phone = c.phone || up.phone || '';
+                  c.hasAccount = true;
+                  c.accountCreated = up.created_at;
+                }
+              });
+            });
+
+            let customers = Object.values(customerMap);
+
+            // Mark account holders
+            customers.forEach(c => {
+              if (c.user_id && !c.hasAccount) c.hasAccount = true;
+              if (!c.hasAccount) c.hasAccount = false;
+            });
+
+            // Search filter
+            const search = customerSearch.toLowerCase().trim();
+            if (search) {
+              customers = customers.filter(c =>
+                (c.name || '').toLowerCase().includes(search) ||
+                c.email.toLowerCase().includes(search) ||
+                (c.phone || '').includes(search)
+              );
+            }
+
+            // Sort by most recent booking
+            customers.sort((a, b) => (b.lastBooking || '').localeCompare(a.lastBooking || ''));
+
+            return (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
+                  <div>
+                    <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>Customers</h1>
+                    <p style={{ fontSize: 14, color: brand.textLight, marginTop: 4 }}>{customers.length} customer{customers.length !== 1 ? 's' : ''} found</p>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search by name, email, or phone..."
+                    value={customerSearch}
+                    onChange={(e) => setCustomerSearch(e.target.value)}
+                    style={{ ...inputStyle, width: 280 }}
+                  />
+                </div>
+                <div className="table-wrapper">
+                  <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden', minWidth: 700 }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                      <thead>
+                        <tr style={{ background: brand.bg }}>
+                          <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight, width: 30 }}></th>
+                          <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Customer</th>
+                          <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Account</th>
+                          <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Bookings</th>
+                          <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Total Spent</th>
+                          <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Last Booking</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {customers.map(c => {
+                          const isExpanded = expandedCustomer === c.email;
+                          const completedCount = c.bookings.filter(b => b.status === 'completed').length;
+                          const upcomingCount = c.bookings.filter(b => ['upcoming', 'scheduled'].includes(b.status)).length;
+                          const cancelledCount = c.bookings.filter(b => b.status === 'cancelled').length;
+
+                          return (
+                            <React.Fragment key={c.email}>
+                              <tr
+                                onClick={() => setExpandedCustomer(isExpanded ? null : c.email)}
+                                style={{ borderTop: `1px solid ${brand.border}`, cursor: 'pointer', background: isExpanded ? brand.bg : 'transparent' }}
+                              >
+                                <td style={{ padding: '16px 8px 16px 16px', fontSize: 14, color: brand.textLight }}>
+                                  {isExpanded ? '▼' : '▶'}
+                                </td>
+                                <td style={{ padding: '16px' }}>
+                                  <p style={{ fontWeight: 500, color: brand.text }}>{c.name || 'Unknown'}</p>
+                                  <p style={{ fontSize: 13, color: brand.textLight }}>{c.email}</p>
+                                  {c.phone && <p style={{ fontSize: 12, color: brand.textLight }}>{c.phone}</p>}
+                                </td>
+                                <td style={{ padding: '16px' }}>
+                                  <span style={{
+                                    padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 500,
+                                    background: c.hasAccount ? '#DBEAFE' : '#f3f4f6',
+                                    color: c.hasAccount ? '#1E40AF' : brand.textLight
+                                  }}>
+                                    {c.hasAccount ? 'Registered' : 'Guest'}
+                                  </span>
+                                </td>
+                                <td style={{ padding: '16px' }}>
+                                  <span style={{ fontWeight: 600, color: brand.text }}>{c.bookings.length}</span>
+                                  <span style={{ fontSize: 12, color: brand.textLight, marginLeft: 6 }}>
+                                    ({upcomingCount} upcoming, {completedCount} done{cancelledCount > 0 ? `, ${cancelledCount} cancelled` : ''})
+                                  </span>
+                                </td>
+                                <td style={{ padding: '16px' }}>
+                                  <span style={{ fontWeight: 600, color: brand.text }}>${c.totalSpent.toFixed(2)}</span>
+                                </td>
+                                <td style={{ padding: '16px' }}>
+                                  <span style={{ color: brand.text }}>{formatDate(c.lastBooking)}</span>
+                                </td>
+                              </tr>
+                              {isExpanded && (
+                                <tr>
+                                  <td colSpan={6} style={{ padding: 0 }}>
+                                    <div style={{ padding: '0 16px 16px 48px', background: brand.bg }}>
+                                      <p style={{ fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 12, paddingTop: 8 }}>
+                                        Booking History for {c.name || c.email}
+                                      </p>
+                                      <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                          <thead>
+                                            <tr style={{ background: '#f9fafb' }}>
+                                              <th style={{ padding: '10px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: brand.textLight }}>Date & Time</th>
+                                              <th style={{ padding: '10px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: brand.textLight }}>Property</th>
+                                              <th style={{ padding: '10px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: brand.textLight }}>Frequency</th>
+                                              <th style={{ padding: '10px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: brand.textLight }}>Total</th>
+                                              <th style={{ padding: '10px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: brand.textLight }}>Status</th>
+                                              <th style={{ padding: '10px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: brand.textLight }}>Worker</th>
+                                            </tr>
+                                          </thead>
+                                          <tbody>
+                                            {c.bookings
+                                              .sort((a, b) => (b.booking_date || '').localeCompare(a.booking_date || ''))
+                                              .map(b => {
+                                                const statusStyle = getStatusStyle(b.status);
+                                                const freqName = getFrequencyName(b.frequency_id);
+                                                const workerName = workers.find(w => w.id === b.worker_id)?.name || '';
+                                                return (
+                                                  <tr key={b.id} style={{ borderTop: `1px solid ${brand.border}` }}>
+                                                    <td style={{ padding: '10px 12px' }}>
+                                                      <p style={{ fontWeight: 500, color: brand.text, fontSize: 13 }}>{formatDate(b.booking_date)}</p>
+                                                      <p style={{ fontSize: 12, color: brand.textLight }}>{b.booking_time}</p>
+                                                    </td>
+                                                    <td style={{ padding: '10px 12px' }}>
+                                                      <p style={{ fontWeight: 500, color: brand.text, fontSize: 13 }}>{b.building}</p>
+                                                      <p style={{ fontSize: 12, color: brand.textLight }}>Unit {b.unit_number} · {b.floor_plan}</p>
+                                                    </td>
+                                                    <td style={{ padding: '10px 12px' }}>
+                                                      {freqName && freqName !== 'One-Time' ? (
+                                                        <span style={{ fontSize: 12, color: brand.gold, fontWeight: 600 }}>{freqName}</span>
+                                                      ) : (
+                                                        <span style={{ fontSize: 12, color: brand.textLight }}>One-Time</span>
+                                                      )}
+                                                    </td>
+                                                    <td style={{ padding: '10px 12px' }}>
+                                                      <span style={{ fontWeight: 600, color: brand.text, fontSize: 13 }}>${b.total_price}</span>
+                                                    </td>
+                                                    <td style={{ padding: '10px 12px' }}>
+                                                      <span style={{ padding: '3px 8px', borderRadius: 100, fontSize: 12, fontWeight: 500, ...statusStyle }}>
+                                                        {b.status}
+                                                      </span>
+                                                    </td>
+                                                    <td style={{ padding: '10px 12px', fontSize: 13, color: workerName ? brand.text : brand.textLight }}>
+                                                      {workerName || 'Unassigned'}
+                                                    </td>
+                                                  </tr>
+                                                );
+                                              })}
+                                          </tbody>
+                                        </table>
+                                      </div>
+                                    </div>
+                                  </td>
+                                </tr>
+                              )}
+                            </React.Fragment>
+                          );
+                        })}
+                        {customers.length === 0 && (
+                          <tr>
+                            <td colSpan={6} style={{ padding: 32, textAlign: 'center', color: brand.textLight }}>
+                              {customerSearch ? 'No customers match your search.' : 'No customers found.'}
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* FREQUENCIES TAB */}
           {activeTab === 'frequencies' && (

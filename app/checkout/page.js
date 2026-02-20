@@ -210,6 +210,27 @@ export default function PaymentFlow() {
       }
     }
 
+    // Auto-populate customer profile address from booking for logged-in users
+    if (user?.id && booking.building_address) {
+      const { data: existingProfile } = await supabase
+        .from('customer_profiles')
+        .select('address')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!existingProfile?.address) {
+        const profileAddress = booking.unit
+          ? `${booking.building_address}, Unit ${booking.unit}`
+          : booking.building_address;
+
+        await supabase.from('customer_profiles').upsert({
+          user_id: user.id,
+          address: profileAddress,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id' });
+      }
+    }
+
     setSavedBookingId(insertedBooking?.id || null);
     localStorage.removeItem('pendingBooking');
     setProcessing(false);
@@ -259,6 +280,19 @@ export default function PaymentFlow() {
           .from('bookings')
           .update({ user_id: newUserId })
           .eq('id', savedBookingId);
+      }
+
+      // Auto-populate customer profile address from booking
+      if (booking.building_address) {
+        const profileAddress = booking.unit
+          ? `${booking.building_address}, Unit ${booking.unit}`
+          : booking.building_address;
+
+        await supabase.from('customer_profiles').upsert({
+          user_id: newUserId,
+          address: profileAddress,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id' });
       }
     }
 

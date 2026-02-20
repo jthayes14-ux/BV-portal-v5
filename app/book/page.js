@@ -178,6 +178,7 @@ function BookingFlowInner() {
       neighborhood_name: selectedNeighborhood?.name || '',
       building_id: buildingId,
       building_name: selectedBuilding?.name || '',
+      building_address: selectedBuilding?.address || '',
       floor_plan_id: floorPlanId,
       floor_plan_name: selectedPlan?.name || '',
       unit, date, time_slot: time,

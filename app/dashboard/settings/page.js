@@ -21,6 +21,7 @@ export default function SettingsPage() {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('address');
+  const [editingAddress, setEditingAddress] = useState(false);
 
   // Address fields
   const [address, setAddress] = useState('');
@@ -60,10 +61,20 @@ export default function SettingsPage() {
       setCity(data.city || '');
       setState(data.state || '');
       setZip(data.zip || '');
+      setSavedAddress(data.address || '');
+      setSavedCity(data.city || '');
+      setSavedState(data.state || '');
+      setSavedZip(data.zip || '');
       setCardLast4(data.card_last4 || '');
       setCardBrand(data.card_brand || '');
     }
   };
+
+  // Keep original values for cancel
+  const [savedAddress, setSavedAddress] = useState('');
+  const [savedCity, setSavedCity] = useState('');
+  const [savedState, setSavedState] = useState('');
+  const [savedZip, setSavedZip] = useState('');
 
   const handleSaveAddress = async (e) => {
     e.preventDefault();
@@ -71,23 +82,38 @@ export default function SettingsPage() {
     setError('');
     setMessage('');
 
-    const { error: upsertError } = await supabase
+    const { error: updateError } = await supabase
       .from('user_profiles')
-      .upsert({
-        user_id: user.id,
+      .update({
         address,
         city,
         state,
         zip,
         updated_at: new Date().toISOString(),
-      }, { onConflict: 'user_id' });
+      })
+      .eq('user_id', user.id);
 
-    if (upsertError) {
+    if (updateError) {
       setError('Failed to save address. Please try again.');
     } else {
       setMessage('Address saved successfully.');
+      setSavedAddress(address);
+      setSavedCity(city);
+      setSavedState(state);
+      setSavedZip(zip);
+      setEditingAddress(false);
     }
     setSaving(false);
+  };
+
+  const handleCancelEdit = () => {
+    setAddress(savedAddress);
+    setCity(savedCity);
+    setState(savedState);
+    setZip(savedZip);
+    setEditingAddress(false);
+    setError('');
+    setMessage('');
   };
 
   const handleLogout = async () => {
@@ -211,63 +237,121 @@ export default function SettingsPage() {
 
         {activeSection === 'address' && (
           <div style={{ background: 'white', borderRadius: 12, border: `1px solid ${brand.border}`, padding: '32px 24px' }}>
-            <h2 style={{ fontSize: 18, fontWeight: 600, color: brand.text, marginBottom: 24 }}>Address</h2>
-            <form onSubmit={handleSaveAddress}>
-              <div style={{ marginBottom: 20 }}>
-                <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 8 }}>Street Address</label>
-                <input
-                  type="text" value={address} onChange={(e) => setAddress(e.target.value)}
-                  placeholder="123 Main St, Apt 4B"
-                  style={{ width: '100%', padding: '14px 16px', border: `1px solid ${brand.border}`, borderRadius: 10, fontSize: 16, boxSizing: 'border-box', outline: 'none' }}
-                  onFocus={(e) => e.target.style.borderColor = brand.primary}
-                  onBlur={(e) => e.target.style.borderColor = brand.border}
-                />
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 8 }}>City</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+              <h2 style={{ fontSize: 18, fontWeight: 600, color: brand.text }}>Address</h2>
+              {!editingAddress && (
+                <button
+                  onClick={() => { setEditingAddress(true); setMessage(''); setError(''); }}
+                  style={{ padding: '8px 20px', fontSize: 14, fontWeight: 500, background: 'white', border: `1px solid ${brand.border}`, borderRadius: 8, cursor: 'pointer', color: brand.text }}
+                >
+                  Edit
+                </button>
+              )}
+            </div>
+
+            {!editingAddress ? (
+              /* Read-only display */
+              address || city || state || zip ? (
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, padding: '20px', background: brand.bg, borderRadius: 10, border: `1px solid ${brand.border}` }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={brand.textLight} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}>
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  <div>
+                    {address && <p style={{ fontSize: 15, fontWeight: 500, color: brand.text, marginBottom: 4 }}>{address}</p>}
+                    {(city || state || zip) && (
+                      <p style={{ fontSize: 14, color: brand.textLight }}>
+                        {[city, state].filter(Boolean).join(', ')}{zip ? ` ${zip}` : ''}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '40px 24px' }}>
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke={brand.textLight} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 16 }}>
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  <p style={{ fontSize: 15, color: brand.textLight, marginBottom: 8 }}>No address on file</p>
+                  <p style={{ fontSize: 13, color: brand.textLight, marginBottom: 16 }}>Your address will be added automatically when you complete your first booking</p>
+                  <button
+                    onClick={() => setEditingAddress(true)}
+                    style={{ padding: '10px 24px', fontSize: 14, fontWeight: 500, background: brand.primary, border: 'none', borderRadius: 8, cursor: 'pointer', color: brand.text }}
+                  >
+                    Add Address
+                  </button>
+                </div>
+              )
+            ) : (
+              /* Edit mode */
+              <form onSubmit={handleSaveAddress}>
+                <div style={{ marginBottom: 20 }}>
+                  <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 8 }}>Street Address</label>
                   <input
-                    type="text" value={city} onChange={(e) => setCity(e.target.value)}
-                    placeholder="Miami"
+                    type="text" value={address} onChange={(e) => setAddress(e.target.value)}
+                    placeholder="123 Main St, Unit 4B"
                     style={{ width: '100%', padding: '14px 16px', border: `1px solid ${brand.border}`, borderRadius: 10, fontSize: 16, boxSizing: 'border-box', outline: 'none' }}
                     onFocus={(e) => e.target.style.borderColor = brand.primary}
                     onBlur={(e) => e.target.style.borderColor = brand.border}
                   />
                 </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 8 }}>State</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 8 }}>City</label>
+                    <input
+                      type="text" value={city} onChange={(e) => setCity(e.target.value)}
+                      placeholder="Miami"
+                      style={{ width: '100%', padding: '14px 16px', border: `1px solid ${brand.border}`, borderRadius: 10, fontSize: 16, boxSizing: 'border-box', outline: 'none' }}
+                      onFocus={(e) => e.target.style.borderColor = brand.primary}
+                      onBlur={(e) => e.target.style.borderColor = brand.border}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 8 }}>State</label>
+                    <input
+                      type="text" value={state} onChange={(e) => setState(e.target.value)}
+                      placeholder="FL"
+                      style={{ width: '100%', padding: '14px 16px', border: `1px solid ${brand.border}`, borderRadius: 10, fontSize: 16, boxSizing: 'border-box', outline: 'none' }}
+                      onFocus={(e) => e.target.style.borderColor = brand.primary}
+                      onBlur={(e) => e.target.style.borderColor = brand.border}
+                    />
+                  </div>
+                </div>
+                <div style={{ marginBottom: 28 }}>
+                  <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 8 }}>ZIP Code</label>
                   <input
-                    type="text" value={state} onChange={(e) => setState(e.target.value)}
-                    placeholder="FL"
-                    style={{ width: '100%', padding: '14px 16px', border: `1px solid ${brand.border}`, borderRadius: 10, fontSize: 16, boxSizing: 'border-box', outline: 'none' }}
+                    type="text" value={zip} onChange={(e) => setZip(e.target.value)}
+                    placeholder="33101"
+                    style={{ width: '100%', maxWidth: 160, padding: '14px 16px', border: `1px solid ${brand.border}`, borderRadius: 10, fontSize: 16, boxSizing: 'border-box', outline: 'none' }}
                     onFocus={(e) => e.target.style.borderColor = brand.primary}
                     onBlur={(e) => e.target.style.borderColor = brand.border}
                   />
                 </div>
-              </div>
-              <div style={{ marginBottom: 28 }}>
-                <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 8 }}>ZIP Code</label>
-                <input
-                  type="text" value={zip} onChange={(e) => setZip(e.target.value)}
-                  placeholder="33101"
-                  style={{ width: '100%', maxWidth: 160, padding: '14px 16px', border: `1px solid ${brand.border}`, borderRadius: 10, fontSize: 16, boxSizing: 'border-box', outline: 'none' }}
-                  onFocus={(e) => e.target.style.borderColor = brand.primary}
-                  onBlur={(e) => e.target.style.borderColor = brand.border}
-                />
-              </div>
-              <button
-                type="submit" disabled={saving}
-                style={{
-                  padding: '14px 32px', fontSize: 15, fontWeight: 600,
-                  background: saving ? '#e0e0e0' : brand.text,
-                  color: saving ? brand.textLight : 'white',
-                  border: 'none', borderRadius: 8,
-                  cursor: saving ? 'not-allowed' : 'pointer',
-                }}
-              >
-                {saving ? 'Saving...' : 'Save Address'}
-              </button>
-            </form>
+                <div style={{ display: 'flex', gap: 12 }}>
+                  <button
+                    type="submit" disabled={saving}
+                    style={{
+                      padding: '14px 32px', fontSize: 15, fontWeight: 600,
+                      background: saving ? '#e0e0e0' : brand.text,
+                      color: saving ? brand.textLight : 'white',
+                      border: 'none', borderRadius: 8,
+                      cursor: saving ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    {saving ? 'Saving...' : 'Save Address'}
+                  </button>
+                  <button
+                    type="button" onClick={handleCancelEdit}
+                    style={{
+                      padding: '14px 24px', fontSize: 15, fontWeight: 500,
+                      background: 'white', color: brand.text,
+                      border: `1px solid ${brand.border}`, borderRadius: 8,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         )}
 

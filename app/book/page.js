@@ -1,6 +1,6 @@
 'use client';
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '../../lib/supabase';
 
@@ -21,8 +21,9 @@ const timeSlots = [
   '5:00 PM – 8:00 PM',
 ];
 
-export default function BookingFlow() {
+function BookingFlowInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [neighborhoods, setNeighborhoods] = useState([]);
   const [buildings, setBuildings] = useState([]);
@@ -49,6 +50,10 @@ export default function BookingFlow() {
   const [phone, setPhone] = useState('');
   const [specialInstructions, setSpecialInstructions] = useState('');
 
+  // Rebook state
+  const [isRebook, setIsRebook] = useState(false);
+  const [rebookBuildingName, setRebookBuildingName] = useState('');
+
   const brand = {
     primary: '#B8C5F2', primaryDark: '#9AA8E0', primaryLight: '#E8EDFC',
     gold: '#C9B037', goldLight: '#F5F0DC', goldDark: '#A69028',
@@ -66,13 +71,72 @@ export default function BookingFlow() {
       supabase.from('add_ons').select('*').order('name'),
       supabase.from('frequencies').select('*').order('sort_order'),
     ]);
-    setNeighborhoods(nRes.data || []);
+    const neighborhoodsData = nRes.data || [];
+    setNeighborhoods(neighborhoodsData);
     setAddOns(aoRes.data || []);
     const freqData = freqRes.data || [];
     setFrequencies(freqData);
     // Default to the first frequency (One-Time) if available
     const oneTime = freqData.find(f => f.interval_days === 0);
     if (oneTime) setFrequencyId(oneTime.id);
+
+    // Check for rebook info
+    const isRebookParam = searchParams.get('rebook') === 'true';
+    const storedRebook = localStorage.getItem('rebookInfo');
+    if (isRebookParam && storedRebook) {
+      try {
+        const rebook = JSON.parse(storedRebook);
+        setIsRebook(true);
+        setRebookBuildingName(rebook.building_name || '');
+
+        // Pre-fill contact info
+        if (rebook.guest_first_name) setFirstName(rebook.guest_first_name);
+        if (rebook.guest_last_name) setLastName(rebook.guest_last_name);
+        if (rebook.guest_email) setEmail(rebook.guest_email);
+        if (rebook.guest_phone) setPhone(rebook.guest_phone);
+
+        // Pre-fill property info — need to find neighborhood from building
+        if (rebook.building_id) {
+          // Look up the building to get its neighborhood_id
+          const { data: buildingData } = await supabase
+            .from('buildings')
+            .select('*')
+            .eq('id', rebook.building_id)
+            .single();
+
+          if (buildingData && buildingData.neighborhood_id) {
+            setNeighborhood(buildingData.neighborhood_id);
+
+            // Load buildings for this neighborhood
+            const { data: bldgs } = await supabase
+              .from('buildings')
+              .select('*')
+              .eq('neighborhood_id', buildingData.neighborhood_id)
+              .order('name');
+            setBuildings(bldgs || []);
+            setBuildingId(rebook.building_id);
+
+            // Load floor plans for this building
+            const { data: fps } = await supabase
+              .from('floor_plans')
+              .select('*')
+              .eq('building_id', rebook.building_id)
+              .order('price');
+            setFloorPlans(fps || []);
+
+            if (rebook.floor_plan_id) setFloorPlanId(rebook.floor_plan_id);
+          }
+        }
+
+        if (rebook.unit_number) setUnit(rebook.unit_number);
+
+        // Clean up — keep it in localStorage for future "Book Again" but remove the rebook query param behavior
+        localStorage.removeItem('rebookInfo');
+      } catch (e) {
+        // Invalid rebook data, ignore
+      }
+    }
+
     setDataLoading(false);
   };
 
@@ -215,6 +279,32 @@ export default function BookingFlow() {
         <div style={{ width: 60, height: 3, background: `linear-gradient(90deg, ${brand.gold}, ${brand.primary})`, margin: '0 auto 32px', borderRadius: 2 }} />
         <h1 style={{ fontSize: 42, fontWeight: 300, textAlign: 'center', marginBottom: 12, color: brand.text, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>Schedule Your Service</h1>
         <p style={{ textAlign: 'center', color: brand.textLight, marginBottom: 56, fontSize: 17 }}>Premium window care for discerning residences</p>
+
+        {/* Rebook Banner */}
+        {isRebook && rebookBuildingName && (
+          <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 16, padding: '20px 28px', marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, animation: 'fadeIn 0.4s ease' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div style={{ width: 40, height: 40, background: brand.goldLight, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={brand.gold} strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              </div>
+              <div>
+                <p style={{ fontSize: 15, fontWeight: 600, color: '#92400E', marginBottom: 2 }}>Booking again at {rebookBuildingName}</p>
+                <p style={{ fontSize: 13, color: '#A16207' }}>Your property and contact info are pre-filled. Just pick a date and time.</p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                setIsRebook(false);
+                setNeighborhood(''); setBuildingId(''); setFloorPlanId(''); setUnit('');
+                setBuildings([]); setFloorPlans([]);
+                setFirstName(''); setLastName(''); setEmail(''); setPhone('');
+              }}
+              style={{ fontSize: 13, fontWeight: 500, color: '#92400E', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', whiteSpace: 'nowrap' }}
+            >
+              Change property
+            </button>
+          </div>
+        )}
 
         <div className="booking-form" style={{ background: brand.bgCard, borderRadius: 24, padding: '40px 36px', boxShadow: '0 8px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04)', border: `1px solid ${brand.borderLight}` }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
@@ -446,5 +536,17 @@ export default function BookingFlow() {
         select option { padding: 12px; }
       `}</style>
     </div>
+  );
+}
+
+export default function BookingFlow() {
+  return (
+    <Suspense fallback={
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FAFBFF' }}>
+        <p style={{ color: '#6B7280' }}>Loading...</p>
+      </div>
+    }>
+      <BookingFlowInner />
+    </Suspense>
   );
 }

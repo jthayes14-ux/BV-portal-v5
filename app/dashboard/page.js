@@ -25,6 +25,20 @@ export default function CustomerDashboard() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showCancelledSkipped, setShowCancelledSkipped] = useState(false);
 
+  // Reschedule state
+  const [rescheduleBooking, setRescheduleBooking] = useState(null);
+  const [rescheduleDate, setRescheduleDate] = useState('');
+  const [rescheduleTime, setRescheduleTime] = useState('');
+  const [rescheduling, setRescheduling] = useState(false);
+  const [rescheduleError, setRescheduleError] = useState('');
+
+  const timeSlots = [
+    '8:00 AM – 11:00 AM',
+    '11:00 AM – 2:00 PM',
+    '2:00 PM – 5:00 PM',
+    '5:00 PM – 8:00 PM',
+  ];
+
   const brand = {
     primary: '#B8C5F2', text: '#1a1a1a', textLight: '#666',
     border: '#e0e0e0', bg: '#fafafa', success: '#22c55e', gold: '#C9B037',
@@ -55,6 +69,60 @@ export default function CustomerDashboard() {
   const handleLogout = async () => {
     await signOut();
     router.push('/login');
+  };
+
+  const today = new Date().toISOString().split('T')[0];
+
+  const openReschedule = (booking) => {
+    setRescheduleBooking(booking);
+    setRescheduleDate('');
+    setRescheduleTime('');
+    setRescheduleError('');
+  };
+
+  const handleReschedule = async () => {
+    if (!rescheduleDate || !rescheduleTime) {
+      setRescheduleError('Please select both a date and time');
+      return;
+    }
+    setRescheduling(true);
+    setRescheduleError('');
+
+    const { error } = await supabase
+      .from('bookings')
+      .update({ booking_date: rescheduleDate, booking_time: rescheduleTime })
+      .eq('id', rescheduleBooking.id);
+
+    if (error) {
+      setRescheduleError('Failed to reschedule. Please try again.');
+      setRescheduling(false);
+      return;
+    }
+
+    setBookings(bookings.map(b =>
+      b.id === rescheduleBooking.id
+        ? { ...b, booking_date: rescheduleDate, booking_time: rescheduleTime }
+        : b
+    ));
+    setRescheduleBooking(null);
+    setRescheduling(false);
+  };
+
+  const handleBookAgain = (booking) => {
+    const rebookData = {
+      neighborhood_id: booking.neighborhood,
+      building_id: booking.building_id,
+      building_name: booking.building,
+      floor_plan_id: booking.floor_plan_id,
+      floor_plan_name: booking.floor_plan,
+      unit_number: booking.unit_number,
+      guest_first_name: booking.guest_first_name || booking.customer_name?.split(' ')[0] || '',
+      guest_last_name: booking.guest_last_name || booking.customer_name?.split(' ').slice(1).join(' ') || '',
+      guest_email: booking.guest_email || booking.customer_email || '',
+      guest_phone: booking.guest_phone || '',
+    };
+    localStorage.setItem('rebookInfo', JSON.stringify(rebookData));
+    router.push('/book?rebook=true');
   };
 
   const upcomingBookings = bookings.filter(b => b.status === 'upcoming' || b.status === 'scheduled');
@@ -155,7 +223,7 @@ export default function CustomerDashboard() {
         <div className="booking-card-actions" style={{ padding: '16px 24px', borderTop: `1px solid ${brand.border}`, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           {(booking.status === 'upcoming' || booking.status === 'scheduled') && (
             <>
-              <button style={{ padding: '10px 20px', fontSize: 14, fontWeight: 500, background: 'white', border: `1px solid ${brand.border}`, borderRadius: 6, cursor: 'pointer', color: brand.text }}>Reschedule</button>
+              <button onClick={() => openReschedule(booking)} style={{ padding: '10px 20px', fontSize: 14, fontWeight: 500, background: 'white', border: `1px solid ${brand.border}`, borderRadius: 6, cursor: 'pointer', color: brand.text }}>Reschedule</button>
               <button onClick={async () => {
                 if (confirm('Cancel this booking?')) {
                   await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', booking.id);
@@ -166,7 +234,7 @@ export default function CustomerDashboard() {
           )}
           {(booking.status === 'completed' || booking.status === 'skipped' || booking.status === 'cancelled') && (
             <>
-              <Link href="/book" style={{ padding: '10px 20px', fontSize: 14, fontWeight: 500, background: brand.primary, border: 'none', borderRadius: 6, color: brand.text, textDecoration: 'none' }}>Book Again</Link>
+              <button onClick={() => handleBookAgain(booking)} style={{ padding: '10px 20px', fontSize: 14, fontWeight: 500, background: brand.primary, border: 'none', borderRadius: 6, cursor: 'pointer', color: brand.text }}>Book Again</button>
               <button style={{ padding: '10px 20px', fontSize: 14, fontWeight: 500, background: 'white', border: `1px solid ${brand.border}`, borderRadius: 6, cursor: 'pointer', color: brand.text }}>View Receipt</button>
             </>
           )}
@@ -266,6 +334,87 @@ export default function CustomerDashboard() {
           </div>
         )}
       </main>
+
+      {/* Reschedule Modal */}
+      {rescheduleBooking && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 24 }}>
+          <div style={{ background: 'white', borderRadius: 16, maxWidth: 440, width: '100%', padding: 32, position: 'relative' }}>
+            <button onClick={() => setRescheduleBooking(null)} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: brand.textLight, lineHeight: 1 }}>
+              &times;
+            </button>
+
+            <h2 style={{ fontSize: 22, fontWeight: 600, color: brand.text, marginBottom: 4 }}>Reschedule Booking</h2>
+            <p style={{ fontSize: 14, color: brand.textLight, marginBottom: 24 }}>
+              {rescheduleBooking.building} &middot; Unit {rescheduleBooking.unit_number}
+            </p>
+
+            <div style={{ background: brand.bg, borderRadius: 10, padding: 16, marginBottom: 24 }}>
+              <p style={{ fontSize: 13, color: brand.textLight, marginBottom: 4 }}>CURRENT DATE & TIME</p>
+              <p style={{ fontSize: 15, fontWeight: 500, color: brand.text }}>{formatDate(rescheduleBooking.booking_date)}</p>
+              <p style={{ fontSize: 14, color: brand.textLight }}>{rescheduleBooking.booking_time}</p>
+            </div>
+
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: brand.textLight, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>New Date</label>
+              <input
+                type="date"
+                value={rescheduleDate}
+                onChange={(e) => setRescheduleDate(e.target.value)}
+                min={today}
+                style={{ width: '100%', padding: '14px 16px', fontSize: 15, border: `1px solid ${brand.border}`, borderRadius: 10, boxSizing: 'border-box', background: 'white' }}
+              />
+            </div>
+
+            <div style={{ marginBottom: 24 }}>
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: brand.textLight, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>New Time</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                {timeSlots.map(slot => (
+                  <button
+                    key={slot}
+                    onClick={() => setRescheduleTime(slot)}
+                    style={{
+                      padding: '12px 10px', fontSize: 13, fontWeight: 500,
+                      border: rescheduleTime === slot ? `2px solid ${brand.gold}` : `1px solid ${brand.border}`,
+                      borderRadius: 10, cursor: 'pointer',
+                      background: rescheduleTime === slot ? '#FFFBEB' : 'white',
+                      color: rescheduleTime === slot ? '#92400E' : brand.text,
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    {slot}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {rescheduleError && (
+              <p style={{ fontSize: 13, color: '#DC2626', marginBottom: 16 }}>{rescheduleError}</p>
+            )}
+
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button
+                onClick={() => setRescheduleBooking(null)}
+                style={{ flex: 1, padding: '14px', fontSize: 15, fontWeight: 500, background: 'white', border: `1px solid ${brand.border}`, borderRadius: 10, cursor: 'pointer', color: brand.text }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReschedule}
+                disabled={rescheduling || !rescheduleDate || !rescheduleTime}
+                style={{
+                  flex: 1, padding: '14px', fontSize: 15, fontWeight: 600,
+                  background: rescheduleDate && rescheduleTime && !rescheduling ? brand.text : brand.border,
+                  color: rescheduleDate && rescheduleTime && !rescheduling ? 'white' : '#999',
+                  border: 'none', borderRadius: 10,
+                  cursor: rescheduleDate && rescheduleTime && !rescheduling ? 'pointer' : 'not-allowed',
+                }}
+              >
+                {rescheduling ? 'Updating...' : 'Confirm'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

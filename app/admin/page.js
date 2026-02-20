@@ -78,6 +78,7 @@ export default function AdminPanel() {
       supabase.from('workers').select('*').order('name'),
       supabase.from('frequencies').select('*').order('sort_order'),
     ]);
+    if (bkRes.error) console.error('Failed to load bookings:', bkRes.error);
     setNeighborhoods(nRes.data || []);
     setBuildings(bRes.data || []);
     setFloorPlans(fpRes.data || []);

@@ -36,6 +36,10 @@ export default function AdminPanel() {
 
   const [expandedCustomer, setExpandedCustomer] = useState(null);
   const [customerSearch, setCustomerSearch] = useState('');
+  const [editingBookingId, setEditingBookingId] = useState(null);
+  const [editingBookingValue, setEditingBookingValue] = useState({});
+  const [editingCustomerEmail, setEditingCustomerEmail] = useState(null);
+  const [editingCustomerValue, setEditingCustomerValue] = useState({});
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState({});
   const [selectedNeighborhood, setSelectedNeighborhood] = useState('');
@@ -219,6 +223,54 @@ export default function AdminPanel() {
     if (!confirm('Cancel this booking? This cannot be undone.')) return;
     await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', bookingId);
     setBookings(bookings.map(b => b.id === bookingId ? { ...b, status: 'cancelled' } : b));
+  };
+
+  const handleSaveBookingEdit = async (bookingId) => {
+    setCrudError('');
+    const updates = {};
+    if (editingBookingValue.booking_date !== undefined) updates.booking_date = editingBookingValue.booking_date;
+    if (editingBookingValue.booking_time !== undefined) updates.booking_time = editingBookingValue.booking_time;
+    if (editingBookingValue.worker_id !== undefined) updates.worker_id = editingBookingValue.worker_id || null;
+    if (editingBookingValue.unit_number !== undefined) updates.unit_number = editingBookingValue.unit_number;
+    if (editingBookingValue.special_instructions !== undefined) updates.special_instructions = editingBookingValue.special_instructions;
+    const { error } = await supabase.from('bookings').update(updates).eq('id', bookingId);
+    if (error) { setCrudError('Failed to update booking: ' + error.message); return; }
+    setBookings(bookings.map(b => b.id === bookingId ? { ...b, ...updates } : b));
+    setEditingBookingId(null);
+    setEditingBookingValue({});
+  };
+
+  const handleSaveCustomerInfo = async (customerEmail, customerBookings, userId) => {
+    setCrudError('');
+    const updates = {};
+    if (editingCustomerValue.customer_name !== undefined) updates.customer_name = editingCustomerValue.customer_name;
+    if (editingCustomerValue.customer_email !== undefined) updates.customer_email = editingCustomerValue.customer_email;
+
+    // Update all bookings for this customer
+    const bookingIds = customerBookings.map(b => b.id);
+    if (Object.keys(updates).length > 0) {
+      const { error } = await supabase.from('bookings').update(updates).in('id', bookingIds);
+      if (error) { setCrudError('Failed to update customer info: ' + error.message); return; }
+      setBookings(bookings.map(b => bookingIds.includes(b.id) ? { ...b, ...updates } : b));
+    }
+
+    // Update user_profiles if they have an account
+    if (userId) {
+      const profileUpdates = {};
+      if (editingCustomerValue.customer_name !== undefined) {
+        const parts = editingCustomerValue.customer_name.trim().split(/\s+/);
+        profileUpdates.first_name = parts[0] || '';
+        profileUpdates.last_name = parts.slice(1).join(' ') || '';
+      }
+      if (editingCustomerValue.phone !== undefined) profileUpdates.phone = editingCustomerValue.phone;
+      if (Object.keys(profileUpdates).length > 0) {
+        await supabase.from('user_profiles').update(profileUpdates).eq('user_id', userId);
+        setUserProfiles(userProfiles.map(up => up.user_id === userId ? { ...up, ...profileUpdates } : up));
+      }
+    }
+
+    setEditingCustomerEmail(null);
+    setEditingCustomerValue({});
   };
 
   const getFrequencyName = (frequencyId) => {
@@ -607,8 +659,51 @@ export default function AdminPanel() {
                                 <tr>
                                   <td colSpan={6} style={{ padding: 0 }}>
                                     <div style={{ padding: '0 16px 16px 48px', background: brand.bg }}>
-                                      <p style={{ fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 12, paddingTop: 8 }}>
-                                        Booking History for {c.name || c.email}
+
+                                      {/* Customer Info Section */}
+                                      <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, padding: 16, marginBottom: 16, marginTop: 8 }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                                          <p style={{ fontSize: 14, fontWeight: 600, color: brand.text }}>Customer Info</p>
+                                          {editingCustomerEmail === c.email ? (
+                                            <div style={{ display: 'flex', gap: 6 }}>
+                                              <button onClick={() => handleSaveCustomerInfo(c.email, c.bookings, c.user_id)} style={{ ...buttonStyle, background: brand.success, color: brand.white, fontSize: 12, padding: '6px 12px' }}>Save</button>
+                                              <button onClick={() => { setEditingCustomerEmail(null); setEditingCustomerValue({}); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, fontSize: 12, padding: '6px 12px', border: `1px solid ${brand.border}` }}>Cancel</button>
+                                            </div>
+                                          ) : (
+                                            <button onClick={() => { setEditingCustomerEmail(c.email); setEditingCustomerValue({ customer_name: c.name || '', customer_email: c.email, phone: c.phone || '' }); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, fontSize: 12, padding: '6px 12px', border: `1px solid ${brand.border}` }}>Edit</button>
+                                          )}
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+                                          <div>
+                                            <label style={{ fontSize: 12, color: brand.textLight, display: 'block', marginBottom: 4 }}>Name</label>
+                                            {editingCustomerEmail === c.email ? (
+                                              <input style={{ ...inputStyle, fontSize: 13 }} value={editingCustomerValue.customer_name || ''} onChange={(e) => setEditingCustomerValue({ ...editingCustomerValue, customer_name: e.target.value })} />
+                                            ) : (
+                                              <p style={{ fontSize: 14, color: brand.text, fontWeight: 500 }}>{c.name || 'Unknown'}</p>
+                                            )}
+                                          </div>
+                                          <div>
+                                            <label style={{ fontSize: 12, color: brand.textLight, display: 'block', marginBottom: 4 }}>Email</label>
+                                            {editingCustomerEmail === c.email ? (
+                                              <input style={{ ...inputStyle, fontSize: 13 }} value={editingCustomerValue.customer_email || ''} onChange={(e) => setEditingCustomerValue({ ...editingCustomerValue, customer_email: e.target.value })} />
+                                            ) : (
+                                              <p style={{ fontSize: 14, color: brand.text }}>{c.email}</p>
+                                            )}
+                                          </div>
+                                          <div>
+                                            <label style={{ fontSize: 12, color: brand.textLight, display: 'block', marginBottom: 4 }}>Phone</label>
+                                            {editingCustomerEmail === c.email ? (
+                                              <input style={{ ...inputStyle, fontSize: 13 }} value={editingCustomerValue.phone || ''} onChange={(e) => setEditingCustomerValue({ ...editingCustomerValue, phone: e.target.value })} placeholder="Enter phone..." />
+                                            ) : (
+                                              <p style={{ fontSize: 14, color: c.phone ? brand.text : brand.textLight }}>{c.phone || 'Not provided'}</p>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      {/* Bookings Table */}
+                                      <p style={{ fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 12 }}>
+                                        Booking History ({c.bookings.length})
                                       </p>
                                       <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
                                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -620,6 +715,7 @@ export default function AdminPanel() {
                                               <th style={{ padding: '10px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: brand.textLight }}>Total</th>
                                               <th style={{ padding: '10px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: brand.textLight }}>Status</th>
                                               <th style={{ padding: '10px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: brand.textLight }}>Worker</th>
+                                              <th style={{ padding: '10px 12px', textAlign: 'right', fontSize: 12, fontWeight: 600, color: brand.textLight }}>Actions</th>
                                             </tr>
                                           </thead>
                                           <tbody>
@@ -629,15 +725,36 @@ export default function AdminPanel() {
                                                 const statusStyle = getStatusStyle(b.status);
                                                 const freqName = getFrequencyName(b.frequency_id);
                                                 const workerName = workers.find(w => w.id === b.worker_id)?.name || '';
+                                                const isEditing = editingBookingId === b.id;
+                                                const isActionable = ['upcoming', 'scheduled'].includes(b.status);
+
                                                 return (
                                                   <tr key={b.id} style={{ borderTop: `1px solid ${brand.border}` }}>
                                                     <td style={{ padding: '10px 12px' }}>
-                                                      <p style={{ fontWeight: 500, color: brand.text, fontSize: 13 }}>{formatDate(b.booking_date)}</p>
-                                                      <p style={{ fontSize: 12, color: brand.textLight }}>{b.booking_time}</p>
+                                                      {isEditing ? (
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                                          <input type="date" style={{ ...inputStyle, fontSize: 12, padding: '6px 8px' }} value={editingBookingValue.booking_date || ''} onChange={(e) => setEditingBookingValue({ ...editingBookingValue, booking_date: e.target.value })} />
+                                                          <input type="text" style={{ ...inputStyle, fontSize: 12, padding: '6px 8px' }} value={editingBookingValue.booking_time || ''} onChange={(e) => setEditingBookingValue({ ...editingBookingValue, booking_time: e.target.value })} placeholder="e.g. 9:00 AM" />
+                                                        </div>
+                                                      ) : (
+                                                        <>
+                                                          <p style={{ fontWeight: 500, color: brand.text, fontSize: 13 }}>{formatDate(b.booking_date)}</p>
+                                                          <p style={{ fontSize: 12, color: brand.textLight }}>{b.booking_time}</p>
+                                                        </>
+                                                      )}
                                                     </td>
                                                     <td style={{ padding: '10px 12px' }}>
-                                                      <p style={{ fontWeight: 500, color: brand.text, fontSize: 13 }}>{b.building}</p>
-                                                      <p style={{ fontSize: 12, color: brand.textLight }}>Unit {b.unit_number} · {b.floor_plan}</p>
+                                                      {isEditing ? (
+                                                        <div>
+                                                          <p style={{ fontWeight: 500, color: brand.text, fontSize: 13 }}>{b.building}</p>
+                                                          <input style={{ ...inputStyle, fontSize: 12, padding: '6px 8px', marginTop: 4 }} value={editingBookingValue.unit_number || ''} onChange={(e) => setEditingBookingValue({ ...editingBookingValue, unit_number: e.target.value })} placeholder="Unit #" />
+                                                        </div>
+                                                      ) : (
+                                                        <>
+                                                          <p style={{ fontWeight: 500, color: brand.text, fontSize: 13 }}>{b.building}</p>
+                                                          <p style={{ fontSize: 12, color: brand.textLight }}>Unit {b.unit_number} · {b.floor_plan}</p>
+                                                        </>
+                                                      )}
                                                     </td>
                                                     <td style={{ padding: '10px 12px' }}>
                                                       {freqName && freqName !== 'One-Time' ? (
@@ -654,8 +771,36 @@ export default function AdminPanel() {
                                                         {b.status}
                                                       </span>
                                                     </td>
-                                                    <td style={{ padding: '10px 12px', fontSize: 13, color: workerName ? brand.text : brand.textLight }}>
-                                                      {workerName || 'Unassigned'}
+                                                    <td style={{ padding: '10px 12px' }}>
+                                                      {isEditing ? (
+                                                        <select style={{ ...inputStyle, fontSize: 12, padding: '6px 8px', width: 120 }} value={editingBookingValue.worker_id || ''} onChange={(e) => setEditingBookingValue({ ...editingBookingValue, worker_id: e.target.value })}>
+                                                          <option value="">Unassigned</option>
+                                                          {workers.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                                                        </select>
+                                                      ) : (
+                                                        <span style={{ fontSize: 13, color: workerName ? brand.text : brand.textLight }}>{workerName || 'Unassigned'}</span>
+                                                      )}
+                                                    </td>
+                                                    <td style={{ padding: '10px 12px', textAlign: 'right' }}>
+                                                      <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                                                        {isEditing ? (
+                                                          <>
+                                                            <button onClick={() => handleSaveBookingEdit(b.id)} style={{ ...buttonStyle, background: brand.success, color: brand.white, fontSize: 11, padding: '5px 10px' }}>Save</button>
+                                                            <button onClick={() => { setEditingBookingId(null); setEditingBookingValue({}); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, fontSize: 11, padding: '5px 10px', border: `1px solid ${brand.border}` }}>Cancel</button>
+                                                          </>
+                                                        ) : (
+                                                          <>
+                                                            <button onClick={(e) => { e.stopPropagation(); setEditingBookingId(b.id); setEditingBookingValue({ booking_date: b.booking_date, booking_time: b.booking_time || '', worker_id: b.worker_id || '', unit_number: b.unit_number || '', special_instructions: b.special_instructions || '' }); }} style={{ ...buttonStyle, background: brand.primary, color: brand.text, fontSize: 11, padding: '5px 10px' }}>Edit</button>
+                                                            {isActionable && (
+                                                              <>
+                                                                <button onClick={(e) => { e.stopPropagation(); handleMarkComplete(b.id); }} style={{ ...buttonStyle, background: brand.success, color: brand.white, fontSize: 11, padding: '5px 10px' }}>Complete</button>
+                                                                <button onClick={(e) => { e.stopPropagation(); handleSkipBooking(b.id); }} style={{ ...buttonStyle, background: '#FEF3C7', color: '#92400E', fontSize: 11, padding: '5px 10px' }}>Skip</button>
+                                                                <button onClick={(e) => { e.stopPropagation(); handleCancelBooking(b.id); }} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger, fontSize: 11, padding: '5px 10px' }}>Cancel</button>
+                                                              </>
+                                                            )}
+                                                          </>
+                                                        )}
+                                                      </div>
                                                     </td>
                                                   </tr>
                                                 );

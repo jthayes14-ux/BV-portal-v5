@@ -3,6 +3,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../lib/useAuth';
 
 function Logo() {
   return (
@@ -24,6 +25,7 @@ const timeSlots = [
 function BookingFlowInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
 
   const [neighborhoods, setNeighborhoods] = useState([]);
   const [buildings, setBuildings] = useState([]);
@@ -61,9 +63,19 @@ function BookingFlowInner() {
     border: '#E5E7EB', borderLight: '#F3F4F6', bg: '#FAFBFF', bgCard: '#FFFFFF',
   };
 
+  // Track whether rebook data was used so we don't overwrite it with profile data
+  const [usedRebook, setUsedRebook] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+
   useEffect(() => {
     loadData();
   }, []);
+
+  // Auto-fill from user profile and most recent booking when user is available
+  useEffect(() => {
+    if (!user || profileLoaded || usedRebook) return;
+    loadUserProfile();
+  }, [user, profileLoaded, usedRebook]);
 
   const loadData = async () => {
     const [nRes, aoRes, freqRes] = await Promise.all([
@@ -87,6 +99,7 @@ function BookingFlowInner() {
       try {
         const rebook = JSON.parse(storedRebook);
         setIsRebook(true);
+        setUsedRebook(true);
         setRebookBuildingName(rebook.building_name || '');
 
         // Pre-fill contact info
@@ -138,6 +151,77 @@ function BookingFlowInner() {
     }
 
     setDataLoading(false);
+  };
+
+  const loadUserProfile = async () => {
+    setProfileLoaded(true);
+
+    // Fetch user profile for contact info
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+
+    // Auto-fill contact info from profile
+    if (profile) {
+      if (profile.first_name && !firstName) setFirstName(profile.first_name);
+      if (profile.last_name && !lastName) setLastName(profile.last_name);
+      if (profile.phone && !phone) setPhone(profile.phone);
+    }
+
+    // Fill email from auth user if not already set
+    if (user.email && !email) setEmail(user.email);
+
+    // Also fill name from auth metadata if profile didn't have it
+    if (!firstName && !profile?.first_name && user.user_metadata?.full_name) {
+      const parts = user.user_metadata.full_name.split(' ');
+      setFirstName(parts[0] || '');
+      if (!lastName && !profile?.last_name) setLastName(parts.slice(1).join(' ') || '');
+    }
+
+    // Fetch most recent booking for property info auto-fill
+    const { data: lastBooking } = await supabase
+      .from('bookings')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (lastBooking && !neighborhood && !buildingId) {
+      // Look up the building to get neighborhood_id
+      if (lastBooking.building_id) {
+        const { data: buildingData } = await supabase
+          .from('buildings')
+          .select('*')
+          .eq('id', lastBooking.building_id)
+          .single();
+
+        if (buildingData && buildingData.neighborhood_id) {
+          setNeighborhood(buildingData.neighborhood_id);
+
+          const { data: bldgs } = await supabase
+            .from('buildings')
+            .select('*')
+            .eq('neighborhood_id', buildingData.neighborhood_id)
+            .order('name');
+          setBuildings(bldgs || []);
+          setBuildingId(lastBooking.building_id);
+
+          const { data: fps } = await supabase
+            .from('floor_plans')
+            .select('*')
+            .eq('building_id', lastBooking.building_id)
+            .order('price');
+          setFloorPlans(fps || []);
+
+          if (lastBooking.floor_plan_id) setFloorPlanId(lastBooking.floor_plan_id);
+        }
+      }
+
+      if (lastBooking.unit_number && !unit) setUnit(lastBooking.unit_number);
+    }
   };
 
   const loadBuildings = async (neighborhoodId) => {

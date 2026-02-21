@@ -80,7 +80,7 @@ function BookingFlowInner() {
   const loadData = async () => {
     const [nRes, aoRes, freqRes] = await Promise.all([
       supabase.from('neighborhoods').select('*').order('name'),
-      supabase.from('add_ons').select('*').order('name'),
+      supabase.from('add_ons').select('*').eq('archived', false).order('name'),
       supabase.from('frequencies').select('*').order('sort_order'),
     ]);
     const neighborhoodsData = nRes.data || [];

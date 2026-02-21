@@ -210,22 +210,46 @@ export default function PaymentFlow() {
       }
     }
 
-    // Auto-populate profile address from booking for logged-in users
-    if (user?.id && booking.building_address) {
+    // Auto-populate profile data from booking for logged-in users
+    if (user?.id) {
       const { data: existingProfile } = await supabase
         .from('user_profiles')
-        .select('address')
+        .select('*')
         .eq('user_id', user.id)
         .single();
 
-      if (!existingProfile?.address) {
-        const profileAddress = booking.unit
+      const profileUpdates = {};
+
+      // Save name and phone if not already in profile
+      if (!existingProfile?.first_name && booking.guest_first_name) {
+        profileUpdates.first_name = booking.guest_first_name;
+      }
+      if (!existingProfile?.last_name && booking.guest_last_name) {
+        profileUpdates.last_name = booking.guest_last_name;
+      }
+      if (!existingProfile?.phone && booking.guest_phone) {
+        profileUpdates.phone = booking.guest_phone;
+      }
+
+      // Save address if not already set
+      if (!existingProfile?.address && booking.building_address) {
+        profileUpdates.address = booking.unit
           ? `${booking.building_address}, Unit ${booking.unit}`
           : booking.building_address;
+      }
 
-        await supabase.from('user_profiles')
-          .update({ address: profileAddress, updated_at: new Date().toISOString() })
-          .eq('user_id', user.id);
+      if (Object.keys(profileUpdates).length > 0) {
+        profileUpdates.updated_at = new Date().toISOString();
+
+        if (existingProfile) {
+          await supabase.from('user_profiles')
+            .update(profileUpdates)
+            .eq('user_id', user.id);
+        } else {
+          // Create profile if it doesn't exist yet
+          await supabase.from('user_profiles')
+            .insert({ user_id: user.id, ...profileUpdates });
+        }
       }
     }
 

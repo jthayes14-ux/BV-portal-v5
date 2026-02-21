@@ -49,6 +49,7 @@ export default function AdminPanel() {
   const [sortDirection, setSortDirection] = useState('desc');
   const [showCancelled, setShowCancelled] = useState(false);
   const [showSkipped, setShowSkipped] = useState(false);
+  const [showArchivedAddOns, setShowArchivedAddOns] = useState(false);
 
   const brand = {
     primary: '#B8C5F2', text: '#1a1a1a', textLight: '#666',
@@ -201,6 +202,14 @@ export default function AdminPanel() {
       case 'workers': setWorkers(workers.filter(w => w.id !== id)); break;
       case 'frequencies': setFrequencies(frequencies.filter(f => f.id !== id)); break;
     }
+  };
+
+  const handleToggleArchiveAddon = async (id, currentArchived) => {
+    setCrudError('');
+    const newArchived = !currentArchived;
+    const { error } = await supabase.from('add_ons').update({ archived: newArchived }).eq('id', id);
+    if (error) { setCrudError('Failed to update: ' + error.message); return; }
+    setAddOns(addOns.map(a => a.id === id ? { ...a, archived: newArchived } : a));
   };
 
   const handleWorkerAssign = async (bookingId, workerId) => {
@@ -1079,9 +1088,15 @@ export default function AdminPanel() {
           {/* ADD-ONS TAB */}
           {activeTab === 'addons' && (
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                 <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>Add-Ons</h1>
                 <button onClick={() => handleAdd('addons')} style={{ ...buttonStyle, background: brand.text, color: brand.white }}>+ Add Add-On</button>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+                <label style={{ fontSize: 14, color: brand.textLight, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <input type="checkbox" checked={showArchivedAddOns} onChange={(e) => setShowArchivedAddOns(e.target.checked)} />
+                  Show archived
+                </label>
               </div>
               <div className="table-wrapper">
                 <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
@@ -1090,12 +1105,13 @@ export default function AdminPanel() {
                       <tr style={{ background: brand.bg }}>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Name</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Price</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Status</th>
                         <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {addOns.map(a => (
-                        <tr key={a.id} style={{ borderTop: `1px solid ${brand.border}` }}>
+                      {addOns.filter(a => showArchivedAddOns || !a.archived).map(a => (
+                        <tr key={a.id} style={{ borderTop: `1px solid ${brand.border}`, opacity: a.archived ? 0.6 : 1 }}>
                           <td style={{ padding: '16px' }}>
                             {editingId === `addon-${a.id}` ? (
                               <input style={inputStyle} value={editValue.name || ''} onChange={(e) => setEditValue({ ...editValue, name: e.target.value })} />
@@ -1110,12 +1126,24 @@ export default function AdminPanel() {
                               <span style={{ fontWeight: 600, color: brand.text }}>${a.price}</span>
                             )}
                           </td>
+                          <td style={{ padding: '16px' }}>
+                            <span style={{
+                              fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 12,
+                              background: a.archived ? '#fee2e2' : '#dcfce7',
+                              color: a.archived ? brand.danger : '#16a34a',
+                            }}>
+                              {a.archived ? 'Archived' : 'Active'}
+                            </span>
+                          </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
                             {editingId === `addon-${a.id}` ? (
                               <button onClick={() => handleSave('addons', a.id)} style={{ ...buttonStyle, background: brand.success, color: brand.white, marginRight: 8 }}>Save</button>
                             ) : (
                               <button onClick={() => { setEditingId(`addon-${a.id}`); setEditValue({ name: a.name, price: a.price }); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, marginRight: 8 }}>Edit</button>
                             )}
+                            <button onClick={() => handleToggleArchiveAddon(a.id, a.archived)} style={{ ...buttonStyle, background: a.archived ? '#dbeafe' : '#fef3c7', color: a.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
+                              {a.archived ? 'Unarchive' : 'Archive'}
+                            </button>
                             <button onClick={() => handleDelete('addons', a.id)} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger }}>Delete</button>
                           </td>
                         </tr>

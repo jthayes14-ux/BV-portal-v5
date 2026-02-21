@@ -31,6 +31,7 @@ function BookingFlowInner() {
   const [buildings, setBuildings] = useState([]);
   const [floorPlans, setFloorPlans] = useState([]);
   const [addOns, setAddOns] = useState([]);
+  const [addonsSectionVisible, setAddonsSectionVisible] = useState(true);
   const [frequencies, setFrequencies] = useState([]);
   const [dataLoading, setDataLoading] = useState(true);
 
@@ -78,14 +79,17 @@ function BookingFlowInner() {
   }, [user, profileLoaded, usedRebook]);
 
   const loadData = async () => {
-    const [nRes, aoRes, freqRes] = await Promise.all([
+    const [nRes, aoRes, freqRes, ssRes] = await Promise.all([
       supabase.from('neighborhoods').select('*').order('name'),
       supabase.from('add_ons').select('*').eq('archived', false).order('name'),
       supabase.from('frequencies').select('*').order('sort_order'),
+      supabase.from('site_settings').select('*').eq('key', 'addons_section_visible').single(),
     ]);
     const neighborhoodsData = nRes.data || [];
     setNeighborhoods(neighborhoodsData);
-    setAddOns(aoRes.data || []);
+    const sectionVisible = ssRes.data ? ssRes.data.value === 'true' : true;
+    setAddonsSectionVisible(sectionVisible);
+    setAddOns(sectionVisible ? (aoRes.data || []) : []);
     const freqData = freqRes.data || [];
     setFrequencies(freqData);
     // Default to the first frequency (One-Time) if available
@@ -471,7 +475,7 @@ function BookingFlowInner() {
             )}
 
             {/* Add-Ons */}
-            {time && (
+            {time && addonsSectionVisible && addOns.length > 0 && (
               <div style={{ animation: 'fadeIn 0.4s ease' }}>
                 <label style={labelStyle}>Premium Add-Ons</label>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

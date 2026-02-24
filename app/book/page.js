@@ -45,6 +45,11 @@ function BookingFlowInner() {
   const [focusedField, setFocusedField] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Unit line lookup state
+  const [unitLookupResult, setUnitLookupResult] = useState(null); // { found: true, unitLine, floorPlan } or { found: false }
+  const [unitLookupLoading, setUnitLookupLoading] = useState(false);
+  const [showFloorPlanFallback, setShowFloorPlanFallback] = useState(false);
+
   // Dynamic availability state
   const [availableSlots, setAvailableSlots] = useState([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
@@ -346,19 +351,23 @@ function BookingFlowInner() {
             setBuildings(bldgs || []);
             setBuildingId(rebook.building_id);
 
-            // Load floor plans for this building
-            const { data: fps } = await supabase
-              .from('floor_plans')
-              .select('*')
-              .eq('building_id', rebook.building_id)
-              .order('price');
-            setFloorPlans(fps || []);
-
-            if (rebook.floor_plan_id) setFloorPlanId(rebook.floor_plan_id);
           }
         }
 
-        if (rebook.unit_number) setUnit(rebook.unit_number);
+        if (rebook.unit_number) {
+          setUnit(rebook.unit_number);
+          // Trigger unit line lookup if building is set
+          if (rebook.building_id) {
+            await lookupUnitLine(rebook.building_id, rebook.unit_number);
+          }
+        } else if (rebook.floor_plan_id) {
+          // No unit but has floor plan — load floor plans and set as fallback
+          if (rebook.building_id) {
+            await loadFloorPlans(rebook.building_id);
+            setFloorPlanId(rebook.floor_plan_id);
+            setShowFloorPlanFallback(true);
+          }
+        }
 
         // Clean up — keep it in localStorage for future "Book Again" but remove the rebook query param behavior
         localStorage.removeItem('rebookInfo');
@@ -426,18 +435,21 @@ function BookingFlowInner() {
           setBuildings(bldgs || []);
           setBuildingId(lastBooking.building_id);
 
-          const { data: fps } = await supabase
-            .from('floor_plans')
-            .select('*')
-            .eq('building_id', lastBooking.building_id)
-            .order('price');
-          setFloorPlans(fps || []);
-
-          if (lastBooking.floor_plan_id) setFloorPlanId(lastBooking.floor_plan_id);
         }
       }
 
-      if (lastBooking.unit_number && !unit) setUnit(lastBooking.unit_number);
+      if (lastBooking.unit_number && !unit) {
+        setUnit(lastBooking.unit_number);
+        // Trigger unit line lookup if building is set
+        if (lastBooking.building_id) {
+          await lookupUnitLine(lastBooking.building_id, lastBooking.unit_number);
+        }
+      } else if (lastBooking.floor_plan_id && lastBooking.building_id) {
+        // No unit but has floor plan — load floor plans and set as fallback
+        await loadFloorPlans(lastBooking.building_id);
+        setFloorPlanId(lastBooking.floor_plan_id);
+        setShowFloorPlanFallback(true);
+      }
     }
   };
 
@@ -451,6 +463,80 @@ function BookingFlowInner() {
     setFloorPlans(data || []);
   };
 
+  // Parse unit number into floor and line components
+  const parseUnitNumber = (unitStr) => {
+    const trimmed = (unitStr || '').trim();
+    if (!trimmed) return null;
+
+    // Check if unit ends in letter(s): e.g. "57D", "12M", "3AB"
+    const letterMatch = trimmed.match(/^(\d+)([A-Za-z]+)$/);
+    if (letterMatch) {
+      return { floor: parseInt(letterMatch[1], 10), line: letterMatch[2].toUpperCase() };
+    }
+
+    // All numbers: e.g. "2207" -> floor = 22, line = "07"
+    const numberMatch = trimmed.match(/^(\d+)$/);
+    if (numberMatch && trimmed.length >= 3) {
+      const digits = numberMatch[1];
+      const line = digits.slice(-2);
+      const floor = parseInt(digits.slice(0, -2), 10);
+      return { floor, line };
+    }
+
+    return null;
+  };
+
+  // Look up unit line from the database
+  const lookupUnitLine = async (bId, unitStr) => {
+    setUnitLookupLoading(true);
+    setUnitLookupResult(null);
+    setShowFloorPlanFallback(false);
+    setFloorPlanId('');
+
+    const parsed = parseUnitNumber(unitStr);
+    if (!parsed) {
+      setUnitLookupResult({ found: false });
+      setShowFloorPlanFallback(true);
+      setUnitLookupLoading(false);
+      // Load floor plans for fallback dropdown
+      await loadFloorPlans(bId);
+      return;
+    }
+
+    const { floor, line } = parsed;
+
+    // Query unit_lines: building_id matches, line_number matches (case insensitive), floor in range
+    const { data: unitLines } = await supabase
+      .from('unit_lines')
+      .select('*, floor_plan:floor_plan_id(*)')
+      .eq('building_id', bId)
+      .ilike('line_number', line);
+
+    // Filter for floor range match
+    const match = (unitLines || []).find(ul =>
+      floor >= ul.floor_min && floor <= ul.floor_max
+    );
+
+    if (match && match.floor_plan) {
+      const price = match.custom_price != null ? Number(match.custom_price) : Number(match.floor_plan.price);
+      setUnitLookupResult({
+        found: true,
+        unitLine: match,
+        floorPlan: match.floor_plan,
+        displayPrice: price,
+      });
+      setFloorPlanId(match.floor_plan.id);
+      setShowFloorPlanFallback(false);
+    } else {
+      setUnitLookupResult({ found: false });
+      setShowFloorPlanFallback(true);
+      // Load floor plans for fallback dropdown
+      await loadFloorPlans(bId);
+    }
+
+    setUnitLookupLoading(false);
+  };
+
   const selectedPlan = floorPlans.find(p => String(p.id) === String(floorPlanId));
   const selectedBuilding = buildings.find(b => String(b.id) === String(buildingId));
   const selectedNeighborhood = neighborhoods.find(n => String(n.id) === String(neighborhood));
@@ -461,13 +547,18 @@ function BookingFlowInner() {
     return sum + (Number(addon?.price) || 0);
   }, 0);
 
-  const subtotal = (Number(selectedPlan?.price) || 0) + addOnsTotal;
+  // Use custom_price from unit line lookup if available, otherwise floor plan price
+  const basePrice = unitLookupResult?.found && unitLookupResult.displayPrice != null
+    ? unitLookupResult.displayPrice
+    : (Number(selectedPlan?.price) || 0);
+  const subtotal = basePrice + addOnsTotal;
   const frequencyDiscount = selectedFrequency && Number(selectedFrequency.discount_percent) > 0
     ? Math.round(subtotal * Number(selectedFrequency.discount_percent) / 100 * 100) / 100
     : 0;
   const total = Math.max(0, subtotal - frequencyDiscount);
 
-  const serviceSelected = neighborhood && buildingId && floorPlanId && unit && date && time;
+  const unitReady = unit && floorPlanId && (unitLookupResult?.found || showFloorPlanFallback);
+  const serviceSelected = neighborhood && buildingId && unitReady && date && time;
   const contactValid = firstName.trim() && lastName.trim() && email.trim() && phone.trim();
   const canBook = serviceSelected && contactValid;
   const today = new Date().toISOString().split('T')[0];
@@ -481,14 +572,14 @@ function BookingFlowInner() {
       building_name: selectedBuilding?.name || '',
       building_address: selectedBuilding?.address || '',
       floor_plan_id: floorPlanId,
-      floor_plan_name: selectedPlan?.name || '',
+      floor_plan_name: unitLookupResult?.found ? unitLookupResult.floorPlan.name : (selectedPlan?.name || ''),
       unit, date, time_slot: time,
       frequency_id: frequencyId,
       frequency_name: selectedFrequency?.name || 'One-Time',
       frequency_discount_percent: Number(selectedFrequency?.discount_percent) || 0,
       frequency_interval_days: Number(selectedFrequency?.interval_days) || 0,
       frequency_discount: frequencyDiscount,
-      base_price: selectedPlan?.price || 0,
+      base_price: basePrice || 0,
       selected_add_ons: selectedAddOns.map(id => {
         const a = addOns.find(x => x.id === id);
         return { id: a.id, name: a.name, price: a.price };
@@ -600,6 +691,7 @@ function BookingFlowInner() {
                 setIsRebook(false);
                 setNeighborhood(''); setBuildingId(''); setFloorPlanId(''); setUnit('');
                 setBuildings([]); setFloorPlans([]);
+                setUnitLookupResult(null); setShowFloorPlanFallback(false);
                 setFirstName(''); setLastName(''); setEmail(''); setPhone('');
               }}
               style={{ fontSize: 13, fontWeight: 500, color: '#92400E', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', whiteSpace: 'nowrap' }}
@@ -614,7 +706,7 @@ function BookingFlowInner() {
             {/* Neighborhood */}
             <div>
               <label style={labelStyle}>Neighborhood</label>
-              <select value={neighborhood} onChange={(e) => { setNeighborhood(e.target.value); setBuildingId(''); setFloorPlanId(''); setBuildings([]); setFloorPlans([]); if (e.target.value) loadBuildings(e.target.value); }} onFocus={() => setFocusedField('neighborhood')} onBlur={() => setFocusedField(null)} style={getSelectStyle('neighborhood')}>
+              <select value={neighborhood} onChange={(e) => { setNeighborhood(e.target.value); setBuildingId(''); setFloorPlanId(''); setUnit(''); setBuildings([]); setFloorPlans([]); setUnitLookupResult(null); setShowFloorPlanFallback(false); if (e.target.value) loadBuildings(e.target.value); }} onFocus={() => setFocusedField('neighborhood')} onBlur={() => setFocusedField(null)} style={getSelectStyle('neighborhood')}>
                 <option value="">Select your neighborhood</option>
                 {neighborhoods.map(n => <option key={n.id} value={n.id}>{n.name}</option>)}
               </select>
@@ -624,17 +716,85 @@ function BookingFlowInner() {
             {neighborhood && (
               <div style={{ animation: 'fadeIn 0.4s ease' }}>
                 <label style={labelStyle}>Building</label>
-                <select value={buildingId} onChange={(e) => { setBuildingId(e.target.value); setFloorPlanId(''); setFloorPlans([]); if (e.target.value) loadFloorPlans(e.target.value); }} onFocus={() => setFocusedField('building')} onBlur={() => setFocusedField(null)} style={getSelectStyle('building')}>
+                <select value={buildingId} onChange={(e) => { setBuildingId(e.target.value); setFloorPlanId(''); setFloorPlans([]); setUnit(''); setUnitLookupResult(null); setShowFloorPlanFallback(false); }} onFocus={() => setFocusedField('building')} onBlur={() => setFocusedField(null)} style={getSelectStyle('building')}>
                   <option value="">Select your building</option>
                   {buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                 </select>
               </div>
             )}
 
-            {/* Floor Plan */}
+            {/* Unit Number */}
             {buildingId && (
               <div style={{ animation: 'fadeIn 0.4s ease' }}>
-                <label style={labelStyle}>Floor Plan</label>
+                <label style={labelStyle}>Unit Number</label>
+                <input
+                  type="text"
+                  value={unit}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setUnit(val);
+                    setUnitLookupResult(null);
+                    setShowFloorPlanFallback(false);
+                    setFloorPlanId('');
+                  }}
+                  onBlur={() => {
+                    setFocusedField(null);
+                    if (unit.trim() && buildingId) {
+                      lookupUnitLine(buildingId, unit);
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && unit.trim() && buildingId) {
+                      e.preventDefault();
+                      lookupUnitLine(buildingId, unit);
+                    }
+                  }}
+                  onFocus={() => setFocusedField('unit')}
+                  placeholder="e.g. 2207 or 57D"
+                  style={getInputStyle('unit')}
+                />
+
+                {/* Loading indicator */}
+                {unitLookupLoading && (
+                  <div style={{ marginTop: 10, padding: '12px 16px', fontSize: 14, color: brand.textLight, background: brand.bgCard, borderRadius: 10, border: `1px solid ${brand.border}` }}>
+                    Looking up unit...
+                  </div>
+                )}
+
+                {/* Unit found - show floor plan info */}
+                {unitLookupResult?.found && (
+                  <div style={{
+                    marginTop: 10, padding: '14px 18px', borderRadius: 12,
+                    background: '#F0FDF4', border: '1px solid #BBF7D0',
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    animation: 'fadeIn 0.3s ease',
+                  }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <span style={{ fontSize: 15, fontWeight: 500, color: '#15803D' }}>
+                      Unit {unit.trim()} — {unitLookupResult.floorPlan.name} — ${unitLookupResult.displayPrice}
+                    </span>
+                  </div>
+                )}
+
+                {/* Unit not found - show message and fallback dropdown */}
+                {unitLookupResult && !unitLookupResult.found && !unitLookupLoading && (
+                  <div style={{ marginTop: 10, animation: 'fadeIn 0.3s ease' }}>
+                    <div style={{
+                      padding: '12px 16px', borderRadius: 10,
+                      background: '#FFFBEB', border: '1px solid #FDE68A',
+                      fontSize: 14, color: '#92400E', marginBottom: 12,
+                    }}>
+                      Unit not recognized
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Floor Plan Fallback Dropdown (only shown when unit not recognized) */}
+            {showFloorPlanFallback && (
+              <div style={{ animation: 'fadeIn 0.4s ease' }}>
+                <label style={labelStyle}>Select Floor Plan</label>
                 <select value={floorPlanId} onChange={(e) => setFloorPlanId(e.target.value)} onFocus={() => setFocusedField('floorPlan')} onBlur={() => setFocusedField(null)} style={getSelectStyle('floorPlan')}>
                   <option value="">Select floor plan</option>
                   {floorPlans.map(p => <option key={p.id} value={p.id}>{p.name} — ${p.price}</option>)}
@@ -642,16 +802,8 @@ function BookingFlowInner() {
               </div>
             )}
 
-            {/* Unit */}
-            {floorPlanId && (
-              <div style={{ animation: 'fadeIn 0.4s ease' }}>
-                <label style={labelStyle}>Unit Number</label>
-                <input type="text" value={unit} onChange={(e) => setUnit(e.target.value)} onFocus={() => setFocusedField('unit')} onBlur={() => setFocusedField(null)} placeholder="e.g. 2405" style={getInputStyle('unit')} />
-              </div>
-            )}
-
             {/* Date */}
-            {unit && (
+            {unitReady && (
               <div style={{ animation: 'fadeIn 0.4s ease' }}>
                 <label style={labelStyle}>Preferred Date</label>
                 <input type="date" value={date} onChange={(e) => { setDate(e.target.value); setTime(''); }} onFocus={() => setFocusedField('date')} onBlur={() => setFocusedField(null)} min={today} max={maxDate || undefined} style={getInputStyle('date')} />
@@ -777,8 +929,8 @@ function BookingFlowInner() {
           <div style={{ marginTop: 32, padding: 32, background: brand.bgCard, borderRadius: 20, boxShadow: '0 8px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04)', border: `1px solid ${brand.borderLight}`, animation: 'fadeIn 0.4s ease' }}>
             <div style={{ marginBottom: 24 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, fontSize: 15, color: brand.textLight }}>
-                <span>Window Cleaning ({selectedPlan?.name})</span>
-                <span>${selectedPlan?.price}</span>
+                <span>Window Cleaning ({unitLookupResult?.found ? unitLookupResult.floorPlan.name : selectedPlan?.name})</span>
+                <span>${basePrice}</span>
               </div>
               {selectedAddOns.length > 0 && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, fontSize: 15, color: brand.textLight }}>

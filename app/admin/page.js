@@ -91,6 +91,40 @@ export default function AdminPanel() {
     { id: 'addons', label: 'Add-Ons' },
     { id: 'workers', label: 'Workers' },
     { id: 'availability', label: 'Availability' },
+    { id: 'settings', label: 'Settings' },
+  ];
+
+  const HOUR_OPTIONS = [
+    { value: '06:00', label: '6:00 AM' }, { value: '07:00', label: '7:00 AM' },
+    { value: '08:00', label: '8:00 AM' }, { value: '09:00', label: '9:00 AM' },
+    { value: '10:00', label: '10:00 AM' }, { value: '11:00', label: '11:00 AM' },
+    { value: '12:00', label: '12:00 PM' }, { value: '13:00', label: '1:00 PM' },
+    { value: '14:00', label: '2:00 PM' }, { value: '15:00', label: '3:00 PM' },
+    { value: '16:00', label: '4:00 PM' }, { value: '17:00', label: '5:00 PM' },
+    { value: '18:00', label: '6:00 PM' }, { value: '19:00', label: '7:00 PM' },
+    { value: '20:00', label: '8:00 PM' },
+  ];
+
+  const SLOT_DURATION_OPTIONS = [
+    { value: '60', label: '1 hour' }, { value: '120', label: '2 hours' },
+    { value: '180', label: '3 hours' }, { value: '240', label: '4 hours' },
+  ];
+
+  const BUFFER_OPTIONS = [
+    { value: '0', label: '0 minutes' }, { value: '15', label: '15 minutes' },
+    { value: '30', label: '30 minutes' }, { value: '45', label: '45 minutes' },
+    { value: '60', label: '1 hour' },
+  ];
+
+  const NOTICE_OPTIONS = [
+    { value: '12', label: '12 hours' }, { value: '24', label: '24 hours' },
+    { value: '48', label: '48 hours' }, { value: '72', label: '72 hours' },
+  ];
+
+  const ADVANCE_OPTIONS = [
+    { value: '7', label: '1 week' }, { value: '14', label: '2 weeks' },
+    { value: '30', label: '30 days' }, { value: '60', label: '60 days' },
+    { value: '90', label: '90 days' },
   ];
 
   const buttonStyle = { padding: '8px 16px', fontSize: 14, fontWeight: 500, border: 'none', borderRadius: 6, cursor: 'pointer' };
@@ -1423,7 +1457,7 @@ export default function AdminPanel() {
           {/* AVAILABILITY TAB */}
           {activeTab === 'availability' && (
             <div>
-              <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text, marginBottom: 20 }}>Availability Management</h1>
+              <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text, marginBottom: 20 }}>Availability</h1>
 
               {/* Sub-tab navigation */}
               <div style={{ display: 'flex', gap: 0, marginBottom: 24, borderBottom: `2px solid ${brand.border}` }}>
@@ -1431,7 +1465,6 @@ export default function AdminPanel() {
                   { id: 'weekly', label: 'Weekly Schedules' },
                   { id: 'blocked', label: 'Blocked Dates' },
                   { id: 'overrides', label: 'Schedule Overrides' },
-                  { id: 'settings', label: 'Service Settings' },
                 ].map(tab => (
                   <button
                     key={tab.id}
@@ -1452,163 +1485,129 @@ export default function AdminPanel() {
               {/* SUB-TAB 1: Weekly Schedules */}
               {availabilitySubTab === 'weekly' && (
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
-                    <select
-                      value={selectedWorkerAvail}
-                      onChange={(e) => { setSelectedWorkerAvail(e.target.value); setEditingAvailability(null); }}
-                      style={{ ...inputStyle, width: 240 }}
-                    >
-                      <option value="">Select a worker...</option>
-                      {workers.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
-                    </select>
-                    {selectedWorkerAvail && !editingAvailability && (
-                      <button
-                        onClick={() => setEditingAvailability(getWorkerAvailability(selectedWorkerAvail))}
-                        style={{ ...buttonStyle, background: brand.text, color: brand.white }}
-                      >
-                        Edit Schedule
-                      </button>
-                    )}
-                  </div>
-
-                  {!selectedWorkerAvail && (
+                  {!selectedWorkerAvail ? (
                     <div>
-                      <p style={{ fontSize: 14, color: brand.textLight, marginBottom: 20 }}>Select a worker to view/edit their schedule, or view all workers below.</p>
-                      {/* All Workers Overview */}
-                      <div className="table-wrapper">
-                        <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
-                          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            <thead>
-                              <tr style={{ background: brand.bg }}>
-                                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Worker</th>
-                                {DAY_NAMES.map(d => (
-                                  <th key={d} style={{ padding: '12px 8px', textAlign: 'center', fontSize: 13, fontWeight: 600, color: brand.textLight }}>{d.slice(0, 3)}</th>
-                                ))}
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {workers.map(w => {
-                                const workerAvail = getWorkerAvailability(w.id);
-                                return (
-                                  <tr key={w.id} style={{ borderTop: `1px solid ${brand.border}` }}>
-                                    <td style={{ padding: '12px 16px', fontWeight: 500, color: brand.text }}>{w.name}</td>
-                                    {workerAvail.map((day, idx) => (
-                                      <td key={idx} style={{ padding: '8px', textAlign: 'center' }}>
-                                        {day.is_active && !day.isNew ? (
-                                          <div>
-                                            <span style={{ fontSize: 11, color: brand.text, display: 'block' }}>{day.start_time?.slice(0, 5)}</span>
-                                            <span style={{ fontSize: 10, color: brand.textLight }}>to</span>
-                                            <span style={{ fontSize: 11, color: brand.text, display: 'block' }}>{day.end_time?.slice(0, 5)}</span>
-                                          </div>
-                                        ) : day.isNew ? (
-                                          <span style={{ fontSize: 11, color: brand.textLight }}>--</span>
-                                        ) : (
-                                          <span style={{ fontSize: 11, color: brand.danger, fontWeight: 500 }}>Off</span>
-                                        )}
-                                      </td>
-                                    ))}
-                                  </tr>
-                                );
-                              })}
-                              {workers.length === 0 && (
-                                <tr><td colSpan={8} style={{ padding: 32, textAlign: 'center', color: brand.textLight }}>No workers found. Add workers first.</td></tr>
-                              )}
-                            </tbody>
-                          </table>
+                      <p style={{ fontSize: 14, color: brand.textLight, marginBottom: 20 }}>Click on a worker to view and edit their weekly schedule.</p>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {workers.map(w => {
+                          const workerAvail = getWorkerAvailability(w.id);
+                          const activeDays = workerAvail.filter(d => d.is_active && !d.isNew).length;
+                          const hasSchedule = workerAvail.some(d => !d.isNew);
+                          return (
+                            <div
+                              key={w.id}
+                              onClick={() => { setSelectedWorkerAvail(w.id); setEditingAvailability(getWorkerAvailability(w.id)); }}
+                              style={{
+                                background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, padding: '16px 20px',
+                                cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                transition: 'box-shadow 0.2s',
+                              }}
+                              onMouseOver={(e) => e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)'}
+                              onMouseOut={(e) => e.currentTarget.style.boxShadow = 'none'}
+                            >
+                              <div>
+                                <p style={{ fontWeight: 600, color: brand.text, fontSize: 15, marginBottom: 4 }}>{w.name}</p>
+                                <p style={{ fontSize: 13, color: brand.textLight }}>
+                                  {hasSchedule ? `${activeDays} day${activeDays !== 1 ? 's' : ''} active` : 'No schedule set'}
+                                </p>
+                              </div>
+                              <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                                {DAY_NAMES.map((d, idx) => {
+                                  const day = workerAvail[idx];
+                                  const active = day.is_active && !day.isNew;
+                                  return (
+                                    <div key={idx} style={{
+                                      width: 28, height: 28, borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                      background: active ? '#dcfce7' : day.isNew ? '#f3f4f6' : '#fee2e2',
+                                      fontSize: 11, fontWeight: 600,
+                                      color: active ? '#16a34a' : day.isNew ? brand.textLight : brand.danger,
+                                    }}>
+                                      {d.slice(0, 2)}
+                                    </div>
+                                  );
+                                })}
+                                <span style={{ marginLeft: 8, color: brand.textLight, fontSize: 18 }}>&#8250;</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                        {workers.length === 0 && (
+                          <div style={{ padding: 32, textAlign: 'center', color: brand.textLight, background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}` }}>
+                            No workers found. Add workers first in the Workers tab.
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                          <button
+                            onClick={() => { setSelectedWorkerAvail(''); setEditingAvailability(null); }}
+                            style={{ ...buttonStyle, background: brand.bg, color: brand.text, border: `1px solid ${brand.border}`, padding: '6px 12px' }}
+                          >
+                            &larr; Back
+                          </button>
+                          <h2 style={{ fontSize: 18, fontWeight: 600, color: brand.text }}>
+                            {workers.find(w => w.id === selectedWorkerAvail)?.name} — Weekly Schedule
+                          </h2>
                         </div>
                       </div>
-                    </div>
-                  )}
 
-                  {selectedWorkerAvail && !editingAvailability && (
-                    <div className="table-wrapper">
-                      <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                          <thead>
-                            <tr style={{ background: brand.bg }}>
-                              <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Day</th>
-                              <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Status</th>
-                              <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Start Time</th>
-                              <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>End Time</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {getWorkerAvailability(selectedWorkerAvail).map((day, idx) => (
-                              <tr key={idx} style={{ borderTop: `1px solid ${brand.border}` }}>
-                                <td style={{ padding: '16px', fontWeight: 500, color: brand.text }}>{DAY_NAMES[idx]}</td>
-                                <td style={{ padding: '16px' }}>
-                                  {day.isNew ? (
-                                    <span style={{ padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 500, background: '#f3f4f6', color: brand.textLight }}>Not set</span>
-                                  ) : day.is_active ? (
-                                    <span style={{ padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 500, background: '#dcfce7', color: '#16a34a' }}>Active</span>
-                                  ) : (
-                                    <span style={{ padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 500, background: '#fee2e2', color: brand.danger }}>Off</span>
-                                  )}
-                                </td>
-                                <td style={{ padding: '16px', color: day.is_active && !day.isNew ? brand.text : brand.textLight }}>{day.isNew ? '--' : day.start_time?.slice(0, 5)}</td>
-                                <td style={{ padding: '16px', color: day.is_active && !day.isNew ? brand.text : brand.textLight }}>{day.isNew ? '--' : day.end_time?.slice(0, 5)}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  )}
-
-                  {editingAvailability && (
-                    <div>
                       <div className="table-wrapper">
                         <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
                           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
                               <tr style={{ background: brand.bg }}>
                                 <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Day</th>
-                                <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Active</th>
+                                <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Day Off</th>
                                 <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Start Time</th>
                                 <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>End Time</th>
                               </tr>
                             </thead>
                             <tbody>
-                              {editingAvailability.map((day, idx) => (
+                              {(editingAvailability || getWorkerAvailability(selectedWorkerAvail)).map((day, idx) => (
                                 <tr key={idx} style={{ borderTop: `1px solid ${brand.border}`, opacity: day.is_active ? 1 : 0.5 }}>
                                   <td style={{ padding: '16px', fontWeight: 500, color: brand.text }}>{DAY_NAMES[idx]}</td>
                                   <td style={{ padding: '16px', textAlign: 'center' }}>
                                     <input
                                       type="checkbox"
-                                      checked={day.is_active}
+                                      checked={!day.is_active}
                                       onChange={(e) => {
-                                        const updated = [...editingAvailability];
-                                        updated[idx] = { ...updated[idx], is_active: e.target.checked };
+                                        const updated = [...(editingAvailability || getWorkerAvailability(selectedWorkerAvail))];
+                                        updated[idx] = { ...updated[idx], is_active: !e.target.checked };
                                         setEditingAvailability(updated);
                                       }}
                                       style={{ width: 18, height: 18, cursor: 'pointer' }}
                                     />
                                   </td>
                                   <td style={{ padding: '12px 16px' }}>
-                                    <input
-                                      type="time"
+                                    <select
                                       value={day.start_time?.slice(0, 5) || '08:00'}
                                       onChange={(e) => {
-                                        const updated = [...editingAvailability];
+                                        const updated = [...(editingAvailability || getWorkerAvailability(selectedWorkerAvail))];
                                         updated[idx] = { ...updated[idx], start_time: e.target.value };
                                         setEditingAvailability(updated);
                                       }}
                                       disabled={!day.is_active}
-                                      style={{ ...inputStyle, width: 140 }}
-                                    />
+                                      style={{ ...inputStyle, width: 150 }}
+                                    >
+                                      {HOUR_OPTIONS.map(h => <option key={h.value} value={h.value}>{h.label}</option>)}
+                                    </select>
                                   </td>
                                   <td style={{ padding: '12px 16px' }}>
-                                    <input
-                                      type="time"
+                                    <select
                                       value={day.end_time?.slice(0, 5) || '17:00'}
                                       onChange={(e) => {
-                                        const updated = [...editingAvailability];
+                                        const updated = [...(editingAvailability || getWorkerAvailability(selectedWorkerAvail))];
                                         updated[idx] = { ...updated[idx], end_time: e.target.value };
                                         setEditingAvailability(updated);
                                       }}
                                       disabled={!day.is_active}
-                                      style={{ ...inputStyle, width: 140 }}
-                                    />
+                                      style={{ ...inputStyle, width: 150 }}
+                                    >
+                                      {HOUR_OPTIONS.map(h => <option key={h.value} value={h.value}>{h.label}</option>)}
+                                    </select>
                                   </td>
                                 </tr>
                               ))}
@@ -1625,7 +1624,7 @@ export default function AdminPanel() {
                           {availSaving ? 'Saving...' : 'Save Schedule'}
                         </button>
                         <button
-                          onClick={() => setEditingAvailability(null)}
+                          onClick={() => { setSelectedWorkerAvail(''); setEditingAvailability(null); }}
                           style={{ ...buttonStyle, background: brand.bg, color: brand.text, border: `1px solid ${brand.border}` }}
                         >
                           Cancel
@@ -1872,63 +1871,60 @@ export default function AdminPanel() {
                 </div>
               )}
 
-              {/* SUB-TAB 4: Service Settings */}
-              {availabilitySubTab === 'settings' && (
-                <div>
-                  <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, padding: 24, maxWidth: 600 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                      <p style={{ fontSize: 16, fontWeight: 600, color: brand.text }}>Scheduling Configuration</p>
-                      {!editingSettings ? (
-                        <button
-                          onClick={() => setEditingSettings({ ...serviceSettings })}
-                          style={{ ...buttonStyle, background: brand.bg, color: brand.text, border: `1px solid ${brand.border}` }}
+            </div>
+          )}
+
+          {/* SETTINGS TAB */}
+          {activeTab === 'settings' && (
+            <div>
+              <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text, marginBottom: 24 }}>Settings</h1>
+              <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, padding: 24, maxWidth: 600 }}>
+                <p style={{ fontSize: 16, fontWeight: 600, color: brand.text, marginBottom: 20 }}>Scheduling Configuration</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                  {[
+                    { key: 'slot_duration_minutes', label: 'Slot Duration', description: 'Length of each booking time slot', options: SLOT_DURATION_OPTIONS },
+                    { key: 'buffer_between_jobs_minutes', label: 'Buffer Between Jobs', description: 'Break time between consecutive bookings', options: BUFFER_OPTIONS },
+                    { key: 'minimum_notice_hours', label: 'Minimum Notice', description: 'Minimum hours before a booking can be made', options: NOTICE_OPTIONS },
+                    { key: 'advance_booking_days', label: 'How Far in Advance', description: 'How far in advance customers can book', options: ADVANCE_OPTIONS },
+                  ].map(setting => (
+                    <div key={setting.key} style={{ padding: '16px 0', borderBottom: `1px solid ${brand.border}` }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                        <div style={{ flex: 1, minWidth: 200 }}>
+                          <p style={{ fontSize: 14, fontWeight: 500, color: brand.text }}>{setting.label}</p>
+                          <p style={{ fontSize: 12, color: brand.textLight, marginTop: 2 }}>{setting.description}</p>
+                        </div>
+                        <select
+                          value={editingSettings ? (editingSettings[setting.key] || '') : (serviceSettings[setting.key] || '')}
+                          onChange={(e) => {
+                            if (!editingSettings) {
+                              setEditingSettings({ ...serviceSettings, [setting.key]: e.target.value });
+                            } else {
+                              setEditingSettings({ ...editingSettings, [setting.key]: e.target.value });
+                            }
+                          }}
+                          style={{ ...inputStyle, width: 180 }}
                         >
-                          Edit
-                        </button>
-                      ) : (
-                        <div style={{ display: 'flex', gap: 8 }}>
-                          <button onClick={handleSaveServiceSettings} disabled={availSaving} style={{ ...buttonStyle, background: brand.success, color: brand.white, opacity: availSaving ? 0.6 : 1 }}>
-                            {availSaving ? 'Saving...' : 'Save'}
-                          </button>
-                          <button onClick={() => setEditingSettings(null)} style={{ ...buttonStyle, background: brand.bg, color: brand.text, border: `1px solid ${brand.border}` }}>Cancel</button>
-                        </div>
-                      )}
-                    </div>
-                    {[
-                      { key: 'slot_duration_minutes', label: 'Slot Duration', unit: 'minutes', description: 'Length of each booking time slot' },
-                      { key: 'buffer_between_jobs_minutes', label: 'Buffer Between Jobs', unit: 'minutes', description: 'Break time between consecutive bookings' },
-                      { key: 'max_bookings_per_slot', label: 'Max Bookings Per Slot', unit: '', description: 'Maximum number of bookings allowed in a single time slot' },
-                      { key: 'advance_booking_days', label: 'Advance Booking Days', unit: 'days', description: 'How far in advance customers can book' },
-                      { key: 'minimum_notice_hours', label: 'Minimum Notice', unit: 'hours', description: 'Minimum hours before a booking can be made' },
-                    ].map(setting => (
-                      <div key={setting.key} style={{ padding: '16px 0', borderBottom: `1px solid ${brand.border}` }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div>
-                            <p style={{ fontSize: 14, fontWeight: 500, color: brand.text }}>{setting.label}</p>
-                            <p style={{ fontSize: 12, color: brand.textLight, marginTop: 2 }}>{setting.description}</p>
-                          </div>
-                          {editingSettings ? (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                              <input
-                                type="number"
-                                value={editingSettings[setting.key] || ''}
-                                onChange={(e) => setEditingSettings({ ...editingSettings, [setting.key]: e.target.value })}
-                                style={{ ...inputStyle, width: 80, textAlign: 'center' }}
-                                min="0"
-                              />
-                              {setting.unit && <span style={{ fontSize: 13, color: brand.textLight }}>{setting.unit}</span>}
-                            </div>
-                          ) : (
-                            <span style={{ fontSize: 16, fontWeight: 600, color: brand.text }}>
-                              {serviceSettings[setting.key] || '--'}{setting.unit ? ` ${setting.unit}` : ''}
-                            </span>
-                          )}
-                        </div>
+                          {setting.options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                        </select>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
                 </div>
-              )}
+                <div style={{ marginTop: 20, display: 'flex', gap: 8 }}>
+                  <button
+                    onClick={handleSaveServiceSettings}
+                    disabled={availSaving || !editingSettings}
+                    style={{ ...buttonStyle, background: brand.success, color: brand.white, opacity: (availSaving || !editingSettings) ? 0.6 : 1 }}
+                  >
+                    {availSaving ? 'Saving...' : 'Save Settings'}
+                  </button>
+                  {editingSettings && (
+                    <button onClick={() => setEditingSettings(null)} style={{ ...buttonStyle, background: brand.bg, color: brand.text, border: `1px solid ${brand.border}` }}>
+                      Cancel
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           )}
 

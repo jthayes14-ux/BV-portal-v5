@@ -163,6 +163,7 @@ export default function PaymentFlow() {
       guest_email: booking.guest_email,
       guest_phone: booking.guest_phone,
       special_instructions: booking.special_instructions || null,
+      worker_id: booking.assigned_worker_id || null,
     };
 
     if (appliedDiscount) {

@@ -63,10 +63,10 @@ export default function AdminPanel() {
   const [availSaving, setAvailSaving] = useState(false);
 
   // Blocked dates form
-  const [blockedDateForm, setBlockedDateForm] = useState({ worker_id: '', blocked_date: '', all_day: true, start_time: '08:00', end_time: '17:00', reason: '' });
+  const [blockedDateForm, setBlockedDateForm] = useState({ worker_id: '', blocked_date: '', all_day: true, start_time: '09:00', end_time: '16:00', reason: '' });
 
   // Schedule overrides form
-  const [overrideForm, setOverrideForm] = useState({ worker_id: '', override_date: '', start_time: '08:00', end_time: '17:00', is_available: true, reason: '' });
+  const [overrideForm, setOverrideForm] = useState({ worker_id: '', override_date: '', start_time: '09:00', end_time: '16:00', is_available: true, reason: '' });
 
   // Service settings editing
   const [editingSettings, setEditingSettings] = useState(null);
@@ -298,7 +298,7 @@ export default function AdminPanel() {
   const getWorkerAvailability = (workerId) => {
     return DAY_NAMES.map((_, idx) => {
       const existing = availability.find(a => a.worker_id === workerId && a.day_of_week === idx);
-      return existing || { worker_id: workerId, day_of_week: idx, start_time: '08:00', end_time: '17:00', is_active: true, isNew: true };
+      return existing || { worker_id: workerId, day_of_week: idx, start_time: '09:00', end_time: '16:00', is_active: true, isNew: true };
     });
   };
 
@@ -314,7 +314,6 @@ export default function AdminPanel() {
           start_time: day.start_time,
           end_time: day.end_time,
           is_active: day.is_active,
-          updated_at: new Date().toISOString(),
         };
         const existing = availability.find(a => a.worker_id === workerId && a.day_of_week === day.day_of_week);
         if (existing) {
@@ -352,7 +351,7 @@ export default function AdminPanel() {
     const { data, error } = await supabase.from('blocked_dates').insert(payload).select().single();
     if (error) { setCrudError('Failed to add blocked date: ' + error.message); return; }
     setBlockedDates([...blockedDates, data]);
-    setBlockedDateForm({ worker_id: blockedDateForm.worker_id, blocked_date: '', all_day: true, start_time: '08:00', end_time: '17:00', reason: '' });
+    setBlockedDateForm({ worker_id: blockedDateForm.worker_id, blocked_date: '', all_day: true, start_time: '09:00', end_time: '16:00', reason: '' });
   };
 
   const handleDeleteBlockedDate = async (id) => {
@@ -379,7 +378,7 @@ export default function AdminPanel() {
     const { data, error } = await supabase.from('schedule_overrides').insert(payload).select().single();
     if (error) { setCrudError('Failed to add override: ' + error.message); return; }
     setScheduleOverrides([...scheduleOverrides, data]);
-    setOverrideForm({ worker_id: overrideForm.worker_id, override_date: '', start_time: '08:00', end_time: '17:00', is_available: true, reason: '' });
+    setOverrideForm({ worker_id: overrideForm.worker_id, override_date: '', start_time: '09:00', end_time: '16:00', is_available: true, reason: '' });
   };
 
   const handleDeleteOverride = async (id) => {
@@ -1583,7 +1582,7 @@ export default function AdminPanel() {
                                   </td>
                                   <td style={{ padding: '12px 16px' }}>
                                     <select
-                                      value={day.start_time?.slice(0, 5) || '08:00'}
+                                      value={day.start_time?.slice(0, 5) || '09:00'}
                                       onChange={(e) => {
                                         const updated = [...(editingAvailability || getWorkerAvailability(selectedWorkerAvail))];
                                         updated[idx] = { ...updated[idx], start_time: e.target.value };
@@ -1597,7 +1596,7 @@ export default function AdminPanel() {
                                   </td>
                                   <td style={{ padding: '12px 16px' }}>
                                     <select
-                                      value={day.end_time?.slice(0, 5) || '17:00'}
+                                      value={day.end_time?.slice(0, 5) || '16:00'}
                                       onChange={(e) => {
                                         const updated = [...(editingAvailability || getWorkerAvailability(selectedWorkerAvail))];
                                         updated[idx] = { ...updated[idx], end_time: e.target.value };

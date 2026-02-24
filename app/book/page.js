@@ -50,11 +50,6 @@ function BookingFlowInner() {
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [slotsMessage, setSlotsMessage] = useState('');
   const [serviceSettings, setServiceSettings] = useState({});
-  const [allAvailability, setAllAvailability] = useState([]);
-  const [allBlockedDates, setAllBlockedDates] = useState([]);
-  const [allOverrides, setAllOverrides] = useState([]);
-  const [allWorkers, setAllWorkers] = useState([]);
-  const [assignedWorkerId, setAssignedWorkerId] = useState(null);
   const [maxDate, setMaxDate] = useState('');
 
   // Contact info fields
@@ -91,24 +86,21 @@ function BookingFlowInner() {
 
   // Compute available time slots when date changes
   useEffect(() => {
-    if (!date || allWorkers.length === 0) {
+    if (!date) {
       setAvailableSlots([]);
       setSlotsMessage('');
-      setAssignedWorkerId(null);
       return;
     }
     computeAvailableSlots(date);
-  }, [date, allAvailability, allBlockedDates, allOverrides, allWorkers, serviceSettings]);
+  }, [date, serviceSettings]);
 
-  const computeAvailableSlots = async (selectedDate) => {
+  const computeAvailableSlots = (selectedDate) => {
     setSlotsLoading(true);
     setSlotsMessage('');
     setAvailableSlots([]);
     setTime('');
-    setAssignedWorkerId(null);
 
     const slotDuration = Number(serviceSettings.slot_duration_minutes) || 60;
-    const buffer = Number(serviceSettings.buffer_between_jobs_minutes) || 15;
     const minNoticeHours = Number(serviceSettings.minimum_notice_hours) || 24;
     const advanceDays = Number(serviceSettings.advance_booking_days) || 30;
 
@@ -133,127 +125,23 @@ function BookingFlowInner() {
       return;
     }
 
-    // day_of_week: 0=Monday, 6=Sunday in our DB. JS getDay: 0=Sun, 1=Mon, ..., 6=Sat
-    const jsDay = dateObj.getDay();
-    const dbDayOfWeek = jsDay === 0 ? 6 : jsDay - 1;
+    // Generate hourly slots from 9 AM to 4 PM (business hours)
+    const businessStart = 9 * 60;  // 9:00 AM in minutes
+    const businessEnd = 16 * 60;   // 4:00 PM in minutes
+    const slots = [];
 
-    // Fetch existing bookings for this date
-    const { data: existingBookings } = await supabase
-      .from('bookings')
-      .select('booking_time, worker_id')
-      .eq('booking_date', selectedDate)
-      .in('status', ['upcoming', 'scheduled']);
-
-    const bookedSlots = existingBookings || [];
-
-    // For each worker, calculate their available slots on this date
-    const slotMap = {}; // { "8:00 AM": [workerId1, workerId2, ...] }
-
-    for (const worker of allWorkers) {
-      // Check for schedule override on this date
-      const override = allOverrides.find(o => o.worker_id === worker.id && o.override_date === selectedDate);
-      let startTime, endTime, isAvailable;
-
-      if (override) {
-        isAvailable = override.is_available;
-        startTime = override.start_time;
-        endTime = override.end_time;
-      } else {
-        // Check weekly availability
-        const weeklyAvail = allAvailability.find(a => a.worker_id === worker.id && a.day_of_week === dbDayOfWeek);
-        if (!weeklyAvail || !weeklyAvail.is_active) continue;
-        isAvailable = true;
-        startTime = weeklyAvail.start_time;
-        endTime = weeklyAvail.end_time;
+    for (let slotStart = businessStart; slotStart + slotDuration <= businessEnd; slotStart += 60) {
+      // Skip slots that are too soon (minimum notice for today)
+      if (selectedDate === now.toISOString().split('T')[0]) {
+        const slotDateTime = new Date(selectedDate + 'T00:00:00');
+        slotDateTime.setMinutes(slotDateTime.getMinutes() + slotStart);
+        if (slotDateTime < minNoticeTime) continue;
       }
 
-      if (!isAvailable) continue;
-
-      // Check blocked dates
-      const blocked = allBlockedDates.filter(bd => bd.worker_id === worker.id && bd.blocked_date === selectedDate);
-      const isFullDayBlocked = blocked.some(bd => bd.all_day);
-      if (isFullDayBlocked) continue;
-
-      // Parse hours
-      const startHour = parseInt(startTime?.slice(0, 2) || '8', 10);
-      const startMin = parseInt(startTime?.slice(3, 5) || '0', 10);
-      const endHour = parseInt(endTime?.slice(0, 2) || '17', 10);
-      const endMin = parseInt(endTime?.slice(3, 5) || '0', 10);
-      const startMinutes = startHour * 60 + startMin;
-      const endMinutes = endHour * 60 + endMin;
-
-      // Get this worker's bookings for the day
-      const workerBookings = bookedSlots.filter(b => b.worker_id === worker.id);
-
-      // Parse booked time ranges (booking_time can be like "8:00 AM" or "8:00 AM – 11:00 AM")
-      const bookedRanges = workerBookings.map(b => {
-        const timeStr = b.booking_time || '';
-        // Try to parse the start time from the booking_time string
-        const match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)/i);
-        if (!match) return null;
-        let h = parseInt(match[1], 10);
-        const m = parseInt(match[2], 10);
-        const ampm = match[3].toUpperCase();
-        if (ampm === 'PM' && h !== 12) h += 12;
-        if (ampm === 'AM' && h === 12) h = 0;
-        const slotStart = h * 60 + m;
-        return { start: slotStart, end: slotStart + slotDuration + buffer };
-      }).filter(Boolean);
-
-      // Also account for partial blocked dates (time range blocks)
-      const partialBlocks = blocked.filter(bd => !bd.all_day).map(bd => {
-        const bStart = parseInt(bd.start_time?.slice(0, 2) || '0', 10) * 60 + parseInt(bd.start_time?.slice(3, 5) || '0', 10);
-        const bEnd = parseInt(bd.end_time?.slice(0, 2) || '0', 10) * 60 + parseInt(bd.end_time?.slice(3, 5) || '0', 10);
-        return { start: bStart, end: bEnd };
-      });
-
-      // Generate hourly slots
-      for (let slotStart = startMinutes; slotStart + slotDuration <= endMinutes; slotStart += 60) {
-        const slotEnd = slotStart + slotDuration;
-
-        // Check minimum notice for today
-        if (selectedDate === now.toISOString().split('T')[0]) {
-          const slotDateTime = new Date(selectedDate + 'T00:00:00');
-          slotDateTime.setMinutes(slotDateTime.getMinutes() + slotStart);
-          if (slotDateTime < minNoticeTime) continue;
-        }
-
-        // Check if slot conflicts with existing bookings (including buffer)
-        const hasBookingConflict = bookedRanges.some(range =>
-          slotStart < range.end && slotEnd > range.start
-        );
-        if (hasBookingConflict) continue;
-
-        // Check if slot conflicts with partial blocks
-        const hasBlockConflict = partialBlocks.some(range =>
-          slotStart < range.end && slotEnd > range.start
-        );
-        if (hasBlockConflict) continue;
-
-        const hour = Math.floor(slotStart / 60);
-        const min = slotStart % 60;
-        const label = formatHour(hour) + (min > 0 ? '' : '');
-
-        if (!slotMap[label]) slotMap[label] = [];
-        slotMap[label].push(worker.id);
-      }
+      const hour = Math.floor(slotStart / 60);
+      const label = formatHour(hour);
+      slots.push({ label });
     }
-
-    // Convert to sorted slots array
-    const slots = Object.entries(slotMap)
-      .map(([label, workerIds]) => ({ label, workerIds }))
-      .sort((a, b) => {
-        // Sort by time
-        const parseTime = (str) => {
-          const m = str.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)/i);
-          if (!m) return 0;
-          let h = parseInt(m[1], 10);
-          if (m[3].toUpperCase() === 'PM' && h !== 12) h += 12;
-          if (m[3].toUpperCase() === 'AM' && h === 12) h = 0;
-          return h * 60 + parseInt(m[2], 10);
-        };
-        return parseTime(a.label) - parseTime(b.label);
-      });
 
     if (slots.length === 0) {
       setSlotsMessage('No times available for this date');
@@ -264,16 +152,12 @@ function BookingFlowInner() {
   };
 
   const loadData = async () => {
-    const [nRes, aoRes, freqRes, ssRes, svcRes, avRes, bdRes, soRes, wRes] = await Promise.all([
+    const [nRes, aoRes, freqRes, ssRes, svcRes] = await Promise.all([
       supabase.from('neighborhoods').select('*').order('name'),
       supabase.from('add_ons').select('*').eq('archived', false).order('name'),
       supabase.from('frequencies').select('*').order('sort_order'),
       supabase.from('site_settings').select('*').eq('key', 'addons_section_visible').single(),
       supabase.from('service_settings').select('*'),
-      supabase.from('availability').select('*').order('day_of_week'),
-      supabase.from('blocked_dates').select('*').order('blocked_date'),
-      supabase.from('schedule_overrides').select('*').order('override_date'),
-      supabase.from('workers').select('*').order('name'),
     ]);
     const neighborhoodsData = nRes.data || [];
     setNeighborhoods(neighborhoodsData);
@@ -290,10 +174,6 @@ function BookingFlowInner() {
     const settingsObj = {};
     (svcRes.data || []).forEach(s => { settingsObj[s.key] = s.value; });
     setServiceSettings(settingsObj);
-    setAllAvailability(avRes.data || []);
-    setAllBlockedDates(bdRes.data || []);
-    setAllOverrides(soRes.data || []);
-    setAllWorkers(wRes.data || []);
 
     // Calculate max booking date
     const advanceDays = Number(settingsObj.advance_booking_days) || 30;
@@ -493,7 +373,6 @@ function BookingFlowInner() {
       guest_email: email.trim(),
       guest_phone: phone.trim(),
       special_instructions: specialInstructions.trim(),
-      assigned_worker_id: assignedWorkerId || null,
     };
     localStorage.setItem('pendingBooking', JSON.stringify(bookingData));
     router.push('/checkout');
@@ -665,9 +544,6 @@ function BookingFlowInner() {
                 ) : (
                   <select value={time} onChange={(e) => {
                     setTime(e.target.value);
-                    // Auto-assign first available worker for this slot
-                    const slot = availableSlots.find(s => s.label === e.target.value);
-                    setAssignedWorkerId(slot && slot.workerIds.length > 0 ? slot.workerIds[0] : null);
                   }} onFocus={() => setFocusedField('time')} onBlur={() => setFocusedField(null)} style={getSelectStyle('time')}>
                     <option value="">Select available time</option>
                     {availableSlots.map(slot => <option key={slot.label} value={slot.label}>{slot.label}</option>)}

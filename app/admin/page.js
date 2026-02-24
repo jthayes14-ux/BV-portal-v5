@@ -27,6 +27,7 @@ export default function AdminPanel() {
   const [neighborhoods, setNeighborhoods] = useState([]);
   const [buildings, setBuildings] = useState([]);
   const [floorPlans, setFloorPlans] = useState([]);
+  const [unitLines, setUnitLines] = useState([]);
   const [addOns, setAddOns] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [workers, setWorkers] = useState([]);
@@ -44,6 +45,7 @@ export default function AdminPanel() {
   const [editValue, setEditValue] = useState({});
   const [selectedNeighborhood, setSelectedNeighborhood] = useState('');
   const [selectedBuilding, setSelectedBuilding] = useState('');
+  const [selectedBuildingUL, setSelectedBuildingUL] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sortField, setSortField] = useState('booking_date');
   const [sortDirection, setSortDirection] = useState('desc');
@@ -88,6 +90,7 @@ export default function AdminPanel() {
     { id: 'neighborhoods', label: 'Neighborhoods' },
     { id: 'buildings', label: 'Buildings' },
     { id: 'floorplans', label: 'Floor Plans' },
+    { id: 'unitlines', label: 'Unit Lines' },
     { id: 'addons', label: 'Add-Ons' },
     { id: 'workers', label: 'Workers' },
     { id: 'availability', label: 'Availability' },
@@ -137,10 +140,11 @@ export default function AdminPanel() {
   }, [authLoading, user]);
 
   const loadAll = async () => {
-    const [nRes, bRes, fpRes, aoRes, bkRes, wRes, fqRes, upRes, avRes, bdRes, soRes, svcRes] = await Promise.all([
+    const [nRes, bRes, fpRes, ulRes, aoRes, bkRes, wRes, fqRes, upRes, avRes, bdRes, soRes, svcRes] = await Promise.all([
       supabase.from('neighborhoods').select('*').order('name'),
       supabase.from('buildings').select('*').order('name'),
       supabase.from('floor_plans').select('*').order('name'),
+      supabase.from('unit_lines').select('*').order('line_number'),
       supabase.from('add_ons').select('*').order('name'),
       supabase.from('bookings').select('*').order('booking_date', { ascending: false }).limit(10000),
       supabase.from('workers').select('*').order('name'),
@@ -154,6 +158,7 @@ export default function AdminPanel() {
     setNeighborhoods(nRes.data || []);
     setBuildings(bRes.data || []);
     setFloorPlans(fpRes.data || []);
+    setUnitLines(ulRes.data || []);
     setAddOns(aoRes.data || []);
     setBookings(bkRes.data || []);
     setWorkers(wRes.data || []);
@@ -198,6 +203,14 @@ export default function AdminPanel() {
         if (result.error) { setCrudError('Failed to add: ' + result.error.message); return; }
         if (result.data) { setFloorPlans([...floorPlans, result.data]); setEditingId(`floorplan-${result.data.id}`); setEditValue({ name: 'New Floor Plan', price: 0, duration_minutes: 60, building_id: buildings[0]?.id }); }
         break;
+      case 'unitlines': {
+        const defaultBuilding = selectedBuildingUL || buildings[0]?.id;
+        const buildingPlans = floorPlans.filter(fp => fp.building_id === defaultBuilding);
+        result = await supabase.from('unit_lines').insert({ building_id: defaultBuilding, line_number: '01', floor_min: 1, floor_max: 99, floor_plan_id: buildingPlans[0]?.id || null, custom_price: null }).select().single();
+        if (result.error) { setCrudError('Failed to add: ' + result.error.message); return; }
+        if (result.data) { setUnitLines([...unitLines, result.data]); setEditingId(`unitline-${result.data.id}`); setEditValue({ building_id: result.data.building_id, line_number: result.data.line_number, floor_min: result.data.floor_min, floor_max: result.data.floor_max, floor_plan_id: result.data.floor_plan_id || '', custom_price: result.data.custom_price || '' }); }
+        break;
+      }
       case 'addons':
         result = await supabase.from('add_ons').insert({ name: 'New Add-On', price: 0 }).select().single();
         if (result.error) { setCrudError('Failed to add: ' + result.error.message); return; }
@@ -231,6 +244,11 @@ export default function AdminPanel() {
       case 'floorplans':
         result = await supabase.from('floor_plans').update(editValue).eq('id', id);
         break;
+      case 'unitlines': {
+        const payload = { ...editValue, custom_price: editValue.custom_price === '' || editValue.custom_price === null ? null : Number(editValue.custom_price), floor_plan_id: editValue.floor_plan_id || null };
+        result = await supabase.from('unit_lines').update(payload).eq('id', id);
+        break;
+      }
       case 'addons':
         result = await supabase.from('add_ons').update(editValue).eq('id', id);
         break;
@@ -250,6 +268,11 @@ export default function AdminPanel() {
       case 'neighborhoods': setNeighborhoods(neighborhoods.map(n => n.id === id ? { ...n, ...editValue } : n)); break;
       case 'buildings': setBuildings(buildings.map(b => b.id === id ? { ...b, ...editValue } : b)); break;
       case 'floorplans': setFloorPlans(floorPlans.map(f => f.id === id ? { ...f, ...editValue } : f)); break;
+      case 'unitlines': {
+        const saved = { ...editValue, custom_price: editValue.custom_price === '' || editValue.custom_price === null ? null : Number(editValue.custom_price), floor_plan_id: editValue.floor_plan_id || null };
+        setUnitLines(unitLines.map(ul => ul.id === id ? { ...ul, ...saved } : ul));
+        break;
+      }
       case 'addons': setAddOns(addOns.map(a => a.id === id ? { ...a, ...editValue } : a)); break;
       case 'workers': setWorkers(workers.map(w => w.id === id ? { ...w, ...editValue } : w)); break;
       case 'frequencies': setFrequencies(frequencies.map(f => f.id === id ? { ...f, ...editValue } : f)); break;
@@ -261,7 +284,7 @@ export default function AdminPanel() {
   const handleDelete = async (type, id) => {
     if (!confirm('Are you sure you want to delete this?')) return;
     setCrudError('');
-    const tableMap = { neighborhoods: 'neighborhoods', buildings: 'buildings', floorplans: 'floor_plans', addons: 'add_ons', workers: 'workers', frequencies: 'frequencies' };
+    const tableMap = { neighborhoods: 'neighborhoods', buildings: 'buildings', floorplans: 'floor_plans', unitlines: 'unit_lines', addons: 'add_ons', workers: 'workers', frequencies: 'frequencies' };
     const { error: deleteError } = await supabase.from(tableMap[type]).delete().eq('id', id);
     if (deleteError) {
       setCrudError('Failed to delete: ' + deleteError.message);
@@ -271,6 +294,7 @@ export default function AdminPanel() {
       case 'neighborhoods': setNeighborhoods(neighborhoods.filter(n => n.id !== id)); break;
       case 'buildings': setBuildings(buildings.filter(b => b.id !== id)); break;
       case 'floorplans': setFloorPlans(floorPlans.filter(f => f.id !== id)); break;
+      case 'unitlines': setUnitLines(unitLines.filter(ul => ul.id !== id)); break;
       case 'addons': setAddOns(addOns.filter(a => a.id !== id)); break;
       case 'workers': setWorkers(workers.filter(w => w.id !== id)); break;
       case 'frequencies': setFrequencies(frequencies.filter(f => f.id !== id)); break;
@@ -558,6 +582,7 @@ export default function AdminPanel() {
 
   const filteredBuildings = selectedNeighborhood ? buildings.filter(b => b.neighborhood_id === selectedNeighborhood) : buildings;
   const filteredFloorPlans = selectedBuilding ? floorPlans.filter(f => f.building_id === selectedBuilding) : floorPlans;
+  const filteredUnitLines = selectedBuildingUL ? unitLines.filter(ul => ul.building_id === selectedBuildingUL) : unitLines;
 
   const handleLogout = async () => { await signOut(); router.push('/login'); };
 
@@ -1306,6 +1331,107 @@ export default function AdminPanel() {
                           </td>
                         </tr>
                       ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* UNIT LINES TAB */}
+          {activeTab === 'unitlines' && (
+            <div>
+              <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
+                <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>Unit Lines</h1>
+                <div className="admin-filter-controls" style={{ display: 'flex', gap: 12 }}>
+                  <select value={selectedBuildingUL} onChange={(e) => setSelectedBuildingUL(e.target.value)} style={{ ...inputStyle, width: 200 }}>
+                    <option value="">All Buildings</option>
+                    {buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                  </select>
+                  <button onClick={() => handleAdd('unitlines')} style={{ ...buttonStyle, background: brand.text, color: brand.white }}>+ Add Unit Line</button>
+                </div>
+              </div>
+              <div className="table-wrapper">
+                <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ background: brand.bg }}>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Building</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Line Number</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Floor Range</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Floor Plan</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Price</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredUnitLines.map(ul => {
+                        const fp = floorPlans.find(f => f.id === ul.floor_plan_id);
+                        const displayPrice = ul.custom_price != null ? `$${ul.custom_price}` : (fp ? `$${fp.price}` : '—');
+                        const isEditing = editingId === `unitline-${ul.id}`;
+                        return (
+                          <tr key={ul.id} style={{ borderTop: `1px solid ${brand.border}` }}>
+                            <td style={{ padding: '16px' }}>
+                              {isEditing ? (
+                                <select style={inputStyle} value={editValue.building_id || ''} onChange={(e) => setEditValue({ ...editValue, building_id: e.target.value })}>
+                                  {buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                                </select>
+                              ) : (
+                                <span style={{ fontWeight: 500, color: brand.text }}>{buildings.find(b => b.id === ul.building_id)?.name}</span>
+                              )}
+                            </td>
+                            <td style={{ padding: '16px' }}>
+                              {isEditing ? (
+                                <input style={{ ...inputStyle, width: 80 }} value={editValue.line_number || ''} onChange={(e) => setEditValue({ ...editValue, line_number: e.target.value })} />
+                              ) : (
+                                <span style={{ fontWeight: 500, color: brand.text }}>{ul.line_number}</span>
+                              )}
+                            </td>
+                            <td style={{ padding: '16px' }}>
+                              {isEditing ? (
+                                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                                  <input style={{ ...inputStyle, width: 70 }} type="number" min="1" value={editValue.floor_min || 1} onChange={(e) => setEditValue({ ...editValue, floor_min: Number(e.target.value) })} />
+                                  <span style={{ color: brand.textLight }}>-</span>
+                                  <input style={{ ...inputStyle, width: 70 }} type="number" min="1" value={editValue.floor_max || 99} onChange={(e) => setEditValue({ ...editValue, floor_max: Number(e.target.value) })} />
+                                </div>
+                              ) : (
+                                <span style={{ color: brand.textLight }}>{ul.floor_min} - {ul.floor_max}</span>
+                              )}
+                            </td>
+                            <td style={{ padding: '16px' }}>
+                              {isEditing ? (
+                                <select style={inputStyle} value={editValue.floor_plan_id || ''} onChange={(e) => setEditValue({ ...editValue, floor_plan_id: e.target.value })}>
+                                  <option value="">— None —</option>
+                                  {floorPlans.filter(f => f.building_id === (editValue.building_id || ul.building_id)).map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+                                </select>
+                              ) : (
+                                <span style={{ color: brand.textLight }}>{fp?.name || '—'}</span>
+                              )}
+                            </td>
+                            <td style={{ padding: '16px' }}>
+                              {isEditing ? (
+                                <input style={{ ...inputStyle, width: 100 }} type="number" placeholder={fp ? `${fp.price}` : ''} value={editValue.custom_price ?? ''} onChange={(e) => setEditValue({ ...editValue, custom_price: e.target.value })} />
+                              ) : (
+                                <span style={{ fontWeight: 600, color: brand.text }}>
+                                  {displayPrice}
+                                  {ul.custom_price != null && <span style={{ fontSize: 11, color: brand.textLight, marginLeft: 4 }}>(custom)</span>}
+                                </span>
+                              )}
+                            </td>
+                            <td style={{ padding: '16px', textAlign: 'right' }}>
+                              {isEditing ? (
+                                <button onClick={() => handleSave('unitlines', ul.id)} style={{ ...buttonStyle, background: brand.success, color: brand.white, marginRight: 8 }}>Save</button>
+                              ) : (
+                                <button onClick={() => { setEditingId(`unitline-${ul.id}`); setEditValue({ building_id: ul.building_id, line_number: ul.line_number, floor_min: ul.floor_min, floor_max: ul.floor_max, floor_plan_id: ul.floor_plan_id || '', custom_price: ul.custom_price ?? '' }); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, marginRight: 8 }}>Edit</button>
+                              )}
+                              <button onClick={() => handleDelete('unitlines', ul.id)} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger }}>Delete</button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {filteredUnitLines.length === 0 && (
+                        <tr><td colSpan={6} style={{ padding: 24, textAlign: 'center', color: brand.textLight }}>No unit lines found. Click &quot;+ Add Unit Line&quot; to create one.</td></tr>
+                      )}
                     </tbody>
                   </table>
                 </div>

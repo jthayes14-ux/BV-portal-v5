@@ -137,7 +137,7 @@ export default function AdminPanel() {
   }, [authLoading, user]);
 
   const loadAll = async () => {
-    const [nRes, bRes, fpRes, aoRes, bkRes, wRes, fqRes, upRes, ssRes, avRes, bdRes, soRes, svcRes] = await Promise.all([
+    const [nRes, bRes, fpRes, aoRes, bkRes, wRes, fqRes, upRes, avRes, bdRes, soRes, svcRes] = await Promise.all([
       supabase.from('neighborhoods').select('*').order('name'),
       supabase.from('buildings').select('*').order('name'),
       supabase.from('floor_plans').select('*').order('name'),
@@ -146,11 +146,10 @@ export default function AdminPanel() {
       supabase.from('workers').select('*').order('name'),
       supabase.from('frequencies').select('*').order('sort_order'),
       supabase.from('user_profiles').select('*').order('created_at', { ascending: false }),
-      supabase.from('site_settings').select('*').eq('key', 'addons_section_visible').single(),
       supabase.from('availability').select('*').order('day_of_week'),
       supabase.from('blocked_dates').select('*').order('blocked_date'),
       supabase.from('schedule_overrides').select('*').order('override_date'),
-      supabase.from('service_settings').select('*'),
+      supabase.from('site_settings').select('*'),
     ]);
     setNeighborhoods(nRes.data || []);
     setBuildings(bRes.data || []);
@@ -160,13 +159,15 @@ export default function AdminPanel() {
     setWorkers(wRes.data || []);
     setFrequencies(fqRes.data || []);
     setUserProfiles(upRes.data || []);
-    if (ssRes.data) setAddonsSectionVisible(ssRes.data.value === 'true');
     setAvailability(avRes.data || []);
     setBlockedDates(bdRes.data || []);
     setScheduleOverrides(soRes.data || []);
-    // Convert service_settings array to object
+    // Convert site_settings array to object for scheduling config
+    const allSettings = svcRes.data || [];
+    const addonVisible = allSettings.find(s => s.key === 'addons_section_visible');
+    if (addonVisible) setAddonsSectionVisible(addonVisible.value === 'true');
     const settingsObj = {};
-    (svcRes.data || []).forEach(s => { settingsObj[s.key] = s.value; });
+    allSettings.forEach(s => { settingsObj[s.key] = s.value; });
     setServiceSettings(settingsObj);
     setDataLoading(false);
   };
@@ -193,9 +194,9 @@ export default function AdminPanel() {
         if (result.data) { setBuildings([...buildings, result.data]); setEditingId(`building-${result.data.id}`); setEditValue({ name: 'New Building', address: '', neighborhood_id: neighborhoods[0]?.id }); }
         break;
       case 'floorplans':
-        result = await supabase.from('floor_plans').insert({ name: 'New Floor Plan', price: 0, building_id: buildings[0]?.id }).select().single();
+        result = await supabase.from('floor_plans').insert({ name: 'New Floor Plan', price: 0, duration_minutes: 60, building_id: buildings[0]?.id }).select().single();
         if (result.error) { setCrudError('Failed to add: ' + result.error.message); return; }
-        if (result.data) { setFloorPlans([...floorPlans, result.data]); setEditingId(`floorplan-${result.data.id}`); setEditValue({ name: 'New Floor Plan', price: 0, building_id: buildings[0]?.id }); }
+        if (result.data) { setFloorPlans([...floorPlans, result.data]); setEditingId(`floorplan-${result.data.id}`); setEditValue({ name: 'New Floor Plan', price: 0, duration_minutes: 60, building_id: buildings[0]?.id }); }
         break;
       case 'addons':
         result = await supabase.from('add_ons').insert({ name: 'New Add-On', price: 0 }).select().single();
@@ -286,7 +287,7 @@ export default function AdminPanel() {
 
   const handleToggleAddonsSection = async () => {
     const newValue = !addonsSectionVisible;
-    const { error } = await supabase.from('site_settings').upsert({ key: 'addons_section_visible', value: String(newValue), updated_at: new Date().toISOString() });
+    const { error } = await supabase.from('site_settings').upsert({ key: 'addons_section_visible', value: String(newValue) }, { onConflict: 'key' });
     if (error) { setCrudError('Failed to update setting: ' + error.message); return; }
     setAddonsSectionVisible(newValue);
   };
@@ -393,7 +394,7 @@ export default function AdminPanel() {
     setAvailSaving(true);
     try {
       for (const [key, value] of Object.entries(editingSettings)) {
-        const { error } = await supabase.from('service_settings').upsert({ key, value: String(value), updated_at: new Date().toISOString() }, { onConflict: 'key' });
+        const { error } = await supabase.from('site_settings').upsert({ key, value: String(value) }, { onConflict: 'key' });
         if (error) throw error;
       }
       setServiceSettings({ ...serviceSettings, ...editingSettings });
@@ -1258,6 +1259,7 @@ export default function AdminPanel() {
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Name</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Building</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Price</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Duration</th>
                         <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Actions</th>
                       </tr>
                     </thead>
@@ -1287,11 +1289,18 @@ export default function AdminPanel() {
                               <span style={{ fontWeight: 600, color: brand.text }}>${f.price}</span>
                             )}
                           </td>
+                          <td style={{ padding: '16px' }}>
+                            {editingId === `floorplan-${f.id}` ? (
+                              <input style={{ ...inputStyle, width: 80 }} type="number" min="15" step="15" value={editValue.duration_minutes || 60} onChange={(e) => setEditValue({ ...editValue, duration_minutes: Number(e.target.value) })} />
+                            ) : (
+                              <span style={{ color: brand.textLight }}>{f.duration_minutes || 60} min</span>
+                            )}
+                          </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
                             {editingId === `floorplan-${f.id}` ? (
                               <button onClick={() => handleSave('floorplans', f.id)} style={{ ...buttonStyle, background: brand.success, color: brand.white, marginRight: 8 }}>Save</button>
                             ) : (
-                              <button onClick={() => { setEditingId(`floorplan-${f.id}`); setEditValue({ name: f.name, price: f.price, building_id: f.building_id }); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, marginRight: 8 }}>Edit</button>
+                              <button onClick={() => { setEditingId(`floorplan-${f.id}`); setEditValue({ name: f.name, price: f.price, duration_minutes: f.duration_minutes || 60, building_id: f.building_id }); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, marginRight: 8 }}>Edit</button>
                             )}
                             <button onClick={() => handleDelete('floorplans', f.id)} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger }}>Delete</button>
                           </td>

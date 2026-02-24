@@ -52,6 +52,29 @@ export default function AdminPanel() {
   const [showArchivedAddOns, setShowArchivedAddOns] = useState(false);
   const [addonsSectionVisible, setAddonsSectionVisible] = useState(true);
 
+  // Availability management state
+  const [availabilitySubTab, setAvailabilitySubTab] = useState('weekly');
+  const [availability, setAvailability] = useState([]);
+  const [blockedDates, setBlockedDates] = useState([]);
+  const [scheduleOverrides, setScheduleOverrides] = useState([]);
+  const [serviceSettings, setServiceSettings] = useState({});
+  const [selectedWorkerAvail, setSelectedWorkerAvail] = useState('');
+  const [editingAvailability, setEditingAvailability] = useState(null);
+  const [availSaving, setAvailSaving] = useState(false);
+
+  // Blocked dates form
+  const [blockedDateForm, setBlockedDateForm] = useState({ worker_id: '', blocked_date: '', all_day: true, start_time: '08:00', end_time: '17:00', reason: '' });
+
+  // Schedule overrides form
+  const [overrideForm, setOverrideForm] = useState({ worker_id: '', override_date: '', start_time: '08:00', end_time: '17:00', is_available: true, reason: '' });
+
+  // Service settings editing
+  const [editingSettings, setEditingSettings] = useState(null);
+
+  // Calendar state for blocked dates
+  const [calendarMonth, setCalendarMonth] = useState(new Date().getMonth());
+  const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
+
   const brand = {
     primary: '#B8C5F2', text: '#1a1a1a', textLight: '#666',
     border: '#e0e0e0', bg: '#fafafa', white: '#ffffff',
@@ -67,6 +90,7 @@ export default function AdminPanel() {
     { id: 'floorplans', label: 'Floor Plans' },
     { id: 'addons', label: 'Add-Ons' },
     { id: 'workers', label: 'Workers' },
+    { id: 'availability', label: 'Availability' },
   ];
 
   const buttonStyle = { padding: '8px 16px', fontSize: 14, fontWeight: 500, border: 'none', borderRadius: 6, cursor: 'pointer' };
@@ -79,7 +103,7 @@ export default function AdminPanel() {
   }, [authLoading, user]);
 
   const loadAll = async () => {
-    const [nRes, bRes, fpRes, aoRes, bkRes, wRes, fqRes, upRes, ssRes] = await Promise.all([
+    const [nRes, bRes, fpRes, aoRes, bkRes, wRes, fqRes, upRes, ssRes, avRes, bdRes, soRes, svcRes] = await Promise.all([
       supabase.from('neighborhoods').select('*').order('name'),
       supabase.from('buildings').select('*').order('name'),
       supabase.from('floor_plans').select('*').order('name'),
@@ -89,6 +113,10 @@ export default function AdminPanel() {
       supabase.from('frequencies').select('*').order('sort_order'),
       supabase.from('user_profiles').select('*').order('created_at', { ascending: false }),
       supabase.from('site_settings').select('*').eq('key', 'addons_section_visible').single(),
+      supabase.from('availability').select('*').order('day_of_week'),
+      supabase.from('blocked_dates').select('*').order('blocked_date'),
+      supabase.from('schedule_overrides').select('*').order('override_date'),
+      supabase.from('service_settings').select('*'),
     ]);
     setNeighborhoods(nRes.data || []);
     setBuildings(bRes.data || []);
@@ -99,6 +127,13 @@ export default function AdminPanel() {
     setFrequencies(fqRes.data || []);
     setUserProfiles(upRes.data || []);
     if (ssRes.data) setAddonsSectionVisible(ssRes.data.value === 'true');
+    setAvailability(avRes.data || []);
+    setBlockedDates(bdRes.data || []);
+    setScheduleOverrides(soRes.data || []);
+    // Convert service_settings array to object
+    const settingsObj = {};
+    (svcRes.data || []).forEach(s => { settingsObj[s.key] = s.value; });
+    setServiceSettings(settingsObj);
     setDataLoading(false);
   };
 
@@ -221,6 +256,147 @@ export default function AdminPanel() {
     if (error) { setCrudError('Failed to update setting: ' + error.message); return; }
     setAddonsSectionVisible(newValue);
   };
+
+  // === Availability Management Handlers ===
+
+  const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+  const getWorkerAvailability = (workerId) => {
+    return DAY_NAMES.map((_, idx) => {
+      const existing = availability.find(a => a.worker_id === workerId && a.day_of_week === idx);
+      return existing || { worker_id: workerId, day_of_week: idx, start_time: '08:00', end_time: '17:00', is_active: true, isNew: true };
+    });
+  };
+
+  const handleSaveWeeklySchedule = async (workerId) => {
+    if (!editingAvailability || !workerId) return;
+    setAvailSaving(true);
+    setCrudError('');
+    try {
+      for (const day of editingAvailability) {
+        const payload = {
+          worker_id: workerId,
+          day_of_week: day.day_of_week,
+          start_time: day.start_time,
+          end_time: day.end_time,
+          is_active: day.is_active,
+          updated_at: new Date().toISOString(),
+        };
+        const existing = availability.find(a => a.worker_id === workerId && a.day_of_week === day.day_of_week);
+        if (existing) {
+          const { error } = await supabase.from('availability').update(payload).eq('id', existing.id);
+          if (error) throw error;
+        } else {
+          const { error } = await supabase.from('availability').insert(payload);
+          if (error) throw error;
+        }
+      }
+      // Reload availability
+      const { data } = await supabase.from('availability').select('*').order('day_of_week');
+      setAvailability(data || []);
+      setEditingAvailability(null);
+    } catch (err) {
+      setCrudError('Failed to save schedule: ' + err.message);
+    }
+    setAvailSaving(false);
+  };
+
+  const handleAddBlockedDate = async () => {
+    setCrudError('');
+    if (!blockedDateForm.worker_id || !blockedDateForm.blocked_date) {
+      setCrudError('Please select a worker and date.');
+      return;
+    }
+    const payload = {
+      worker_id: blockedDateForm.worker_id,
+      blocked_date: blockedDateForm.blocked_date,
+      all_day: blockedDateForm.all_day,
+      start_time: blockedDateForm.all_day ? null : blockedDateForm.start_time,
+      end_time: blockedDateForm.all_day ? null : blockedDateForm.end_time,
+      reason: blockedDateForm.reason,
+    };
+    const { data, error } = await supabase.from('blocked_dates').insert(payload).select().single();
+    if (error) { setCrudError('Failed to add blocked date: ' + error.message); return; }
+    setBlockedDates([...blockedDates, data]);
+    setBlockedDateForm({ worker_id: blockedDateForm.worker_id, blocked_date: '', all_day: true, start_time: '08:00', end_time: '17:00', reason: '' });
+  };
+
+  const handleDeleteBlockedDate = async (id) => {
+    if (!confirm('Remove this blocked date?')) return;
+    const { error } = await supabase.from('blocked_dates').delete().eq('id', id);
+    if (error) { setCrudError('Failed to delete: ' + error.message); return; }
+    setBlockedDates(blockedDates.filter(bd => bd.id !== id));
+  };
+
+  const handleAddOverride = async () => {
+    setCrudError('');
+    if (!overrideForm.worker_id || !overrideForm.override_date) {
+      setCrudError('Please select a worker and date.');
+      return;
+    }
+    const payload = {
+      worker_id: overrideForm.worker_id,
+      override_date: overrideForm.override_date,
+      start_time: overrideForm.start_time,
+      end_time: overrideForm.end_time,
+      is_available: overrideForm.is_available,
+      reason: overrideForm.reason,
+    };
+    const { data, error } = await supabase.from('schedule_overrides').insert(payload).select().single();
+    if (error) { setCrudError('Failed to add override: ' + error.message); return; }
+    setScheduleOverrides([...scheduleOverrides, data]);
+    setOverrideForm({ worker_id: overrideForm.worker_id, override_date: '', start_time: '08:00', end_time: '17:00', is_available: true, reason: '' });
+  };
+
+  const handleDeleteOverride = async (id) => {
+    if (!confirm('Remove this schedule override?')) return;
+    const { error } = await supabase.from('schedule_overrides').delete().eq('id', id);
+    if (error) { setCrudError('Failed to delete: ' + error.message); return; }
+    setScheduleOverrides(scheduleOverrides.filter(so => so.id !== id));
+  };
+
+  const handleSaveServiceSettings = async () => {
+    setCrudError('');
+    setAvailSaving(true);
+    try {
+      for (const [key, value] of Object.entries(editingSettings)) {
+        const { error } = await supabase.from('service_settings').upsert({ key, value: String(value), updated_at: new Date().toISOString() }, { onConflict: 'key' });
+        if (error) throw error;
+      }
+      setServiceSettings({ ...serviceSettings, ...editingSettings });
+      setEditingSettings(null);
+    } catch (err) {
+      setCrudError('Failed to save settings: ' + err.message);
+    }
+    setAvailSaving(false);
+  };
+
+  const getCalendarDays = (year, month) => {
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const days = [];
+    // Pad start to Monday (getDay: 0=Sun, 1=Mon, ..., 6=Sat)
+    let startPad = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+    for (let i = startPad; i > 0; i--) {
+      const d = new Date(year, month, 1 - i);
+      days.push({ date: d, isCurrentMonth: false });
+    }
+    for (let i = 1; i <= lastDay.getDate(); i++) {
+      days.push({ date: new Date(year, month, i), isCurrentMonth: true });
+    }
+    // Pad end
+    while (days.length % 7 !== 0) {
+      const d = new Date(year, month + 1, days.length - startPad - lastDay.getDate() + 1);
+      days.push({ date: d, isCurrentMonth: false });
+    }
+    return days;
+  };
+
+  const formatDateISO = (d) => {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+
+  const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
   const handleWorkerAssign = async (bookingId, workerId) => {
     await supabase.from('bookings').update({ worker_id: workerId || null }).eq('id', bookingId);
@@ -1241,6 +1417,518 @@ export default function AdminPanel() {
                   </table>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* AVAILABILITY TAB */}
+          {activeTab === 'availability' && (
+            <div>
+              <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text, marginBottom: 20 }}>Availability Management</h1>
+
+              {/* Sub-tab navigation */}
+              <div style={{ display: 'flex', gap: 0, marginBottom: 24, borderBottom: `2px solid ${brand.border}` }}>
+                {[
+                  { id: 'weekly', label: 'Weekly Schedules' },
+                  { id: 'blocked', label: 'Blocked Dates' },
+                  { id: 'overrides', label: 'Schedule Overrides' },
+                  { id: 'settings', label: 'Service Settings' },
+                ].map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setAvailabilitySubTab(tab.id)}
+                    style={{
+                      padding: '10px 20px', fontSize: 14, fontWeight: availabilitySubTab === tab.id ? 600 : 400,
+                      color: availabilitySubTab === tab.id ? brand.text : brand.textLight,
+                      background: 'transparent', border: 'none', cursor: 'pointer',
+                      borderBottom: availabilitySubTab === tab.id ? `2px solid ${brand.text}` : '2px solid transparent',
+                      marginBottom: -2,
+                    }}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* SUB-TAB 1: Weekly Schedules */}
+              {availabilitySubTab === 'weekly' && (
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+                    <select
+                      value={selectedWorkerAvail}
+                      onChange={(e) => { setSelectedWorkerAvail(e.target.value); setEditingAvailability(null); }}
+                      style={{ ...inputStyle, width: 240 }}
+                    >
+                      <option value="">Select a worker...</option>
+                      {workers.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                    </select>
+                    {selectedWorkerAvail && !editingAvailability && (
+                      <button
+                        onClick={() => setEditingAvailability(getWorkerAvailability(selectedWorkerAvail))}
+                        style={{ ...buttonStyle, background: brand.text, color: brand.white }}
+                      >
+                        Edit Schedule
+                      </button>
+                    )}
+                  </div>
+
+                  {!selectedWorkerAvail && (
+                    <div>
+                      <p style={{ fontSize: 14, color: brand.textLight, marginBottom: 20 }}>Select a worker to view/edit their schedule, or view all workers below.</p>
+                      {/* All Workers Overview */}
+                      <div className="table-wrapper">
+                        <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <thead>
+                              <tr style={{ background: brand.bg }}>
+                                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Worker</th>
+                                {DAY_NAMES.map(d => (
+                                  <th key={d} style={{ padding: '12px 8px', textAlign: 'center', fontSize: 13, fontWeight: 600, color: brand.textLight }}>{d.slice(0, 3)}</th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {workers.map(w => {
+                                const workerAvail = getWorkerAvailability(w.id);
+                                return (
+                                  <tr key={w.id} style={{ borderTop: `1px solid ${brand.border}` }}>
+                                    <td style={{ padding: '12px 16px', fontWeight: 500, color: brand.text }}>{w.name}</td>
+                                    {workerAvail.map((day, idx) => (
+                                      <td key={idx} style={{ padding: '8px', textAlign: 'center' }}>
+                                        {day.is_active && !day.isNew ? (
+                                          <div>
+                                            <span style={{ fontSize: 11, color: brand.text, display: 'block' }}>{day.start_time?.slice(0, 5)}</span>
+                                            <span style={{ fontSize: 10, color: brand.textLight }}>to</span>
+                                            <span style={{ fontSize: 11, color: brand.text, display: 'block' }}>{day.end_time?.slice(0, 5)}</span>
+                                          </div>
+                                        ) : day.isNew ? (
+                                          <span style={{ fontSize: 11, color: brand.textLight }}>--</span>
+                                        ) : (
+                                          <span style={{ fontSize: 11, color: brand.danger, fontWeight: 500 }}>Off</span>
+                                        )}
+                                      </td>
+                                    ))}
+                                  </tr>
+                                );
+                              })}
+                              {workers.length === 0 && (
+                                <tr><td colSpan={8} style={{ padding: 32, textAlign: 'center', color: brand.textLight }}>No workers found. Add workers first.</td></tr>
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedWorkerAvail && !editingAvailability && (
+                    <div className="table-wrapper">
+                      <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                          <thead>
+                            <tr style={{ background: brand.bg }}>
+                              <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Day</th>
+                              <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Status</th>
+                              <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Start Time</th>
+                              <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>End Time</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {getWorkerAvailability(selectedWorkerAvail).map((day, idx) => (
+                              <tr key={idx} style={{ borderTop: `1px solid ${brand.border}` }}>
+                                <td style={{ padding: '16px', fontWeight: 500, color: brand.text }}>{DAY_NAMES[idx]}</td>
+                                <td style={{ padding: '16px' }}>
+                                  {day.isNew ? (
+                                    <span style={{ padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 500, background: '#f3f4f6', color: brand.textLight }}>Not set</span>
+                                  ) : day.is_active ? (
+                                    <span style={{ padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 500, background: '#dcfce7', color: '#16a34a' }}>Active</span>
+                                  ) : (
+                                    <span style={{ padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 500, background: '#fee2e2', color: brand.danger }}>Off</span>
+                                  )}
+                                </td>
+                                <td style={{ padding: '16px', color: day.is_active && !day.isNew ? brand.text : brand.textLight }}>{day.isNew ? '--' : day.start_time?.slice(0, 5)}</td>
+                                <td style={{ padding: '16px', color: day.is_active && !day.isNew ? brand.text : brand.textLight }}>{day.isNew ? '--' : day.end_time?.slice(0, 5)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {editingAvailability && (
+                    <div>
+                      <div className="table-wrapper">
+                        <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <thead>
+                              <tr style={{ background: brand.bg }}>
+                                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Day</th>
+                                <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Active</th>
+                                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Start Time</th>
+                                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>End Time</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {editingAvailability.map((day, idx) => (
+                                <tr key={idx} style={{ borderTop: `1px solid ${brand.border}`, opacity: day.is_active ? 1 : 0.5 }}>
+                                  <td style={{ padding: '16px', fontWeight: 500, color: brand.text }}>{DAY_NAMES[idx]}</td>
+                                  <td style={{ padding: '16px', textAlign: 'center' }}>
+                                    <input
+                                      type="checkbox"
+                                      checked={day.is_active}
+                                      onChange={(e) => {
+                                        const updated = [...editingAvailability];
+                                        updated[idx] = { ...updated[idx], is_active: e.target.checked };
+                                        setEditingAvailability(updated);
+                                      }}
+                                      style={{ width: 18, height: 18, cursor: 'pointer' }}
+                                    />
+                                  </td>
+                                  <td style={{ padding: '12px 16px' }}>
+                                    <input
+                                      type="time"
+                                      value={day.start_time?.slice(0, 5) || '08:00'}
+                                      onChange={(e) => {
+                                        const updated = [...editingAvailability];
+                                        updated[idx] = { ...updated[idx], start_time: e.target.value };
+                                        setEditingAvailability(updated);
+                                      }}
+                                      disabled={!day.is_active}
+                                      style={{ ...inputStyle, width: 140 }}
+                                    />
+                                  </td>
+                                  <td style={{ padding: '12px 16px' }}>
+                                    <input
+                                      type="time"
+                                      value={day.end_time?.slice(0, 5) || '17:00'}
+                                      onChange={(e) => {
+                                        const updated = [...editingAvailability];
+                                        updated[idx] = { ...updated[idx], end_time: e.target.value };
+                                        setEditingAvailability(updated);
+                                      }}
+                                      disabled={!day.is_active}
+                                      style={{ ...inputStyle, width: 140 }}
+                                    />
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+                        <button
+                          onClick={() => handleSaveWeeklySchedule(selectedWorkerAvail)}
+                          disabled={availSaving}
+                          style={{ ...buttonStyle, background: brand.success, color: brand.white, opacity: availSaving ? 0.6 : 1 }}
+                        >
+                          {availSaving ? 'Saving...' : 'Save Schedule'}
+                        </button>
+                        <button
+                          onClick={() => setEditingAvailability(null)}
+                          style={{ ...buttonStyle, background: brand.bg, color: brand.text, border: `1px solid ${brand.border}` }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* SUB-TAB 2: Blocked Dates */}
+              {availabilitySubTab === 'blocked' && (
+                <div>
+                  <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+                    {/* Left: Calendar + Form */}
+                    <div style={{ flex: '1 1 400px', minWidth: 320 }}>
+                      <div style={{ marginBottom: 16 }}>
+                        <select
+                          value={blockedDateForm.worker_id}
+                          onChange={(e) => setBlockedDateForm({ ...blockedDateForm, worker_id: e.target.value })}
+                          style={{ ...inputStyle, width: 240, marginBottom: 16 }}
+                        >
+                          <option value="">Select worker...</option>
+                          {workers.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                        </select>
+                      </div>
+
+                      {/* Calendar */}
+                      <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, padding: 16, marginBottom: 16 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                          <button onClick={() => { if (calendarMonth === 0) { setCalendarMonth(11); setCalendarYear(calendarYear - 1); } else setCalendarMonth(calendarMonth - 1); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, padding: '6px 12px', border: `1px solid ${brand.border}` }}>&lt;</button>
+                          <span style={{ fontSize: 16, fontWeight: 600, color: brand.text }}>{MONTH_NAMES[calendarMonth]} {calendarYear}</span>
+                          <button onClick={() => { if (calendarMonth === 11) { setCalendarMonth(0); setCalendarYear(calendarYear + 1); } else setCalendarMonth(calendarMonth + 1); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, padding: '6px 12px', border: `1px solid ${brand.border}` }}>&gt;</button>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
+                          {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map(d => (
+                            <div key={d} style={{ padding: '6px 0', textAlign: 'center', fontSize: 12, fontWeight: 600, color: brand.textLight }}>{d}</div>
+                          ))}
+                          {getCalendarDays(calendarYear, calendarMonth).map((day, i) => {
+                            const dateStr = formatDateISO(day.date);
+                            const workerBlocked = blockedDates.filter(bd => bd.blocked_date === dateStr && (!blockedDateForm.worker_id || bd.worker_id === blockedDateForm.worker_id));
+                            const isBlocked = workerBlocked.length > 0;
+                            const isSelected = blockedDateForm.blocked_date === dateStr;
+                            const isToday = formatDateISO(new Date()) === dateStr;
+                            return (
+                              <button
+                                key={i}
+                                onClick={() => {
+                                  if (blockedDateForm.worker_id) {
+                                    setBlockedDateForm({ ...blockedDateForm, blocked_date: dateStr });
+                                  }
+                                }}
+                                style={{
+                                  padding: '8px 4px', textAlign: 'center', fontSize: 13, border: 'none', borderRadius: 4,
+                                  cursor: blockedDateForm.worker_id ? 'pointer' : 'default',
+                                  background: isSelected ? brand.primary : isBlocked ? '#fee2e2' : isToday ? '#DBEAFE' : 'transparent',
+                                  color: day.isCurrentMonth ? (isBlocked ? brand.danger : brand.text) : '#ccc',
+                                  fontWeight: isToday || isSelected ? 600 : 400,
+                                }}
+                              >
+                                {day.date.getDate()}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Add Blocked Date Form */}
+                      {blockedDateForm.worker_id && blockedDateForm.blocked_date && (
+                        <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, padding: 16 }}>
+                          <p style={{ fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 12 }}>
+                            Block {formatDate(blockedDateForm.blocked_date)} for {workers.find(w => w.id === blockedDateForm.worker_id)?.name}
+                          </p>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                            <label style={{ fontSize: 13, color: brand.text, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                              <input
+                                type="checkbox"
+                                checked={blockedDateForm.all_day}
+                                onChange={(e) => setBlockedDateForm({ ...blockedDateForm, all_day: e.target.checked })}
+                              />
+                              All Day
+                            </label>
+                          </div>
+                          {!blockedDateForm.all_day && (
+                            <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+                              <div>
+                                <label style={{ fontSize: 12, color: brand.textLight, display: 'block', marginBottom: 4 }}>Start</label>
+                                <input type="time" value={blockedDateForm.start_time} onChange={(e) => setBlockedDateForm({ ...blockedDateForm, start_time: e.target.value })} style={{ ...inputStyle, width: 140 }} />
+                              </div>
+                              <div>
+                                <label style={{ fontSize: 12, color: brand.textLight, display: 'block', marginBottom: 4 }}>End</label>
+                                <input type="time" value={blockedDateForm.end_time} onChange={(e) => setBlockedDateForm({ ...blockedDateForm, end_time: e.target.value })} style={{ ...inputStyle, width: 140 }} />
+                              </div>
+                            </div>
+                          )}
+                          <div style={{ marginBottom: 12 }}>
+                            <label style={{ fontSize: 12, color: brand.textLight, display: 'block', marginBottom: 4 }}>Reason (optional)</label>
+                            <input
+                              type="text"
+                              value={blockedDateForm.reason}
+                              onChange={(e) => setBlockedDateForm({ ...blockedDateForm, reason: e.target.value })}
+                              placeholder="e.g. Vacation, Doctor's appointment..."
+                              style={inputStyle}
+                            />
+                          </div>
+                          <button onClick={handleAddBlockedDate} style={{ ...buttonStyle, background: brand.danger, color: brand.white }}>
+                            Block This Date
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Right: List of blocked dates */}
+                    <div style={{ flex: '1 1 380px', minWidth: 300 }}>
+                      <p style={{ fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 12 }}>
+                        Upcoming Blocked Dates
+                      </p>
+                      <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
+                        {blockedDates
+                          .filter(bd => !blockedDateForm.worker_id || bd.worker_id === blockedDateForm.worker_id)
+                          .filter(bd => bd.blocked_date >= formatDateISO(new Date()))
+                          .sort((a, b) => a.blocked_date.localeCompare(b.blocked_date))
+                          .map(bd => (
+                            <div key={bd.id} style={{ padding: '12px 16px', borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <div>
+                                <p style={{ fontWeight: 500, color: brand.text, fontSize: 14 }}>
+                                  {formatDate(bd.blocked_date)}
+                                  <span style={{ fontSize: 12, color: brand.textLight, marginLeft: 8 }}>
+                                    {workers.find(w => w.id === bd.worker_id)?.name}
+                                  </span>
+                                </p>
+                                <p style={{ fontSize: 12, color: brand.textLight }}>
+                                  {bd.all_day ? 'All day' : `${bd.start_time?.slice(0, 5)} - ${bd.end_time?.slice(0, 5)}`}
+                                  {bd.reason && ` · ${bd.reason}`}
+                                </p>
+                              </div>
+                              <button onClick={() => handleDeleteBlockedDate(bd.id)} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger, fontSize: 12, padding: '6px 10px' }}>
+                                Delete
+                              </button>
+                            </div>
+                          ))}
+                        {blockedDates.filter(bd => !blockedDateForm.worker_id || bd.worker_id === blockedDateForm.worker_id).filter(bd => bd.blocked_date >= formatDateISO(new Date())).length === 0 && (
+                          <div style={{ padding: 24, textAlign: 'center', color: brand.textLight, fontSize: 14 }}>
+                            No upcoming blocked dates.
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SUB-TAB 3: Schedule Overrides */}
+              {availabilitySubTab === 'overrides' && (
+                <div>
+                  {/* Add Override Form */}
+                  <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, padding: 20, marginBottom: 24 }}>
+                    <p style={{ fontSize: 16, fontWeight: 600, color: brand.text, marginBottom: 16 }}>Add Schedule Override</p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
+                      <div>
+                        <label style={{ fontSize: 12, color: brand.textLight, display: 'block', marginBottom: 4 }}>Worker</label>
+                        <select value={overrideForm.worker_id} onChange={(e) => setOverrideForm({ ...overrideForm, worker_id: e.target.value })} style={inputStyle}>
+                          <option value="">Select worker...</option>
+                          {workers.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ fontSize: 12, color: brand.textLight, display: 'block', marginBottom: 4 }}>Date</label>
+                        <input type="date" value={overrideForm.override_date} onChange={(e) => setOverrideForm({ ...overrideForm, override_date: e.target.value })} style={inputStyle} />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: 12, color: brand.textLight, display: 'block', marginBottom: 4 }}>Start Time</label>
+                        <input type="time" value={overrideForm.start_time} onChange={(e) => setOverrideForm({ ...overrideForm, start_time: e.target.value })} style={inputStyle} />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: 12, color: brand.textLight, display: 'block', marginBottom: 4 }}>End Time</label>
+                        <input type="time" value={overrideForm.end_time} onChange={(e) => setOverrideForm({ ...overrideForm, end_time: e.target.value })} style={inputStyle} />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: 12, color: brand.textLight, display: 'block', marginBottom: 4 }}>Status</label>
+                        <select value={overrideForm.is_available ? 'available' : 'unavailable'} onChange={(e) => setOverrideForm({ ...overrideForm, is_available: e.target.value === 'available' })} style={inputStyle}>
+                          <option value="available">Available</option>
+                          <option value="unavailable">Unavailable</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ fontSize: 12, color: brand.textLight, display: 'block', marginBottom: 4 }}>Reason</label>
+                        <input type="text" value={overrideForm.reason} onChange={(e) => setOverrideForm({ ...overrideForm, reason: e.target.value })} placeholder="e.g. Working Saturday" style={inputStyle} />
+                      </div>
+                    </div>
+                    <button onClick={handleAddOverride} style={{ ...buttonStyle, background: brand.text, color: brand.white, marginTop: 16 }}>
+                      + Add Override
+                    </button>
+                  </div>
+
+                  {/* Overrides List */}
+                  <div className="table-wrapper">
+                    <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                          <tr style={{ background: brand.bg }}>
+                            <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Worker</th>
+                            <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Date</th>
+                            <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Hours</th>
+                            <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Status</th>
+                            <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Reason</th>
+                            <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {scheduleOverrides
+                            .sort((a, b) => a.override_date.localeCompare(b.override_date))
+                            .map(so => (
+                              <tr key={so.id} style={{ borderTop: `1px solid ${brand.border}` }}>
+                                <td style={{ padding: '16px', fontWeight: 500, color: brand.text }}>
+                                  {workers.find(w => w.id === so.worker_id)?.name || 'Unknown'}
+                                </td>
+                                <td style={{ padding: '16px', color: brand.text }}>{formatDate(so.override_date)}</td>
+                                <td style={{ padding: '16px', color: brand.text }}>{so.start_time?.slice(0, 5)} - {so.end_time?.slice(0, 5)}</td>
+                                <td style={{ padding: '16px' }}>
+                                  <span style={{
+                                    padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 500,
+                                    background: so.is_available ? '#dcfce7' : '#fee2e2',
+                                    color: so.is_available ? '#16a34a' : brand.danger,
+                                  }}>
+                                    {so.is_available ? 'Available' : 'Unavailable'}
+                                  </span>
+                                </td>
+                                <td style={{ padding: '16px', color: brand.textLight, fontSize: 13 }}>{so.reason || '--'}</td>
+                                <td style={{ padding: '16px', textAlign: 'right' }}>
+                                  <button onClick={() => handleDeleteOverride(so.id)} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger, fontSize: 12, padding: '6px 12px' }}>
+                                    Delete
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          {scheduleOverrides.length === 0 && (
+                            <tr><td colSpan={6} style={{ padding: 32, textAlign: 'center', color: brand.textLight }}>No schedule overrides.</td></tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SUB-TAB 4: Service Settings */}
+              {availabilitySubTab === 'settings' && (
+                <div>
+                  <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, padding: 24, maxWidth: 600 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                      <p style={{ fontSize: 16, fontWeight: 600, color: brand.text }}>Scheduling Configuration</p>
+                      {!editingSettings ? (
+                        <button
+                          onClick={() => setEditingSettings({ ...serviceSettings })}
+                          style={{ ...buttonStyle, background: brand.bg, color: brand.text, border: `1px solid ${brand.border}` }}
+                        >
+                          Edit
+                        </button>
+                      ) : (
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <button onClick={handleSaveServiceSettings} disabled={availSaving} style={{ ...buttonStyle, background: brand.success, color: brand.white, opacity: availSaving ? 0.6 : 1 }}>
+                            {availSaving ? 'Saving...' : 'Save'}
+                          </button>
+                          <button onClick={() => setEditingSettings(null)} style={{ ...buttonStyle, background: brand.bg, color: brand.text, border: `1px solid ${brand.border}` }}>Cancel</button>
+                        </div>
+                      )}
+                    </div>
+                    {[
+                      { key: 'slot_duration_minutes', label: 'Slot Duration', unit: 'minutes', description: 'Length of each booking time slot' },
+                      { key: 'buffer_between_jobs_minutes', label: 'Buffer Between Jobs', unit: 'minutes', description: 'Break time between consecutive bookings' },
+                      { key: 'max_bookings_per_slot', label: 'Max Bookings Per Slot', unit: '', description: 'Maximum number of bookings allowed in a single time slot' },
+                      { key: 'advance_booking_days', label: 'Advance Booking Days', unit: 'days', description: 'How far in advance customers can book' },
+                      { key: 'minimum_notice_hours', label: 'Minimum Notice', unit: 'hours', description: 'Minimum hours before a booking can be made' },
+                    ].map(setting => (
+                      <div key={setting.key} style={{ padding: '16px 0', borderBottom: `1px solid ${brand.border}` }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div>
+                            <p style={{ fontSize: 14, fontWeight: 500, color: brand.text }}>{setting.label}</p>
+                            <p style={{ fontSize: 12, color: brand.textLight, marginTop: 2 }}>{setting.description}</p>
+                          </div>
+                          {editingSettings ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                              <input
+                                type="number"
+                                value={editingSettings[setting.key] || ''}
+                                onChange={(e) => setEditingSettings({ ...editingSettings, [setting.key]: e.target.value })}
+                                style={{ ...inputStyle, width: 80, textAlign: 'center' }}
+                                min="0"
+                              />
+                              {setting.unit && <span style={{ fontSize: 13, color: brand.textLight }}>{setting.unit}</span>}
+                            </div>
+                          ) : (
+                            <span style={{ fontSize: 16, fontWeight: 600, color: brand.text }}>
+                              {serviceSettings[setting.key] || '--'}{setting.unit ? ` ${setting.unit}` : ''}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

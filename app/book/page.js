@@ -277,14 +277,14 @@ function BookingFlowInner() {
 
   const loadData = async () => {
     const [nRes, aoRes, freqRes, svcRes, avRes, bdRes, soRes, wRes] = await Promise.all([
-      supabase.from('neighborhoods').select('*').order('name'),
+      supabase.from('neighborhoods').select('*').eq('archived', false).order('name'),
       supabase.from('add_ons').select('*').eq('archived', false).order('name'),
-      supabase.from('frequencies').select('*').order('sort_order'),
+      supabase.from('frequencies').select('*').eq('archived', false).order('sort_order'),
       supabase.from('site_settings').select('*'),
       supabase.from('availability').select('*').order('day_of_week'),
       supabase.from('blocked_dates').select('*').order('blocked_date'),
       supabase.from('schedule_overrides').select('*').order('override_date'),
-      supabase.from('workers').select('*').order('name'),
+      supabase.from('workers').select('*').eq('archived', false).order('name'),
     ]);
     const neighborhoodsData = nRes.data || [];
     setNeighborhoods(neighborhoodsData);
@@ -347,6 +347,7 @@ function BookingFlowInner() {
               .from('buildings')
               .select('*')
               .eq('neighborhood_id', buildingData.neighborhood_id)
+              .eq('archived', false)
               .order('name');
             setBuildings(bldgs || []);
             setBuildingId(rebook.building_id);
@@ -431,6 +432,7 @@ function BookingFlowInner() {
             .from('buildings')
             .select('*')
             .eq('neighborhood_id', buildingData.neighborhood_id)
+            .eq('archived', false)
             .order('name');
           setBuildings(bldgs || []);
           setBuildingId(lastBooking.building_id);
@@ -454,12 +456,12 @@ function BookingFlowInner() {
   };
 
   const loadBuildings = async (neighborhoodId) => {
-    const { data } = await supabase.from('buildings').select('*').eq('neighborhood_id', neighborhoodId).order('name');
+    const { data } = await supabase.from('buildings').select('*').eq('neighborhood_id', neighborhoodId).eq('archived', false).order('name');
     setBuildings(data || []);
   };
 
   const loadFloorPlans = async (bId) => {
-    const { data } = await supabase.from('floor_plans').select('*').eq('building_id', bId).order('price');
+    const { data } = await supabase.from('floor_plans').select('*').eq('building_id', bId).eq('archived', false).order('price');
     setFloorPlans(data || []);
   };
 
@@ -510,6 +512,7 @@ function BookingFlowInner() {
       .from('unit_lines')
       .select('*, floor_plan:floor_plan_id(*)')
       .eq('building_id', bId)
+      .eq('archived', false)
       .ilike('line_number', line);
 
     // Filter for floor range match

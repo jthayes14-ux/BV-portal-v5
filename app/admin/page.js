@@ -52,7 +52,23 @@ export default function AdminPanel() {
   const [showCancelled, setShowCancelled] = useState(false);
   const [showSkipped, setShowSkipped] = useState(false);
   const [showArchivedAddOns, setShowArchivedAddOns] = useState(false);
+  const [showArchivedNeighborhoods, setShowArchivedNeighborhoods] = useState(false);
+  const [showArchivedBuildings, setShowArchivedBuildings] = useState(false);
+  const [showArchivedFloorPlans, setShowArchivedFloorPlans] = useState(false);
+  const [showArchivedUnitLines, setShowArchivedUnitLines] = useState(false);
+  const [showArchivedWorkers, setShowArchivedWorkers] = useState(false);
+  const [showArchivedFrequencies, setShowArchivedFrequencies] = useState(false);
   const [addonsSectionVisible, setAddonsSectionVisible] = useState(true);
+
+  // Search/filter state for tables
+  const [searchNeighborhoods, setSearchNeighborhoods] = useState('');
+  const [searchBuildings, setSearchBuildings] = useState('');
+  const [searchFloorPlans, setSearchFloorPlans] = useState('');
+  const [searchUnitLines, setSearchUnitLines] = useState('');
+  const [searchAddOns, setSearchAddOns] = useState('');
+  const [searchWorkers, setSearchWorkers] = useState('');
+  const [searchFrequencies, setSearchFrequencies] = useState('');
+  const [searchBookings, setSearchBookings] = useState('');
 
   // Availability management state
   const [availabilitySubTab, setAvailabilitySubTab] = useState('weekly');
@@ -301,12 +317,23 @@ export default function AdminPanel() {
     }
   };
 
-  const handleToggleArchiveAddon = async (id, currentArchived) => {
+  const handleToggleArchive = async (type, id, currentArchived) => {
     setCrudError('');
     const newArchived = !currentArchived;
-    const { error } = await supabase.from('add_ons').update({ archived: newArchived }).eq('id', id);
+    const tableMap = { neighborhoods: 'neighborhoods', buildings: 'buildings', floorplans: 'floor_plans', unitlines: 'unit_lines', addons: 'add_ons', workers: 'workers', frequencies: 'frequencies' };
+    const { error } = await supabase.from(tableMap[type]).update({ archived: newArchived }).eq('id', id);
     if (error) { setCrudError('Failed to update: ' + error.message); return; }
-    setAddOns(addOns.map(a => a.id === id ? { ...a, archived: newArchived } : a));
+    const setterMap = {
+      neighborhoods: [neighborhoods, setNeighborhoods],
+      buildings: [buildings, setBuildings],
+      floorplans: [floorPlans, setFloorPlans],
+      unitlines: [unitLines, setUnitLines],
+      addons: [addOns, setAddOns],
+      workers: [workers, setWorkers],
+      frequencies: [frequencies, setFrequencies],
+    };
+    const [items, setter] = setterMap[type];
+    setter(items.map(item => item.id === id ? { ...item, archived: newArchived } : item));
   };
 
   const handleToggleAddonsSection = async () => {
@@ -542,6 +569,18 @@ export default function AdminPanel() {
   const filteredBookings = bookings.filter(b => {
     if (b.status === 'cancelled' && !showCancelled) return false;
     if (b.status === 'skipped' && !showSkipped) return false;
+    if (searchBookings) {
+      const s = searchBookings.toLowerCase();
+      const workerName = (workers.find(w => w.id === b.worker_id)?.name || '').toLowerCase();
+      if (
+        !(b.customer_name || '').toLowerCase().includes(s) &&
+        !(b.customer_email || '').toLowerCase().includes(s) &&
+        !(b.building || '').toLowerCase().includes(s) &&
+        !(b.unit_number || '').toLowerCase().includes(s) &&
+        !(b.status || '').toLowerCase().includes(s) &&
+        !workerName.includes(s)
+      ) return false;
+    }
     return true;
   });
 
@@ -580,9 +619,60 @@ export default function AdminPanel() {
 
   const sortIndicator = (field) => sortField === field ? (sortDirection === 'asc' ? ' \u25B2' : ' \u25BC') : '';
 
-  const filteredBuildings = selectedNeighborhood ? buildings.filter(b => b.neighborhood_id === selectedNeighborhood) : buildings;
-  const filteredFloorPlans = selectedBuilding ? floorPlans.filter(f => f.building_id === selectedBuilding) : floorPlans;
-  const filteredUnitLines = selectedBuildingUL ? unitLines.filter(ul => ul.building_id === selectedBuildingUL) : unitLines;
+  const filteredNeighborhoods = neighborhoods.filter(n => {
+    if (!showArchivedNeighborhoods && n.archived) return false;
+    if (searchNeighborhoods && !(n.name || '').toLowerCase().includes(searchNeighborhoods.toLowerCase())) return false;
+    return true;
+  });
+  const filteredBuildings = buildings.filter(b => {
+    if (!showArchivedBuildings && b.archived) return false;
+    if (selectedNeighborhood && b.neighborhood_id !== selectedNeighborhood) return false;
+    if (searchBuildings) {
+      const s = searchBuildings.toLowerCase();
+      const nName = (neighborhoods.find(n => n.id === b.neighborhood_id)?.name || '').toLowerCase();
+      if (!(b.name || '').toLowerCase().includes(s) && !(b.address || '').toLowerCase().includes(s) && !nName.includes(s)) return false;
+    }
+    return true;
+  });
+  const filteredFloorPlans = floorPlans.filter(f => {
+    if (!showArchivedFloorPlans && f.archived) return false;
+    if (selectedBuilding && f.building_id !== selectedBuilding) return false;
+    if (searchFloorPlans) {
+      const s = searchFloorPlans.toLowerCase();
+      const bName = (buildings.find(b => b.id === f.building_id)?.name || '').toLowerCase();
+      if (!(f.name || '').toLowerCase().includes(s) && !bName.includes(s)) return false;
+    }
+    return true;
+  });
+  const filteredUnitLines = unitLines.filter(ul => {
+    if (!showArchivedUnitLines && ul.archived) return false;
+    if (selectedBuildingUL && ul.building_id !== selectedBuildingUL) return false;
+    if (searchUnitLines) {
+      const s = searchUnitLines.toLowerCase();
+      const bName = (buildings.find(b => b.id === ul.building_id)?.name || '').toLowerCase();
+      const fpName = (floorPlans.find(f => f.id === ul.floor_plan_id)?.name || '').toLowerCase();
+      if (!(ul.line_number || '').toLowerCase().includes(s) && !bName.includes(s) && !fpName.includes(s)) return false;
+    }
+    return true;
+  });
+  const filteredWorkers = workers.filter(w => {
+    if (!showArchivedWorkers && w.archived) return false;
+    if (searchWorkers) {
+      const s = searchWorkers.toLowerCase();
+      if (!(w.name || '').toLowerCase().includes(s) && !(w.email || '').toLowerCase().includes(s) && !(w.phone || '').toLowerCase().includes(s)) return false;
+    }
+    return true;
+  });
+  const filteredFrequenciesList = frequencies.filter(f => {
+    if (!showArchivedFrequencies && f.archived) return false;
+    if (searchFrequencies && !(f.name || '').toLowerCase().includes(searchFrequencies.toLowerCase())) return false;
+    return true;
+  });
+  const filteredAddOnsList = addOns.filter(a => {
+    if (!showArchivedAddOns && a.archived) return false;
+    if (searchAddOns && !(a.name || '').toLowerCase().includes(searchAddOns.toLowerCase())) return false;
+    return true;
+  });
 
   const handleLogout = async () => { await signOut(); router.push('/login'); };
 
@@ -668,7 +758,8 @@ export default function AdminPanel() {
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
                 <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>Bookings</h1>
-                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <input type="text" placeholder="Search bookings..." value={searchBookings} onChange={(e) => setSearchBookings(e.target.value)} style={{ ...inputStyle, width: 220 }} />
                   <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
                     <input type="checkbox" checked={showCancelled} onChange={(e) => setShowCancelled(e.target.checked)} style={{ cursor: 'pointer' }} />
                     Show Cancelled
@@ -1087,9 +1178,16 @@ export default function AdminPanel() {
           {/* FREQUENCIES TAB */}
           {activeTab === 'frequencies' && (
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+              <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
                 <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>Frequencies</h1>
-                <button onClick={() => handleAdd('frequencies')} style={{ ...buttonStyle, background: brand.text, color: brand.white }}>+ Add Frequency</button>
+                <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <input type="text" placeholder="Search frequencies..." value={searchFrequencies} onChange={(e) => setSearchFrequencies(e.target.value)} style={{ ...inputStyle, width: 200 }} />
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
+                    <input type="checkbox" checked={showArchivedFrequencies} onChange={(e) => setShowArchivedFrequencies(e.target.checked)} />
+                    Show archived
+                  </label>
+                  <button onClick={() => handleAdd('frequencies')} style={{ ...buttonStyle, background: brand.text, color: brand.white }}>+ Add Frequency</button>
+                </div>
               </div>
               <div className="table-wrapper">
                 <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
@@ -1100,12 +1198,13 @@ export default function AdminPanel() {
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Discount %</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Interval (days)</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Sort Order</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Status</th>
                         <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {frequencies.map(f => (
-                        <tr key={f.id} style={{ borderTop: `1px solid ${brand.border}` }}>
+                      {filteredFrequenciesList.map(f => (
+                        <tr key={f.id} style={{ borderTop: `1px solid ${brand.border}`, opacity: f.archived ? 0.6 : 1 }}>
                           <td style={{ padding: '16px' }}>
                             {editingId === `frequency-${f.id}` ? (
                               <input style={inputStyle} value={editValue.name || ''} onChange={(e) => setEditValue({ ...editValue, name: e.target.value })} />
@@ -1134,16 +1233,27 @@ export default function AdminPanel() {
                               <span style={{ color: brand.textLight }}>{f.sort_order}</span>
                             )}
                           </td>
+                          <td style={{ padding: '16px' }}>
+                            <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 12, background: f.archived ? '#fee2e2' : '#dcfce7', color: f.archived ? brand.danger : '#16a34a' }}>
+                              {f.archived ? 'Archived' : 'Active'}
+                            </span>
+                          </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
                             {editingId === `frequency-${f.id}` ? (
                               <button onClick={() => handleSave('frequencies', f.id)} style={{ ...buttonStyle, background: brand.success, color: brand.white, marginRight: 8 }}>Save</button>
                             ) : (
                               <button onClick={() => { setEditingId(`frequency-${f.id}`); setEditValue({ name: f.name, discount_percent: f.discount_percent, interval_days: f.interval_days, sort_order: f.sort_order }); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, marginRight: 8 }}>Edit</button>
                             )}
+                            <button onClick={() => handleToggleArchive('frequencies', f.id, f.archived)} style={{ ...buttonStyle, background: f.archived ? '#dbeafe' : '#fef3c7', color: f.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
+                              {f.archived ? 'Unarchive' : 'Archive'}
+                            </button>
                             <button onClick={() => handleDelete('frequencies', f.id)} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger }}>Delete</button>
                           </td>
                         </tr>
                       ))}
+                      {filteredFrequenciesList.length === 0 && (
+                        <tr><td colSpan={6} style={{ padding: 24, textAlign: 'center', color: brand.textLight }}>No frequencies found.</td></tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -1154,9 +1264,16 @@ export default function AdminPanel() {
           {/* NEIGHBORHOODS TAB */}
           {activeTab === 'neighborhoods' && (
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+              <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
                 <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>Neighborhoods</h1>
-                <button onClick={() => handleAdd('neighborhoods')} style={{ ...buttonStyle, background: brand.text, color: brand.white }}>+ Add Neighborhood</button>
+                <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <input type="text" placeholder="Search neighborhoods..." value={searchNeighborhoods} onChange={(e) => setSearchNeighborhoods(e.target.value)} style={{ ...inputStyle, width: 200 }} />
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
+                    <input type="checkbox" checked={showArchivedNeighborhoods} onChange={(e) => setShowArchivedNeighborhoods(e.target.checked)} />
+                    Show archived
+                  </label>
+                  <button onClick={() => handleAdd('neighborhoods')} style={{ ...buttonStyle, background: brand.text, color: brand.white }}>+ Add Neighborhood</button>
+                </div>
               </div>
               <div className="table-wrapper">
                 <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
@@ -1165,12 +1282,13 @@ export default function AdminPanel() {
                       <tr style={{ background: brand.bg }}>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Name</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Buildings</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Status</th>
                         <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {neighborhoods.map(n => (
-                        <tr key={n.id} style={{ borderTop: `1px solid ${brand.border}` }}>
+                      {filteredNeighborhoods.map(n => (
+                        <tr key={n.id} style={{ borderTop: `1px solid ${brand.border}`, opacity: n.archived ? 0.6 : 1 }}>
                           <td style={{ padding: '16px' }}>
                             {editingId === `neighborhood-${n.id}` ? (
                               <input style={inputStyle} value={editValue.name || ''} onChange={(e) => setEditValue({ ...editValue, name: e.target.value })} />
@@ -1179,16 +1297,27 @@ export default function AdminPanel() {
                             )}
                           </td>
                           <td style={{ padding: '16px', color: brand.textLight }}>{buildings.filter(b => b.neighborhood_id === n.id).length} buildings</td>
+                          <td style={{ padding: '16px' }}>
+                            <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 12, background: n.archived ? '#fee2e2' : '#dcfce7', color: n.archived ? brand.danger : '#16a34a' }}>
+                              {n.archived ? 'Archived' : 'Active'}
+                            </span>
+                          </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
                             {editingId === `neighborhood-${n.id}` ? (
                               <button onClick={() => handleSave('neighborhoods', n.id)} style={{ ...buttonStyle, background: brand.success, color: brand.white, marginRight: 8 }}>Save</button>
                             ) : (
                               <button onClick={() => { setEditingId(`neighborhood-${n.id}`); setEditValue({ name: n.name }); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, marginRight: 8 }}>Edit</button>
                             )}
+                            <button onClick={() => handleToggleArchive('neighborhoods', n.id, n.archived)} style={{ ...buttonStyle, background: n.archived ? '#dbeafe' : '#fef3c7', color: n.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
+                              {n.archived ? 'Unarchive' : 'Archive'}
+                            </button>
                             <button onClick={() => handleDelete('neighborhoods', n.id)} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger }}>Delete</button>
                           </td>
                         </tr>
                       ))}
+                      {filteredNeighborhoods.length === 0 && (
+                        <tr><td colSpan={4} style={{ padding: 24, textAlign: 'center', color: brand.textLight }}>No neighborhoods found.</td></tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -1199,13 +1328,18 @@ export default function AdminPanel() {
           {/* BUILDINGS TAB */}
           {activeTab === 'buildings' && (
             <div>
-              <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
+              <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
                 <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>Buildings</h1>
-                <div className="admin-filter-controls" style={{ display: 'flex', gap: 12 }}>
+                <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <input type="text" placeholder="Search buildings..." value={searchBuildings} onChange={(e) => setSearchBuildings(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <select value={selectedNeighborhood} onChange={(e) => setSelectedNeighborhood(e.target.value)} style={{ ...inputStyle, width: 180 }}>
                     <option value="">All Neighborhoods</option>
                     {neighborhoods.map(n => <option key={n.id} value={n.id}>{n.name}</option>)}
                   </select>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
+                    <input type="checkbox" checked={showArchivedBuildings} onChange={(e) => setShowArchivedBuildings(e.target.checked)} />
+                    Show archived
+                  </label>
                   <button onClick={() => handleAdd('buildings')} style={{ ...buttonStyle, background: brand.text, color: brand.white }}>+ Add Building</button>
                 </div>
               </div>
@@ -1217,12 +1351,13 @@ export default function AdminPanel() {
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Name</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Address</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Neighborhood</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Status</th>
                         <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredBuildings.map(b => (
-                        <tr key={b.id} style={{ borderTop: `1px solid ${brand.border}` }}>
+                        <tr key={b.id} style={{ borderTop: `1px solid ${brand.border}`, opacity: b.archived ? 0.6 : 1 }}>
                           <td style={{ padding: '16px' }}>
                             {editingId === `building-${b.id}` ? (
                               <input style={inputStyle} value={editValue.name || ''} onChange={(e) => setEditValue({ ...editValue, name: e.target.value })} />
@@ -1246,16 +1381,27 @@ export default function AdminPanel() {
                               <span style={{ color: brand.textLight }}>{neighborhoods.find(n => n.id === b.neighborhood_id)?.name}</span>
                             )}
                           </td>
+                          <td style={{ padding: '16px' }}>
+                            <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 12, background: b.archived ? '#fee2e2' : '#dcfce7', color: b.archived ? brand.danger : '#16a34a' }}>
+                              {b.archived ? 'Archived' : 'Active'}
+                            </span>
+                          </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
                             {editingId === `building-${b.id}` ? (
                               <button onClick={() => handleSave('buildings', b.id)} style={{ ...buttonStyle, background: brand.success, color: brand.white, marginRight: 8 }}>Save</button>
                             ) : (
                               <button onClick={() => { setEditingId(`building-${b.id}`); setEditValue({ name: b.name, address: b.address, neighborhood_id: b.neighborhood_id }); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, marginRight: 8 }}>Edit</button>
                             )}
+                            <button onClick={() => handleToggleArchive('buildings', b.id, b.archived)} style={{ ...buttonStyle, background: b.archived ? '#dbeafe' : '#fef3c7', color: b.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
+                              {b.archived ? 'Unarchive' : 'Archive'}
+                            </button>
                             <button onClick={() => handleDelete('buildings', b.id)} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger }}>Delete</button>
                           </td>
                         </tr>
                       ))}
+                      {filteredBuildings.length === 0 && (
+                        <tr><td colSpan={5} style={{ padding: 24, textAlign: 'center', color: brand.textLight }}>No buildings found.</td></tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -1266,13 +1412,18 @@ export default function AdminPanel() {
           {/* FLOOR PLANS TAB */}
           {activeTab === 'floorplans' && (
             <div>
-              <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
+              <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
                 <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>Floor Plans</h1>
-                <div className="admin-filter-controls" style={{ display: 'flex', gap: 12 }}>
+                <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <input type="text" placeholder="Search floor plans..." value={searchFloorPlans} onChange={(e) => setSearchFloorPlans(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <select value={selectedBuilding} onChange={(e) => setSelectedBuilding(e.target.value)} style={{ ...inputStyle, width: 200 }}>
                     <option value="">All Buildings</option>
                     {buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                   </select>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
+                    <input type="checkbox" checked={showArchivedFloorPlans} onChange={(e) => setShowArchivedFloorPlans(e.target.checked)} />
+                    Show archived
+                  </label>
                   <button onClick={() => handleAdd('floorplans')} style={{ ...buttonStyle, background: brand.text, color: brand.white }}>+ Add Floor Plan</button>
                 </div>
               </div>
@@ -1285,12 +1436,13 @@ export default function AdminPanel() {
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Building</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Price</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Duration</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Status</th>
                         <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredFloorPlans.map(f => (
-                        <tr key={f.id} style={{ borderTop: `1px solid ${brand.border}` }}>
+                        <tr key={f.id} style={{ borderTop: `1px solid ${brand.border}`, opacity: f.archived ? 0.6 : 1 }}>
                           <td style={{ padding: '16px' }}>
                             {editingId === `floorplan-${f.id}` ? (
                               <input style={inputStyle} value={editValue.name || ''} onChange={(e) => setEditValue({ ...editValue, name: e.target.value })} />
@@ -1321,16 +1473,27 @@ export default function AdminPanel() {
                               <span style={{ color: brand.textLight }}>{f.duration_minutes || 60} min</span>
                             )}
                           </td>
+                          <td style={{ padding: '16px' }}>
+                            <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 12, background: f.archived ? '#fee2e2' : '#dcfce7', color: f.archived ? brand.danger : '#16a34a' }}>
+                              {f.archived ? 'Archived' : 'Active'}
+                            </span>
+                          </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
                             {editingId === `floorplan-${f.id}` ? (
                               <button onClick={() => handleSave('floorplans', f.id)} style={{ ...buttonStyle, background: brand.success, color: brand.white, marginRight: 8 }}>Save</button>
                             ) : (
                               <button onClick={() => { setEditingId(`floorplan-${f.id}`); setEditValue({ name: f.name, price: f.price, duration_minutes: f.duration_minutes || 60, building_id: f.building_id }); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, marginRight: 8 }}>Edit</button>
                             )}
+                            <button onClick={() => handleToggleArchive('floorplans', f.id, f.archived)} style={{ ...buttonStyle, background: f.archived ? '#dbeafe' : '#fef3c7', color: f.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
+                              {f.archived ? 'Unarchive' : 'Archive'}
+                            </button>
                             <button onClick={() => handleDelete('floorplans', f.id)} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger }}>Delete</button>
                           </td>
                         </tr>
                       ))}
+                      {filteredFloorPlans.length === 0 && (
+                        <tr><td colSpan={6} style={{ padding: 24, textAlign: 'center', color: brand.textLight }}>No floor plans found.</td></tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -1341,13 +1504,18 @@ export default function AdminPanel() {
           {/* UNIT LINES TAB */}
           {activeTab === 'unitlines' && (
             <div>
-              <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
+              <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
                 <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>Unit Lines</h1>
-                <div className="admin-filter-controls" style={{ display: 'flex', gap: 12 }}>
+                <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <input type="text" placeholder="Search unit lines..." value={searchUnitLines} onChange={(e) => setSearchUnitLines(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <select value={selectedBuildingUL} onChange={(e) => setSelectedBuildingUL(e.target.value)} style={{ ...inputStyle, width: 200 }}>
                     <option value="">All Buildings</option>
                     {buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                   </select>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
+                    <input type="checkbox" checked={showArchivedUnitLines} onChange={(e) => setShowArchivedUnitLines(e.target.checked)} />
+                    Show archived
+                  </label>
                   <button onClick={() => handleAdd('unitlines')} style={{ ...buttonStyle, background: brand.text, color: brand.white }}>+ Add Unit Line</button>
                 </div>
               </div>
@@ -1361,6 +1529,7 @@ export default function AdminPanel() {
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Floor Range</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Floor Plan</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Price</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Status</th>
                         <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Actions</th>
                       </tr>
                     </thead>
@@ -1370,7 +1539,7 @@ export default function AdminPanel() {
                         const displayPrice = ul.custom_price != null ? `$${ul.custom_price}` : (fp ? `$${fp.price}` : '—');
                         const isEditing = editingId === `unitline-${ul.id}`;
                         return (
-                          <tr key={ul.id} style={{ borderTop: `1px solid ${brand.border}` }}>
+                          <tr key={ul.id} style={{ borderTop: `1px solid ${brand.border}`, opacity: ul.archived ? 0.6 : 1 }}>
                             <td style={{ padding: '16px' }}>
                               {isEditing ? (
                                 <select style={inputStyle} value={editValue.building_id || ''} onChange={(e) => setEditValue({ ...editValue, building_id: e.target.value })}>
@@ -1418,19 +1587,27 @@ export default function AdminPanel() {
                                 </span>
                               )}
                             </td>
+                            <td style={{ padding: '16px' }}>
+                              <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 12, background: ul.archived ? '#fee2e2' : '#dcfce7', color: ul.archived ? brand.danger : '#16a34a' }}>
+                                {ul.archived ? 'Archived' : 'Active'}
+                              </span>
+                            </td>
                             <td style={{ padding: '16px', textAlign: 'right' }}>
                               {isEditing ? (
                                 <button onClick={() => handleSave('unitlines', ul.id)} style={{ ...buttonStyle, background: brand.success, color: brand.white, marginRight: 8 }}>Save</button>
                               ) : (
                                 <button onClick={() => { setEditingId(`unitline-${ul.id}`); setEditValue({ building_id: ul.building_id, line_number: ul.line_number, floor_min: ul.floor_min, floor_max: ul.floor_max, floor_plan_id: ul.floor_plan_id || '', custom_price: ul.custom_price ?? '' }); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, marginRight: 8 }}>Edit</button>
                               )}
+                              <button onClick={() => handleToggleArchive('unitlines', ul.id, ul.archived)} style={{ ...buttonStyle, background: ul.archived ? '#dbeafe' : '#fef3c7', color: ul.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
+                                {ul.archived ? 'Unarchive' : 'Archive'}
+                              </button>
                               <button onClick={() => handleDelete('unitlines', ul.id)} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger }}>Delete</button>
                             </td>
                           </tr>
                         );
                       })}
                       {filteredUnitLines.length === 0 && (
-                        <tr><td colSpan={6} style={{ padding: 24, textAlign: 'center', color: brand.textLight }}>No unit lines found. Click &quot;+ Add Unit Line&quot; to create one.</td></tr>
+                        <tr><td colSpan={7} style={{ padding: 24, textAlign: 'center', color: brand.textLight }}>No unit lines found. Click &quot;+ Add Unit Line&quot; to create one.</td></tr>
                       )}
                     </tbody>
                   </table>
@@ -1442,9 +1619,16 @@ export default function AdminPanel() {
           {/* ADD-ONS TAB */}
           {activeTab === 'addons' && (
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
                 <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>Add-Ons</h1>
-                <button onClick={() => handleAdd('addons')} style={{ ...buttonStyle, background: brand.text, color: brand.white }}>+ Add Add-On</button>
+                <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <input type="text" placeholder="Search add-ons..." value={searchAddOns} onChange={(e) => setSearchAddOns(e.target.value)} style={{ ...inputStyle, width: 200 }} />
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
+                    <input type="checkbox" checked={showArchivedAddOns} onChange={(e) => setShowArchivedAddOns(e.target.checked)} />
+                    Show archived
+                  </label>
+                  <button onClick={() => handleAdd('addons')} style={{ ...buttonStyle, background: brand.text, color: brand.white }}>+ Add Add-On</button>
+                </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderRadius: 8, border: `1px solid ${brand.border}`, background: brand.bg, marginBottom: 16 }}>
                 <div>
@@ -1462,12 +1646,6 @@ export default function AdminPanel() {
                   {addonsSectionVisible ? 'Visible' : 'Hidden'}
                 </button>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-                <label style={{ fontSize: 14, color: brand.textLight, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <input type="checkbox" checked={showArchivedAddOns} onChange={(e) => setShowArchivedAddOns(e.target.checked)} />
-                  Show archived
-                </label>
-              </div>
               <div className="table-wrapper">
                 <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -1480,7 +1658,7 @@ export default function AdminPanel() {
                       </tr>
                     </thead>
                     <tbody>
-                      {addOns.filter(a => showArchivedAddOns || !a.archived).map(a => (
+                      {filteredAddOnsList.map(a => (
                         <tr key={a.id} style={{ borderTop: `1px solid ${brand.border}`, opacity: a.archived ? 0.6 : 1 }}>
                           <td style={{ padding: '16px' }}>
                             {editingId === `addon-${a.id}` ? (
@@ -1511,7 +1689,7 @@ export default function AdminPanel() {
                             ) : (
                               <button onClick={() => { setEditingId(`addon-${a.id}`); setEditValue({ name: a.name, price: a.price }); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, marginRight: 8 }}>Edit</button>
                             )}
-                            <button onClick={() => handleToggleArchiveAddon(a.id, a.archived)} style={{ ...buttonStyle, background: a.archived ? '#dbeafe' : '#fef3c7', color: a.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
+                            <button onClick={() => handleToggleArchive('addons', a.id, a.archived)} style={{ ...buttonStyle, background: a.archived ? '#dbeafe' : '#fef3c7', color: a.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
                               {a.archived ? 'Unarchive' : 'Archive'}
                             </button>
                             <button onClick={() => handleDelete('addons', a.id)} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger }}>Delete</button>
@@ -1528,9 +1706,16 @@ export default function AdminPanel() {
           {/* WORKERS TAB */}
           {activeTab === 'workers' && (
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+              <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
                 <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>Workers</h1>
-                <button onClick={() => handleAdd('workers')} style={{ ...buttonStyle, background: brand.text, color: brand.white }}>+ Add Worker</button>
+                <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <input type="text" placeholder="Search workers..." value={searchWorkers} onChange={(e) => setSearchWorkers(e.target.value)} style={{ ...inputStyle, width: 200 }} />
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
+                    <input type="checkbox" checked={showArchivedWorkers} onChange={(e) => setShowArchivedWorkers(e.target.checked)} />
+                    Show archived
+                  </label>
+                  <button onClick={() => handleAdd('workers')} style={{ ...buttonStyle, background: brand.text, color: brand.white }}>+ Add Worker</button>
+                </div>
               </div>
               <div className="table-wrapper">
                 <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
@@ -1541,12 +1726,13 @@ export default function AdminPanel() {
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Email</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Phone</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Assigned Jobs</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Status</th>
                         <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {workers.map(w => (
-                        <tr key={w.id} style={{ borderTop: `1px solid ${brand.border}` }}>
+                      {filteredWorkers.map(w => (
+                        <tr key={w.id} style={{ borderTop: `1px solid ${brand.border}`, opacity: w.archived ? 0.6 : 1 }}>
                           <td style={{ padding: '16px' }}>
                             {editingId === `worker-${w.id}` ? (
                               <input style={inputStyle} value={editValue.name || ''} onChange={(e) => setEditValue({ ...editValue, name: e.target.value })} />
@@ -1571,16 +1757,27 @@ export default function AdminPanel() {
                           <td style={{ padding: '16px', color: brand.textLight }}>
                             {bookings.filter(b => b.worker_id === w.id && b.status === 'upcoming').length} upcoming
                           </td>
+                          <td style={{ padding: '16px' }}>
+                            <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 12, background: w.archived ? '#fee2e2' : '#dcfce7', color: w.archived ? brand.danger : '#16a34a' }}>
+                              {w.archived ? 'Archived' : 'Active'}
+                            </span>
+                          </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
                             {editingId === `worker-${w.id}` ? (
                               <button onClick={() => handleSave('workers', w.id)} style={{ ...buttonStyle, background: brand.success, color: brand.white, marginRight: 8 }}>Save</button>
                             ) : (
                               <button onClick={() => { setEditingId(`worker-${w.id}`); setEditValue({ name: w.name, email: w.email, phone: w.phone }); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, marginRight: 8 }}>Edit</button>
                             )}
+                            <button onClick={() => handleToggleArchive('workers', w.id, w.archived)} style={{ ...buttonStyle, background: w.archived ? '#dbeafe' : '#fef3c7', color: w.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
+                              {w.archived ? 'Unarchive' : 'Archive'}
+                            </button>
                             <button onClick={() => handleDelete('workers', w.id)} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger }}>Delete</button>
                           </td>
                         </tr>
                       ))}
+                      {filteredWorkers.length === 0 && (
+                        <tr><td colSpan={6} style={{ padding: 24, textAlign: 'center', color: brand.textLight }}>No workers found.</td></tr>
+                      )}
                     </tbody>
                   </table>
                 </div>

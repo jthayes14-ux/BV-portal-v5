@@ -271,12 +271,11 @@ function BookingFlowInner() {
   };
 
   const loadData = async () => {
-    const [nRes, aoRes, freqRes, ssRes, svcRes, avRes, bdRes, soRes, wRes] = await Promise.all([
+    const [nRes, aoRes, freqRes, svcRes, avRes, bdRes, soRes, wRes] = await Promise.all([
       supabase.from('neighborhoods').select('*').order('name'),
       supabase.from('add_ons').select('*').eq('archived', false).order('name'),
       supabase.from('frequencies').select('*').order('sort_order'),
-      supabase.from('site_settings').select('*').eq('key', 'addons_section_visible').single(),
-      supabase.from('service_settings').select('*'),
+      supabase.from('site_settings').select('*'),
       supabase.from('availability').select('*').order('day_of_week'),
       supabase.from('blocked_dates').select('*').order('blocked_date'),
       supabase.from('schedule_overrides').select('*').order('override_date'),
@@ -284,7 +283,9 @@ function BookingFlowInner() {
     ]);
     const neighborhoodsData = nRes.data || [];
     setNeighborhoods(neighborhoodsData);
-    const sectionVisible = ssRes.data ? ssRes.data.value === 'true' : true;
+    const allSettings = svcRes.data || [];
+    const addonSetting = allSettings.find(s => s.key === 'addons_section_visible');
+    const sectionVisible = addonSetting ? addonSetting.value === 'true' : true;
     setAddonsSectionVisible(sectionVisible);
     setAddOns(sectionVisible ? (aoRes.data || []) : []);
     const freqData = freqRes.data || [];
@@ -295,7 +296,7 @@ function BookingFlowInner() {
 
     // Load availability-related data
     const settingsObj = {};
-    (svcRes.data || []).forEach(s => { settingsObj[s.key] = s.value; });
+    allSettings.forEach(s => { settingsObj[s.key] = s.value; });
     setServiceSettings(settingsObj);
     setAllAvailability(avRes.data || []);
     setAllBlockedDates(bdRes.data || []);

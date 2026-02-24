@@ -50,6 +50,7 @@ export default function AdminPanel() {
   const [showCancelled, setShowCancelled] = useState(false);
   const [showSkipped, setShowSkipped] = useState(false);
   const [showArchivedAddOns, setShowArchivedAddOns] = useState(false);
+  const [addonsSectionVisible, setAddonsSectionVisible] = useState(true);
 
   const brand = {
     primary: '#B8C5F2', text: '#1a1a1a', textLight: '#666',
@@ -78,7 +79,7 @@ export default function AdminPanel() {
   }, [authLoading, user]);
 
   const loadAll = async () => {
-    const [nRes, bRes, fpRes, aoRes, bkRes, wRes, fqRes, upRes] = await Promise.all([
+    const [nRes, bRes, fpRes, aoRes, bkRes, wRes, fqRes, upRes, ssRes] = await Promise.all([
       supabase.from('neighborhoods').select('*').order('name'),
       supabase.from('buildings').select('*').order('name'),
       supabase.from('floor_plans').select('*').order('name'),
@@ -87,6 +88,7 @@ export default function AdminPanel() {
       supabase.from('workers').select('*').order('name'),
       supabase.from('frequencies').select('*').order('sort_order'),
       supabase.from('user_profiles').select('*').order('created_at', { ascending: false }),
+      supabase.from('site_settings').select('*').eq('key', 'addons_section_visible').single(),
     ]);
     setNeighborhoods(nRes.data || []);
     setBuildings(bRes.data || []);
@@ -96,6 +98,7 @@ export default function AdminPanel() {
     setWorkers(wRes.data || []);
     setFrequencies(fqRes.data || []);
     setUserProfiles(upRes.data || []);
+    if (ssRes.data) setAddonsSectionVisible(ssRes.data.value === 'true');
     setDataLoading(false);
   };
 
@@ -210,6 +213,13 @@ export default function AdminPanel() {
     const { error } = await supabase.from('add_ons').update({ archived: newArchived }).eq('id', id);
     if (error) { setCrudError('Failed to update: ' + error.message); return; }
     setAddOns(addOns.map(a => a.id === id ? { ...a, archived: newArchived } : a));
+  };
+
+  const handleToggleAddonsSection = async () => {
+    const newValue = !addonsSectionVisible;
+    const { error } = await supabase.from('site_settings').upsert({ key: 'addons_section_visible', value: String(newValue), updated_at: new Date().toISOString() });
+    if (error) { setCrudError('Failed to update setting: ' + error.message); return; }
+    setAddonsSectionVisible(newValue);
   };
 
   const handleWorkerAssign = async (bookingId, workerId) => {
@@ -1091,6 +1101,22 @@ export default function AdminPanel() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                 <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>Add-Ons</h1>
                 <button onClick={() => handleAdd('addons')} style={{ ...buttonStyle, background: brand.text, color: brand.white }}>+ Add Add-On</button>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderRadius: 8, border: `1px solid ${brand.border}`, background: brand.bg, marginBottom: 16 }}>
+                <div>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: brand.text }}>Add-Ons section on booking page</span>
+                  <p style={{ fontSize: 13, color: brand.textLight, margin: '2px 0 0' }}>
+                    {addonsSectionVisible ? 'Customers can see and select add-ons when booking' : 'The entire add-ons section is hidden from the booking page'}
+                  </p>
+                </div>
+                <button onClick={handleToggleAddonsSection} style={{
+                  ...buttonStyle,
+                  background: addonsSectionVisible ? '#dcfce7' : '#fee2e2',
+                  color: addonsSectionVisible ? '#16a34a' : brand.danger,
+                  fontWeight: 600,
+                }}>
+                  {addonsSectionVisible ? 'Visible' : 'Hidden'}
+                </button>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
                 <label style={{ fontSize: 14, color: brand.textLight, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>

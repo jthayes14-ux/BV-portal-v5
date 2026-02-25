@@ -7,10 +7,10 @@ import { useAuth } from '../../../lib/useAuth';
 
 function Logo() {
   return (
-    <div style={{ display: 'flex', gap: 4 }}>
-      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
-      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
-      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
+    <div style={{ display: 'flex', gap: 3 }}>
+      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
+      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
+      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
     </div>
   );
 }
@@ -31,12 +31,6 @@ export default function AdminCalendar() {
   const [selectedDay, setSelectedDay] = useState(null);
   const [showCancelled, setShowCancelled] = useState(false);
   const [showSkipped, setShowSkipped] = useState(false);
-
-  const brand = {
-    primary: '#B8C5F2', text: '#1a1a1a', textLight: '#666',
-    border: '#e0e0e0', bg: '#fafafa', white: '#ffffff',
-    success: '#22c55e', gold: '#C9B037',
-  };
 
   useEffect(() => {
     if (!authLoading && !user) { router.push('/login'); return; }
@@ -91,28 +85,43 @@ export default function AdminCalendar() {
 
   const getStatusStyle = (status) => {
     switch (status) {
-      case 'upcoming': return { background: brand.primary, color: brand.text };
-      case 'scheduled': return { background: '#DBEAFE', color: '#1E40AF' };
-      case 'completed': return { background: '#e8e8e8', color: brand.text };
+      case 'upcoming': return { background: '#000', color: '#fff' };
+      case 'scheduled': return { background: '#f0f0f0', color: '#000' };
+      case 'completed': return { background: '#f0f0f0', color: '#6b6b6b' };
       case 'skipped': return { background: '#FEF3C7', color: '#92400E' };
       case 'cancelled': return { background: '#FEE2E2', color: '#DC2626' };
-      default: return { background: '#e8e8e8', color: brand.text };
+      default: return { background: '#f0f0f0', color: '#6b6b6b' };
     }
   };
 
   if (authLoading || dataLoading) {
-    return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: brand.bg }}><p style={{ color: brand.textLight }}>Loading...</p></div>;
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ width: 40, height: 40, border: '3px solid #f0f0f0', borderTopColor: '#000', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
+          <p style={{ color: '#6b6b6b', fontSize: 15 }}>Loading...</p>
+        </div>
+        <style jsx global>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: brand.bg }}>
-      <header className="admin-header calendar-header" style={{ padding: '16px 32px', background: brand.white, borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+    <div style={{ minHeight: '100vh', background: '#fff', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+      <header className="admin-header calendar-header" style={{
+        padding: '14px 24px', background: '#fff', borderBottom: '1px solid #f0f0f0',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        position: 'sticky', top: 0, zIndex: 100
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <Logo />
-          <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
-          <span style={{ marginLeft: 12, padding: '4px 10px', background: brand.text, color: brand.white, borderRadius: 4, fontSize: 12, fontWeight: 600 }}>CALENDAR</span>
+          <span style={{ fontSize: 18, fontWeight: 700, color: '#000', letterSpacing: '-0.02em' }}>BetterView</span>
+          <span style={{ marginLeft: 8, padding: '4px 10px', background: '#000', color: '#fff', borderRadius: 6, fontSize: 11, fontWeight: 700, letterSpacing: '0.04em' }}>CALENDAR</span>
         </div>
-        <Link href="/admin" style={{ fontSize: 14, color: brand.text, textDecoration: 'none', padding: '8px 16px', border: `1px solid ${brand.border}`, borderRadius: 6, fontWeight: 500 }}>
+        <Link href="/admin" style={{
+          fontSize: 14, color: '#000', textDecoration: 'none', padding: '8px 20px',
+          background: '#f5f5f5', borderRadius: 100, fontWeight: 600, transition: 'background 0.15s'
+        }}>
           Back to Admin
         </Link>
       </header>
@@ -120,33 +129,45 @@ export default function AdminCalendar() {
       <main style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 24px' }}>
         {/* Month Navigation */}
         <div className="calendar-nav" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
-          <button onClick={prevMonth} style={{ padding: '10px 20px', fontSize: 14, background: brand.white, border: `1px solid ${brand.border}`, borderRadius: 6, cursor: 'pointer', color: brand.text }}>
+          <button onClick={prevMonth} style={{
+            padding: '10px 24px', fontSize: 14, fontWeight: 600,
+            background: '#f5f5f5', border: 'none', borderRadius: 100,
+            cursor: 'pointer', color: '#000', transition: 'background 0.15s'
+          }}>
             Previous
           </button>
-          <h1 style={{ fontSize: 28, fontWeight: 600, color: brand.text }}>{monthName}</h1>
-          <button onClick={nextMonth} style={{ padding: '10px 20px', fontSize: 14, background: brand.white, border: `1px solid ${brand.border}`, borderRadius: 6, cursor: 'pointer', color: brand.text }}>
+          <h1 style={{ fontSize: 28, fontWeight: 800, color: '#000', letterSpacing: '-0.02em' }}>{monthName}</h1>
+          <button onClick={nextMonth} style={{
+            padding: '10px 24px', fontSize: 14, fontWeight: 600,
+            background: '#f5f5f5', border: 'none', borderRadius: 100,
+            cursor: 'pointer', color: '#000', transition: 'background 0.15s'
+          }}>
             Next
           </button>
         </div>
 
         {/* Filters */}
-        <div style={{ display: 'flex', gap: 16, marginBottom: 16, alignItems: 'center' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
-            <input type="checkbox" checked={showCancelled} onChange={(e) => setShowCancelled(e.target.checked)} style={{ cursor: 'pointer' }} />
+        <div style={{ display: 'flex', gap: 20, marginBottom: 20, alignItems: 'center' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: '#6b6b6b', cursor: 'pointer' }}>
+            <input type="checkbox" checked={showCancelled} onChange={(e) => setShowCancelled(e.target.checked)} style={{ cursor: 'pointer', width: 18, height: 18, accentColor: '#000' }} />
             Show Cancelled
           </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
-            <input type="checkbox" checked={showSkipped} onChange={(e) => setShowSkipped(e.target.checked)} style={{ cursor: 'pointer' }} />
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: '#6b6b6b', cursor: 'pointer' }}>
+            <input type="checkbox" checked={showSkipped} onChange={(e) => setShowSkipped(e.target.checked)} style={{ cursor: 'pointer', width: 18, height: 18, accentColor: '#000' }} />
             Show Skipped
           </label>
         </div>
 
         {/* Calendar Grid */}
-        <div style={{ background: brand.white, borderRadius: 12, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
+        <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #f0f0f0', overflow: 'hidden' }}>
           {/* Day Headers */}
-          <div className="calendar-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: `1px solid ${brand.border}` }}>
+          <div className="calendar-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: '1px solid #f0f0f0' }}>
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-              <div key={day} style={{ padding: '12px 8px', textAlign: 'center', fontSize: 13, fontWeight: 600, color: brand.textLight, background: brand.bg }}>
+              <div key={day} style={{
+                padding: '14px 8px', textAlign: 'center', fontSize: 13,
+                fontWeight: 700, color: '#6b6b6b', background: '#fafafa',
+                textTransform: 'uppercase', letterSpacing: '0.04em',
+              }}>
                 {day}
               </div>
             ))}
@@ -156,7 +177,7 @@ export default function AdminCalendar() {
           <div className="calendar-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
             {/* Empty cells for days before the first */}
             {Array.from({ length: firstDay }, (_, i) => (
-              <div key={`empty-${i}`} style={{ minHeight: 100, padding: 8, borderRight: `1px solid ${brand.border}`, borderBottom: `1px solid ${brand.border}`, background: brand.bg }} />
+              <div key={`empty-${i}`} style={{ minHeight: 100, padding: 8, borderRight: '1px solid #f0f0f0', borderBottom: '1px solid #f0f0f0', background: '#fafafa' }} />
             ))}
 
             {/* Day cells */}
@@ -173,23 +194,33 @@ export default function AdminCalendar() {
                   className="calendar-day-cell"
                   style={{
                     minHeight: 100, padding: 8, cursor: 'pointer',
-                    borderRight: `1px solid ${brand.border}`,
-                    borderBottom: `1px solid ${brand.border}`,
-                    background: isSelected ? brand.primary + '20' : isToday ? '#FFFBEB' : brand.white,
-                    transition: 'background 0.2s'
+                    borderRight: '1px solid #f0f0f0',
+                    borderBottom: '1px solid #f0f0f0',
+                    background: isSelected ? '#f5f5f5' : isToday ? '#fafafa' : '#fff',
+                    transition: 'background 0.15s'
                   }}
                 >
-                  <div style={{ fontSize: 14, fontWeight: isToday ? 700 : 500, color: isToday ? brand.gold : brand.text, marginBottom: 4 }}>
+                  <div style={{
+                    fontSize: 14, marginBottom: 4,
+                    fontWeight: isToday ? 800 : 500,
+                    color: isToday ? '#fff' : '#000',
+                    width: isToday ? 28 : 'auto', height: isToday ? 28 : 'auto',
+                    background: isToday ? '#000' : 'transparent',
+                    borderRadius: isToday ? '50%' : 0,
+                    display: isToday ? 'flex' : 'block',
+                    alignItems: 'center', justifyContent: 'center',
+                  }}>
                     {day}
                   </div>
                   {dayBk.slice(0, 3).map((bk, idx) => {
                     const isRecurring = !!bk.recurring_group_id;
                     return (
                       <div key={idx} className="calendar-booking-pill" style={{
-                        padding: '2px 6px', marginBottom: 2, borderRadius: 4, fontSize: 11,
-                        background: bk.status === 'upcoming' ? brand.primary : bk.status === 'scheduled' ? '#DBEAFE' : '#e8e8e8',
-                        color: brand.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                        display: 'flex', alignItems: 'center', gap: 3,
+                        padding: '2px 6px', marginBottom: 2, borderRadius: 6, fontSize: 11,
+                        background: bk.status === 'upcoming' ? '#000' : bk.status === 'scheduled' ? '#f0f0f0' : '#f5f5f5',
+                        color: bk.status === 'upcoming' ? '#fff' : '#000',
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        display: 'flex', alignItems: 'center', gap: 3, fontWeight: 500,
                       }}>
                         {isRecurring && (
                           <span style={{ fontSize: 10, flexShrink: 0 }} title="Recurring">&#x21BB;</span>
@@ -199,7 +230,7 @@ export default function AdminCalendar() {
                     );
                   })}
                   {dayBk.length > 3 && (
-                    <div style={{ fontSize: 11, color: brand.textLight, padding: '2px 6px' }}>
+                    <div style={{ fontSize: 11, color: '#6b6b6b', padding: '2px 6px', fontWeight: 600 }}>
                       +{dayBk.length - 3} more
                     </div>
                   )}
@@ -211,15 +242,15 @@ export default function AdminCalendar() {
 
         {/* Selected Day Detail */}
         {selectedDay && (
-          <div style={{ marginTop: 32, background: brand.white, borderRadius: 12, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
-            <div style={{ padding: '20px 24px', background: brand.bg, borderBottom: `1px solid ${brand.border}` }}>
-              <h2 style={{ fontSize: 18, fontWeight: 600, color: brand.text }}>
+          <div style={{ marginTop: 32, background: '#fff', borderRadius: 20, border: '1px solid #f0f0f0', overflow: 'hidden' }}>
+            <div style={{ padding: '20px 24px', background: '#fafafa', borderBottom: '1px solid #f0f0f0' }}>
+              <h2 style={{ fontSize: 18, fontWeight: 700, color: '#000', letterSpacing: '-0.01em' }}>
                 {formatDate(`${year}-${String(month + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`)}
               </h2>
-              <p style={{ fontSize: 14, color: brand.textLight }}>{dayBookings.length} booking{dayBookings.length !== 1 ? 's' : ''}</p>
+              <p style={{ fontSize: 14, color: '#6b6b6b', marginTop: 4 }}>{dayBookings.length} booking{dayBookings.length !== 1 ? 's' : ''}</p>
             </div>
             {dayBookings.length === 0 ? (
-              <div style={{ padding: '40px 24px', textAlign: 'center', color: brand.textLight }}>
+              <div style={{ padding: '48px 24px', textAlign: 'center', color: '#6b6b6b', fontSize: 15 }}>
                 No bookings on this day
               </div>
             ) : (
@@ -231,36 +262,36 @@ export default function AdminCalendar() {
                   const statusStyle = getStatusStyle(booking.status);
 
                   return (
-                    <div key={`${booking.id}-${idx}`} className="calendar-detail-row" style={{ padding: '16px 24px', borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                    <div key={`${booking.id}-${idx}`} className="calendar-detail-row" style={{ padding: '18px 24px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                       <div>
-                        <p style={{ fontWeight: 600, color: brand.text }}>{booking.building} - Unit {booking.unit_number}</p>
-                        <p style={{ fontSize: 13, color: brand.textLight }}>{booking.booking_time} · {booking.customer_name}</p>
+                        <p style={{ fontWeight: 700, color: '#000', fontSize: 15, letterSpacing: '-0.01em' }}>{booking.building} - Unit {booking.unit_number}</p>
+                        <p style={{ fontSize: 14, color: '#6b6b6b', marginTop: 2 }}>{booking.booking_time} · {booking.customer_name}</p>
                         {freqName && freqName !== 'One-Time' && (
-                          <p style={{ fontSize: 12, color: brand.gold, marginTop: 2 }}>
+                          <p style={{ fontSize: 12, color: '#000', marginTop: 4, fontWeight: 600 }}>
                             &#x21BB; {freqName} frequency
-                            {isRecurring && <span style={{ color: brand.textLight }}> (recurring series)</span>}
+                            {isRecurring && <span style={{ color: '#6b6b6b', fontWeight: 400 }}> (recurring series)</span>}
                           </p>
                         )}
                       </div>
-                      <div className="calendar-detail-meta" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <span style={{ fontSize: 13, color: brand.textLight }}>
-                          Worker: <strong>{getWorkerName(booking.worker_id)}</strong>
+                      <div className="calendar-detail-meta" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span style={{ fontSize: 13, color: '#6b6b6b' }}>
+                          Worker: <strong style={{ color: '#000' }}>{getWorkerName(booking.worker_id)}</strong>
                         </span>
                         {freqName && freqName !== 'One-Time' && (
                           <span style={{
-                            padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 600,
-                            background: '#F5F0DC', color: '#A69028'
+                            padding: '4px 12px', borderRadius: 100, fontSize: 12, fontWeight: 600,
+                            background: '#f5f5f5', color: '#000'
                           }}>
                             {freqName}
                           </span>
                         )}
                         <span style={{
-                          padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 500,
+                          padding: '4px 12px', borderRadius: 100, fontSize: 12, fontWeight: 600,
                           ...statusStyle
                         }}>
                           {booking.status}
                         </span>
-                        <span style={{ fontWeight: 600, color: brand.text }}>${booking.total_price}</span>
+                        <span style={{ fontWeight: 700, color: '#000', fontSize: 15 }}>${booking.total_price}</span>
                       </div>
                     </div>
                   );

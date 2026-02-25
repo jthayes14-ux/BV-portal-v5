@@ -7,10 +7,10 @@ import { useAuth } from '../../lib/useAuth';
 
 function Logo() {
   return (
-    <div style={{ display: 'flex', gap: 4 }}>
-      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
-      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
-      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
+    <div style={{ display: 'flex', gap: 3 }}>
+      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
+      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
+      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
     </div>
   );
 }
@@ -94,9 +94,9 @@ export default function AdminPanel() {
   const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
 
   const brand = {
-    primary: '#B8C5F2', text: '#1a1a1a', textLight: '#666',
-    border: '#e0e0e0', bg: '#fafafa', white: '#ffffff',
-    danger: '#dc2626', success: '#22c55e', gold: '#C9B037',
+    primary: '#000', text: '#000', textLight: '#6b6b6b',
+    border: '#f0f0f0', bg: '#fafafa', white: '#ffffff',
+    danger: '#dc2626', success: '#000', gold: '#000',
   };
 
   const tabs = [
@@ -146,8 +146,8 @@ export default function AdminPanel() {
     { value: '90', label: '90 days' },
   ];
 
-  const buttonStyle = { padding: '8px 16px', fontSize: 14, fontWeight: 500, border: 'none', borderRadius: 6, cursor: 'pointer' };
-  const inputStyle = { padding: '10px 12px', fontSize: 14, border: `1px solid ${brand.border}`, borderRadius: 6, width: '100%', boxSizing: 'border-box' };
+  const buttonStyle = { padding: '8px 18px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 100, cursor: 'pointer', transition: 'all 0.15s ease' };
+  const inputStyle = { padding: '10px 14px', fontSize: 14, border: '1.5px solid #e5e5e5', borderRadius: 10, width: '100%', boxSizing: 'border-box', outline: 'none', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" };
 
   useEffect(() => {
     if (!authLoading && !user) { router.push('/login'); return; }
@@ -678,33 +678,33 @@ export default function AdminPanel() {
 
   const getStatusStyle = (status) => {
     switch (status) {
-      case 'upcoming': return { background: brand.primary, color: brand.text };
-      case 'scheduled': return { background: '#DBEAFE', color: '#1E40AF' };
-      case 'completed': return { background: '#e8e8e8', color: brand.text };
+      case 'upcoming': return { background: '#000', color: '#fff' };
+      case 'scheduled': return { background: '#f0f0f0', color: '#000' };
+      case 'completed': return { background: '#f0f0f0', color: '#6b6b6b' };
       case 'skipped': return { background: '#FEF3C7', color: '#92400E' };
       case 'cancelled': return { background: '#FEE2E2', color: '#DC2626' };
-      default: return { background: '#e8e8e8', color: brand.text };
+      default: return { background: '#f0f0f0', color: '#6b6b6b' };
     }
   };
 
   if (authLoading || dataLoading) {
-    return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: brand.bg }}><p style={{ color: brand.textLight }}>Loading...</p></div>;
+    return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}><div style={{ textAlign: 'center' }}><div style={{ width: 40, height: 40, border: '3px solid #f0f0f0', borderTopColor: '#000', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} /><p style={{ color: '#6b6b6b', fontSize: 15 }}>Loading...</p></div><style jsx global>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style></div>;
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: brand.bg }}>
-      <header className="admin-header" style={{ padding: '16px 32px', background: brand.white, borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+    <div style={{ minHeight: '100vh', background: '#fff', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+      <header className="admin-header" style={{ padding: '14px 24px', background: '#fff', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <Logo />
-          <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
-          <span style={{ marginLeft: 12, padding: '4px 10px', background: brand.text, color: brand.white, borderRadius: 4, fontSize: 12, fontWeight: 600 }}>ADMIN</span>
+          <span style={{ fontSize: 18, fontWeight: 700, color: '#000', letterSpacing: '-0.02em' }}>BetterView</span>
+          <span style={{ marginLeft: 8, padding: '4px 10px', background: '#000', color: '#fff', borderRadius: 6, fontSize: 11, fontWeight: 700, letterSpacing: '0.04em' }}>ADMIN</span>
         </div>
-        <div className="admin-header-right" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Link href="/admin/calendar" style={{ fontSize: 14, color: brand.primary, textDecoration: 'none', fontWeight: 500, padding: '8px 16px', border: `1px solid ${brand.border}`, borderRadius: 6 }}>
+        <div className="admin-header-right" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Link href="/admin/calendar" style={{ fontSize: 14, color: '#000', textDecoration: 'none', fontWeight: 600, padding: '8px 20px', background: '#f5f5f5', borderRadius: 100, transition: 'background 0.15s' }}>
             Calendar View
           </Link>
-          <span style={{ fontSize: 14, color: brand.textLight }}>{user?.email}</span>
-          <button onClick={handleLogout} style={{ ...buttonStyle, background: 'transparent', border: `1px solid ${brand.border}`, color: brand.text }}>Log Out</button>
+          <span style={{ fontSize: 13, color: '#6b6b6b' }}>{user?.email}</span>
+          <button onClick={handleLogout} style={{ ...buttonStyle, background: '#f5f5f5', color: '#000' }}>Log Out</button>
         </div>
 
         <button className="mobile-nav-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
@@ -720,24 +720,27 @@ export default function AdminPanel() {
         </button>
 
         <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
-          <Link href="/admin/calendar" onClick={() => setMobileMenuOpen(false)} style={{ padding: '14px 16px', fontSize: 16, fontWeight: 500, color: brand.primary, textDecoration: 'none', textAlign: 'center', borderRadius: 8, border: `1px solid ${brand.border}` }}>
+          <Link href="/admin/calendar" onClick={() => setMobileMenuOpen(false)} style={{ padding: '16px', fontSize: 16, fontWeight: 600, color: '#fff', textDecoration: 'none', textAlign: 'center', borderRadius: 12, background: '#000' }}>
             Calendar View
           </Link>
-          <span style={{ padding: '14px 16px', fontSize: 14, color: brand.textLight, textAlign: 'center' }}>{user?.email}</span>
-          <button onClick={() => { handleLogout(); setMobileMenuOpen(false); }} style={{ padding: '14px 16px', fontSize: 16, fontWeight: 500, background: 'transparent', border: `1px solid ${brand.border}`, borderRadius: 8, color: brand.text, cursor: 'pointer' }}>
+          <span style={{ padding: '14px 16px', fontSize: 13, color: '#6b6b6b', textAlign: 'center' }}>{user?.email}</span>
+          <button onClick={() => { handleLogout(); setMobileMenuOpen(false); }} style={{ padding: '16px', fontSize: 16, fontWeight: 600, background: '#f5f5f5', border: 'none', borderRadius: 12, color: '#000', cursor: 'pointer' }}>
             Log Out
           </button>
         </div>
       </header>
 
       <div className="admin-layout" style={{ display: 'flex' }}>
-        <aside className="admin-sidebar" style={{ width: 220, background: brand.white, borderRight: `1px solid ${brand.border}`, minHeight: 'calc(100vh - 65px)', padding: '24px 0' }}>
+        <aside className="admin-sidebar" style={{ width: 200, background: '#fff', borderRight: '1px solid #f0f0f0', minHeight: 'calc(100vh - 57px)', padding: '16px 0', position: 'sticky', top: 57, alignSelf: 'flex-start' }}>
           {tabs.map(tab => (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
-              display: 'block', width: '100%', padding: '12px 24px', textAlign: 'left',
-              background: activeTab === tab.id ? brand.bg : 'transparent', border: 'none',
-              borderLeft: activeTab === tab.id ? `3px solid ${brand.text}` : '3px solid transparent',
-              fontSize: 15, fontWeight: activeTab === tab.id ? 600 : 400, color: brand.text, cursor: 'pointer'
+              display: 'block', width: '100%', padding: '10px 20px', textAlign: 'left',
+              background: activeTab === tab.id ? '#f5f5f5' : 'transparent', border: 'none',
+              borderLeft: activeTab === tab.id ? '3px solid #000' : '3px solid transparent',
+              fontSize: 14, fontWeight: activeTab === tab.id ? 700 : 500,
+              color: activeTab === tab.id ? '#000' : '#6b6b6b',
+              cursor: 'pointer', transition: 'all 0.15s ease',
+              letterSpacing: activeTab === tab.id ? '-0.01em' : '0',
             }}>
               {tab.label}
             </button>
@@ -747,9 +750,9 @@ export default function AdminPanel() {
         <main className="admin-main" style={{ flex: 1, padding: 32 }}>
 
           {crudError && (
-            <div style={{ padding: '12px 16px', background: '#FEE2E2', borderRadius: 8, marginBottom: 20, fontSize: 14, color: '#DC2626', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ padding: '14px 20px', background: '#FEE2E2', borderRadius: 14, marginBottom: 20, fontSize: 14, color: '#DC2626', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 500 }}>
               <span>{crudError}</span>
-              <button onClick={() => setCrudError('')} style={{ background: 'none', border: 'none', color: '#DC2626', fontWeight: 600, cursor: 'pointer', fontSize: 16 }}>&times;</button>
+              <button onClick={() => setCrudError('')} style={{ background: 'none', border: 'none', color: '#DC2626', fontWeight: 700, cursor: 'pointer', fontSize: 18, width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>&times;</button>
             </div>
           )}
 
@@ -757,7 +760,7 @@ export default function AdminPanel() {
           {activeTab === 'bookings' && (
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>Bookings</h1>
+                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#000', letterSpacing: '-0.02em' }}>Bookings</h1>
                 <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input type="text" placeholder="Search bookings..." value={searchBookings} onChange={(e) => setSearchBookings(e.target.value)} style={{ ...inputStyle, width: 220 }} />
                   <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
@@ -771,7 +774,7 @@ export default function AdminPanel() {
                 </div>
               </div>
               <div className="table-wrapper">
-                <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden', minWidth: 800 }}>
+                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #f0f0f0', overflow: 'hidden', minWidth: 800 }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                       <tr style={{ background: brand.bg }}>
@@ -842,7 +845,7 @@ export default function AdminPanel() {
                               <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                                 {isActionable && (
                                   <>
-                                    <button onClick={() => handleMarkComplete(booking.id)} style={{ ...buttonStyle, background: brand.success, color: brand.white, fontSize: 12, padding: '6px 12px' }}>
+                                    <button onClick={() => handleMarkComplete(booking.id)} style={{ ...buttonStyle, background: '#000', color: '#fff', fontSize: 12, padding: '6px 12px' }}>
                                       Complete
                                     </button>
                                     <button onClick={() => handleSkipBooking(booking.id)} style={{ ...buttonStyle, background: '#FEF3C7', color: '#92400E', fontSize: 12, padding: '6px 12px' }}>
@@ -933,7 +936,7 @@ export default function AdminPanel() {
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
                   <div>
-                    <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>Customers</h1>
+                    <h1 style={{ fontSize: 24, fontWeight: 800, color: '#000', letterSpacing: '-0.02em' }}>Customers</h1>
                     <p style={{ fontSize: 14, color: brand.textLight, marginTop: 4 }}>{customers.length} customer{customers.length !== 1 ? 's' : ''} found</p>
                   </div>
                   <input
@@ -945,7 +948,7 @@ export default function AdminPanel() {
                   />
                 </div>
                 <div className="table-wrapper">
-                  <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden', minWidth: 700 }}>
+                  <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #f0f0f0', overflow: 'hidden', minWidth: 700 }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                       <thead>
                         <tr style={{ background: brand.bg }}>
@@ -1006,16 +1009,16 @@ export default function AdminPanel() {
                                     <div style={{ padding: '0 16px 16px 48px', background: brand.bg }}>
 
                                       {/* Customer Info Section */}
-                                      <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, padding: 16, marginBottom: 16, marginTop: 8 }}>
+                                      <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #f0f0f0', padding: 16, marginBottom: 16, marginTop: 8 }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                                           <p style={{ fontSize: 14, fontWeight: 600, color: brand.text }}>Customer Info</p>
                                           {editingCustomerEmail === c.email ? (
                                             <div style={{ display: 'flex', gap: 6 }}>
-                                              <button onClick={() => handleSaveCustomerInfo(c.email, c.bookings, c.user_id)} style={{ ...buttonStyle, background: brand.success, color: brand.white, fontSize: 12, padding: '6px 12px' }}>Save</button>
-                                              <button onClick={() => { setEditingCustomerEmail(null); setEditingCustomerValue({}); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, fontSize: 12, padding: '6px 12px', border: `1px solid ${brand.border}` }}>Cancel</button>
+                                              <button onClick={() => handleSaveCustomerInfo(c.email, c.bookings, c.user_id)} style={{ ...buttonStyle, background: '#000', color: '#fff', fontSize: 12, padding: '6px 12px' }}>Save</button>
+                                              <button onClick={() => { setEditingCustomerEmail(null); setEditingCustomerValue({}); }} style={{ ...buttonStyle, background: '#f5f5f5', color: '#000', fontSize: 12, padding: '6px 14px' }}>Cancel</button>
                                             </div>
                                           ) : (
-                                            <button onClick={() => { setEditingCustomerEmail(c.email); setEditingCustomerValue({ customer_name: c.name || '', customer_email: c.email, phone: c.phone || '' }); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, fontSize: 12, padding: '6px 12px', border: `1px solid ${brand.border}` }}>Edit</button>
+                                            <button onClick={() => { setEditingCustomerEmail(c.email); setEditingCustomerValue({ customer_name: c.name || '', customer_email: c.email, phone: c.phone || '' }); }} style={{ ...buttonStyle, background: '#f5f5f5', color: '#000', fontSize: 12, padding: '6px 14px' }}>Edit</button>
                                           )}
                                         </div>
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
@@ -1050,7 +1053,7 @@ export default function AdminPanel() {
                                       <p style={{ fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 12 }}>
                                         Booking History ({c.bookings.length})
                                       </p>
-                                      <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
+                                      <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #f0f0f0', overflow: 'hidden' }}>
                                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                           <thead>
                                             <tr style={{ background: '#f9fafb' }}>
@@ -1130,15 +1133,15 @@ export default function AdminPanel() {
                                                       <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                                                         {isEditing ? (
                                                           <>
-                                                            <button onClick={() => handleSaveBookingEdit(b.id)} style={{ ...buttonStyle, background: brand.success, color: brand.white, fontSize: 11, padding: '5px 10px' }}>Save</button>
+                                                            <button onClick={() => handleSaveBookingEdit(b.id)} style={{ ...buttonStyle, background: '#000', color: '#fff', fontSize: 11, padding: '5px 10px' }}>Save</button>
                                                             <button onClick={() => { setEditingBookingId(null); setEditingBookingValue({}); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, fontSize: 11, padding: '5px 10px', border: `1px solid ${brand.border}` }}>Cancel</button>
                                                           </>
                                                         ) : (
                                                           <>
-                                                            <button onClick={(e) => { e.stopPropagation(); setEditingBookingId(b.id); setEditingBookingValue({ booking_date: b.booking_date, booking_time: b.booking_time || '', worker_id: b.worker_id || '', unit_number: b.unit_number || '', special_instructions: b.special_instructions || '' }); }} style={{ ...buttonStyle, background: brand.primary, color: brand.text, fontSize: 11, padding: '5px 10px' }}>Edit</button>
+                                                            <button onClick={(e) => { e.stopPropagation(); setEditingBookingId(b.id); setEditingBookingValue({ booking_date: b.booking_date, booking_time: b.booking_time || '', worker_id: b.worker_id || '', unit_number: b.unit_number || '', special_instructions: b.special_instructions || '' }); }} style={{ ...buttonStyle, background: '#f5f5f5', color: '#000', fontSize: 11, padding: '5px 10px' }}>Edit</button>
                                                             {isActionable && (
                                                               <>
-                                                                <button onClick={(e) => { e.stopPropagation(); handleMarkComplete(b.id); }} style={{ ...buttonStyle, background: brand.success, color: brand.white, fontSize: 11, padding: '5px 10px' }}>Complete</button>
+                                                                <button onClick={(e) => { e.stopPropagation(); handleMarkComplete(b.id); }} style={{ ...buttonStyle, background: '#000', color: '#fff', fontSize: 11, padding: '5px 10px' }}>Complete</button>
                                                                 <button onClick={(e) => { e.stopPropagation(); handleSkipBooking(b.id); }} style={{ ...buttonStyle, background: '#FEF3C7', color: '#92400E', fontSize: 11, padding: '5px 10px' }}>Skip</button>
                                                                 <button onClick={(e) => { e.stopPropagation(); handleCancelBooking(b.id); }} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger, fontSize: 11, padding: '5px 10px' }}>Cancel</button>
                                                               </>
@@ -1179,18 +1182,18 @@ export default function AdminPanel() {
           {activeTab === 'frequencies' && (
             <div>
               <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>Frequencies</h1>
+                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#000', letterSpacing: '-0.02em' }}>Frequencies</h1>
                 <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input type="text" placeholder="Search frequencies..." value={searchFrequencies} onChange={(e) => setSearchFrequencies(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
                     <input type="checkbox" checked={showArchivedFrequencies} onChange={(e) => setShowArchivedFrequencies(e.target.checked)} />
                     Show archived
                   </label>
-                  <button onClick={() => handleAdd('frequencies')} style={{ ...buttonStyle, background: brand.text, color: brand.white }}>+ Add Frequency</button>
+                  <button onClick={() => handleAdd('frequencies')} style={{ ...buttonStyle, background: '#000', color: '#fff' }}>+ Add Frequency</button>
                 </div>
               </div>
               <div className="table-wrapper">
-                <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
+                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #f0f0f0', overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                       <tr style={{ background: brand.bg }}>
@@ -1240,9 +1243,9 @@ export default function AdminPanel() {
                           </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
                             {editingId === `frequency-${f.id}` ? (
-                              <button onClick={() => handleSave('frequencies', f.id)} style={{ ...buttonStyle, background: brand.success, color: brand.white, marginRight: 8 }}>Save</button>
+                              <button onClick={() => handleSave('frequencies', f.id)} style={{ ...buttonStyle, background: '#000', color: '#fff', marginRight: 8 }}>Save</button>
                             ) : (
-                              <button onClick={() => { setEditingId(`frequency-${f.id}`); setEditValue({ name: f.name, discount_percent: f.discount_percent, interval_days: f.interval_days, sort_order: f.sort_order }); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, marginRight: 8 }}>Edit</button>
+                              <button onClick={() => { setEditingId(`frequency-${f.id}`); setEditValue({ name: f.name, discount_percent: f.discount_percent, interval_days: f.interval_days, sort_order: f.sort_order }); }} style={{ ...buttonStyle, background: '#f5f5f5', color: '#000', marginRight: 8 }}>Edit</button>
                             )}
                             <button onClick={() => handleToggleArchive('frequencies', f.id, f.archived)} style={{ ...buttonStyle, background: f.archived ? '#dbeafe' : '#fef3c7', color: f.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
                               {f.archived ? 'Unarchive' : 'Archive'}
@@ -1265,18 +1268,18 @@ export default function AdminPanel() {
           {activeTab === 'neighborhoods' && (
             <div>
               <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>Neighborhoods</h1>
+                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#000', letterSpacing: '-0.02em' }}>Neighborhoods</h1>
                 <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input type="text" placeholder="Search neighborhoods..." value={searchNeighborhoods} onChange={(e) => setSearchNeighborhoods(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
                     <input type="checkbox" checked={showArchivedNeighborhoods} onChange={(e) => setShowArchivedNeighborhoods(e.target.checked)} />
                     Show archived
                   </label>
-                  <button onClick={() => handleAdd('neighborhoods')} style={{ ...buttonStyle, background: brand.text, color: brand.white }}>+ Add Neighborhood</button>
+                  <button onClick={() => handleAdd('neighborhoods')} style={{ ...buttonStyle, background: '#000', color: '#fff' }}>+ Add Neighborhood</button>
                 </div>
               </div>
               <div className="table-wrapper">
-                <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
+                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #f0f0f0', overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                       <tr style={{ background: brand.bg }}>
@@ -1304,9 +1307,9 @@ export default function AdminPanel() {
                           </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
                             {editingId === `neighborhood-${n.id}` ? (
-                              <button onClick={() => handleSave('neighborhoods', n.id)} style={{ ...buttonStyle, background: brand.success, color: brand.white, marginRight: 8 }}>Save</button>
+                              <button onClick={() => handleSave('neighborhoods', n.id)} style={{ ...buttonStyle, background: '#000', color: '#fff', marginRight: 8 }}>Save</button>
                             ) : (
-                              <button onClick={() => { setEditingId(`neighborhood-${n.id}`); setEditValue({ name: n.name }); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, marginRight: 8 }}>Edit</button>
+                              <button onClick={() => { setEditingId(`neighborhood-${n.id}`); setEditValue({ name: n.name }); }} style={{ ...buttonStyle, background: '#f5f5f5', color: '#000', marginRight: 8 }}>Edit</button>
                             )}
                             <button onClick={() => handleToggleArchive('neighborhoods', n.id, n.archived)} style={{ ...buttonStyle, background: n.archived ? '#dbeafe' : '#fef3c7', color: n.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
                               {n.archived ? 'Unarchive' : 'Archive'}
@@ -1329,7 +1332,7 @@ export default function AdminPanel() {
           {activeTab === 'buildings' && (
             <div>
               <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>Buildings</h1>
+                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#000', letterSpacing: '-0.02em' }}>Buildings</h1>
                 <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input type="text" placeholder="Search buildings..." value={searchBuildings} onChange={(e) => setSearchBuildings(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <select value={selectedNeighborhood} onChange={(e) => setSelectedNeighborhood(e.target.value)} style={{ ...inputStyle, width: 180 }}>
@@ -1340,11 +1343,11 @@ export default function AdminPanel() {
                     <input type="checkbox" checked={showArchivedBuildings} onChange={(e) => setShowArchivedBuildings(e.target.checked)} />
                     Show archived
                   </label>
-                  <button onClick={() => handleAdd('buildings')} style={{ ...buttonStyle, background: brand.text, color: brand.white }}>+ Add Building</button>
+                  <button onClick={() => handleAdd('buildings')} style={{ ...buttonStyle, background: '#000', color: '#fff' }}>+ Add Building</button>
                 </div>
               </div>
               <div className="table-wrapper">
-                <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
+                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #f0f0f0', overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                       <tr style={{ background: brand.bg }}>
@@ -1388,9 +1391,9 @@ export default function AdminPanel() {
                           </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
                             {editingId === `building-${b.id}` ? (
-                              <button onClick={() => handleSave('buildings', b.id)} style={{ ...buttonStyle, background: brand.success, color: brand.white, marginRight: 8 }}>Save</button>
+                              <button onClick={() => handleSave('buildings', b.id)} style={{ ...buttonStyle, background: '#000', color: '#fff', marginRight: 8 }}>Save</button>
                             ) : (
-                              <button onClick={() => { setEditingId(`building-${b.id}`); setEditValue({ name: b.name, address: b.address, neighborhood_id: b.neighborhood_id }); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, marginRight: 8 }}>Edit</button>
+                              <button onClick={() => { setEditingId(`building-${b.id}`); setEditValue({ name: b.name, address: b.address, neighborhood_id: b.neighborhood_id }); }} style={{ ...buttonStyle, background: '#f5f5f5', color: '#000', marginRight: 8 }}>Edit</button>
                             )}
                             <button onClick={() => handleToggleArchive('buildings', b.id, b.archived)} style={{ ...buttonStyle, background: b.archived ? '#dbeafe' : '#fef3c7', color: b.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
                               {b.archived ? 'Unarchive' : 'Archive'}
@@ -1413,7 +1416,7 @@ export default function AdminPanel() {
           {activeTab === 'floorplans' && (
             <div>
               <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>Floor Plans</h1>
+                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#000', letterSpacing: '-0.02em' }}>Floor Plans</h1>
                 <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input type="text" placeholder="Search floor plans..." value={searchFloorPlans} onChange={(e) => setSearchFloorPlans(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <select value={selectedBuilding} onChange={(e) => setSelectedBuilding(e.target.value)} style={{ ...inputStyle, width: 200 }}>
@@ -1424,11 +1427,11 @@ export default function AdminPanel() {
                     <input type="checkbox" checked={showArchivedFloorPlans} onChange={(e) => setShowArchivedFloorPlans(e.target.checked)} />
                     Show archived
                   </label>
-                  <button onClick={() => handleAdd('floorplans')} style={{ ...buttonStyle, background: brand.text, color: brand.white }}>+ Add Floor Plan</button>
+                  <button onClick={() => handleAdd('floorplans')} style={{ ...buttonStyle, background: '#000', color: '#fff' }}>+ Add Floor Plan</button>
                 </div>
               </div>
               <div className="table-wrapper">
-                <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
+                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #f0f0f0', overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                       <tr style={{ background: brand.bg }}>
@@ -1480,9 +1483,9 @@ export default function AdminPanel() {
                           </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
                             {editingId === `floorplan-${f.id}` ? (
-                              <button onClick={() => handleSave('floorplans', f.id)} style={{ ...buttonStyle, background: brand.success, color: brand.white, marginRight: 8 }}>Save</button>
+                              <button onClick={() => handleSave('floorplans', f.id)} style={{ ...buttonStyle, background: '#000', color: '#fff', marginRight: 8 }}>Save</button>
                             ) : (
-                              <button onClick={() => { setEditingId(`floorplan-${f.id}`); setEditValue({ name: f.name, price: f.price, duration_minutes: f.duration_minutes || 60, building_id: f.building_id }); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, marginRight: 8 }}>Edit</button>
+                              <button onClick={() => { setEditingId(`floorplan-${f.id}`); setEditValue({ name: f.name, price: f.price, duration_minutes: f.duration_minutes || 60, building_id: f.building_id }); }} style={{ ...buttonStyle, background: '#f5f5f5', color: '#000', marginRight: 8 }}>Edit</button>
                             )}
                             <button onClick={() => handleToggleArchive('floorplans', f.id, f.archived)} style={{ ...buttonStyle, background: f.archived ? '#dbeafe' : '#fef3c7', color: f.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
                               {f.archived ? 'Unarchive' : 'Archive'}
@@ -1505,7 +1508,7 @@ export default function AdminPanel() {
           {activeTab === 'unitlines' && (
             <div>
               <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>Unit Lines</h1>
+                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#000', letterSpacing: '-0.02em' }}>Unit Lines</h1>
                 <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input type="text" placeholder="Search unit lines..." value={searchUnitLines} onChange={(e) => setSearchUnitLines(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <select value={selectedBuildingUL} onChange={(e) => setSelectedBuildingUL(e.target.value)} style={{ ...inputStyle, width: 200 }}>
@@ -1516,11 +1519,11 @@ export default function AdminPanel() {
                     <input type="checkbox" checked={showArchivedUnitLines} onChange={(e) => setShowArchivedUnitLines(e.target.checked)} />
                     Show archived
                   </label>
-                  <button onClick={() => handleAdd('unitlines')} style={{ ...buttonStyle, background: brand.text, color: brand.white }}>+ Add Unit Line</button>
+                  <button onClick={() => handleAdd('unitlines')} style={{ ...buttonStyle, background: '#000', color: '#fff' }}>+ Add Unit Line</button>
                 </div>
               </div>
               <div className="table-wrapper">
-                <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
+                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #f0f0f0', overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                       <tr style={{ background: brand.bg }}>
@@ -1594,9 +1597,9 @@ export default function AdminPanel() {
                             </td>
                             <td style={{ padding: '16px', textAlign: 'right' }}>
                               {isEditing ? (
-                                <button onClick={() => handleSave('unitlines', ul.id)} style={{ ...buttonStyle, background: brand.success, color: brand.white, marginRight: 8 }}>Save</button>
+                                <button onClick={() => handleSave('unitlines', ul.id)} style={{ ...buttonStyle, background: '#000', color: '#fff', marginRight: 8 }}>Save</button>
                               ) : (
-                                <button onClick={() => { setEditingId(`unitline-${ul.id}`); setEditValue({ building_id: ul.building_id, line_number: ul.line_number, floor_min: ul.floor_min, floor_max: ul.floor_max, floor_plan_id: ul.floor_plan_id || '', custom_price: ul.custom_price ?? '' }); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, marginRight: 8 }}>Edit</button>
+                                <button onClick={() => { setEditingId(`unitline-${ul.id}`); setEditValue({ building_id: ul.building_id, line_number: ul.line_number, floor_min: ul.floor_min, floor_max: ul.floor_max, floor_plan_id: ul.floor_plan_id || '', custom_price: ul.custom_price ?? '' }); }} style={{ ...buttonStyle, background: '#f5f5f5', color: '#000', marginRight: 8 }}>Edit</button>
                               )}
                               <button onClick={() => handleToggleArchive('unitlines', ul.id, ul.archived)} style={{ ...buttonStyle, background: ul.archived ? '#dbeafe' : '#fef3c7', color: ul.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
                                 {ul.archived ? 'Unarchive' : 'Archive'}
@@ -1620,17 +1623,17 @@ export default function AdminPanel() {
           {activeTab === 'addons' && (
             <div>
               <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>Add-Ons</h1>
+                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#000', letterSpacing: '-0.02em' }}>Add-Ons</h1>
                 <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input type="text" placeholder="Search add-ons..." value={searchAddOns} onChange={(e) => setSearchAddOns(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
                     <input type="checkbox" checked={showArchivedAddOns} onChange={(e) => setShowArchivedAddOns(e.target.checked)} />
                     Show archived
                   </label>
-                  <button onClick={() => handleAdd('addons')} style={{ ...buttonStyle, background: brand.text, color: brand.white }}>+ Add Add-On</button>
+                  <button onClick={() => handleAdd('addons')} style={{ ...buttonStyle, background: '#000', color: '#fff' }}>+ Add Add-On</button>
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderRadius: 8, border: `1px solid ${brand.border}`, background: brand.bg, marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderRadius: 16, border: '1px solid #f0f0f0', background: '#fafafa', marginBottom: 16 }}>
                 <div>
                   <span style={{ fontSize: 14, fontWeight: 600, color: brand.text }}>Add-Ons section on booking page</span>
                   <p style={{ fontSize: 13, color: brand.textLight, margin: '2px 0 0' }}>
@@ -1647,7 +1650,7 @@ export default function AdminPanel() {
                 </button>
               </div>
               <div className="table-wrapper">
-                <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
+                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #f0f0f0', overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                       <tr style={{ background: brand.bg }}>
@@ -1685,9 +1688,9 @@ export default function AdminPanel() {
                           </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
                             {editingId === `addon-${a.id}` ? (
-                              <button onClick={() => handleSave('addons', a.id)} style={{ ...buttonStyle, background: brand.success, color: brand.white, marginRight: 8 }}>Save</button>
+                              <button onClick={() => handleSave('addons', a.id)} style={{ ...buttonStyle, background: '#000', color: '#fff', marginRight: 8 }}>Save</button>
                             ) : (
-                              <button onClick={() => { setEditingId(`addon-${a.id}`); setEditValue({ name: a.name, price: a.price }); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, marginRight: 8 }}>Edit</button>
+                              <button onClick={() => { setEditingId(`addon-${a.id}`); setEditValue({ name: a.name, price: a.price }); }} style={{ ...buttonStyle, background: '#f5f5f5', color: '#000', marginRight: 8 }}>Edit</button>
                             )}
                             <button onClick={() => handleToggleArchive('addons', a.id, a.archived)} style={{ ...buttonStyle, background: a.archived ? '#dbeafe' : '#fef3c7', color: a.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
                               {a.archived ? 'Unarchive' : 'Archive'}
@@ -1707,18 +1710,18 @@ export default function AdminPanel() {
           {activeTab === 'workers' && (
             <div>
               <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>Workers</h1>
+                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#000', letterSpacing: '-0.02em' }}>Workers</h1>
                 <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input type="text" placeholder="Search workers..." value={searchWorkers} onChange={(e) => setSearchWorkers(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
                     <input type="checkbox" checked={showArchivedWorkers} onChange={(e) => setShowArchivedWorkers(e.target.checked)} />
                     Show archived
                   </label>
-                  <button onClick={() => handleAdd('workers')} style={{ ...buttonStyle, background: brand.text, color: brand.white }}>+ Add Worker</button>
+                  <button onClick={() => handleAdd('workers')} style={{ ...buttonStyle, background: '#000', color: '#fff' }}>+ Add Worker</button>
                 </div>
               </div>
               <div className="table-wrapper">
-                <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
+                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #f0f0f0', overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                       <tr style={{ background: brand.bg }}>
@@ -1764,9 +1767,9 @@ export default function AdminPanel() {
                           </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
                             {editingId === `worker-${w.id}` ? (
-                              <button onClick={() => handleSave('workers', w.id)} style={{ ...buttonStyle, background: brand.success, color: brand.white, marginRight: 8 }}>Save</button>
+                              <button onClick={() => handleSave('workers', w.id)} style={{ ...buttonStyle, background: '#000', color: '#fff', marginRight: 8 }}>Save</button>
                             ) : (
-                              <button onClick={() => { setEditingId(`worker-${w.id}`); setEditValue({ name: w.name, email: w.email, phone: w.phone }); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, marginRight: 8 }}>Edit</button>
+                              <button onClick={() => { setEditingId(`worker-${w.id}`); setEditValue({ name: w.name, email: w.email, phone: w.phone }); }} style={{ ...buttonStyle, background: '#f5f5f5', color: '#000', marginRight: 8 }}>Edit</button>
                             )}
                             <button onClick={() => handleToggleArchive('workers', w.id, w.archived)} style={{ ...buttonStyle, background: w.archived ? '#dbeafe' : '#fef3c7', color: w.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
                               {w.archived ? 'Unarchive' : 'Archive'}
@@ -1788,10 +1791,10 @@ export default function AdminPanel() {
           {/* AVAILABILITY TAB */}
           {activeTab === 'availability' && (
             <div>
-              <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text, marginBottom: 20 }}>Availability</h1>
+              <h1 style={{ fontSize: 24, fontWeight: 800, color: '#000', letterSpacing: '-0.02em', marginBottom: 20 }}>Availability</h1>
 
               {/* Sub-tab navigation */}
-              <div style={{ display: 'flex', gap: 0, marginBottom: 24, borderBottom: `2px solid ${brand.border}` }}>
+              <div style={{ display: 'inline-flex', gap: 4, marginBottom: 28, background: '#f5f5f5', borderRadius: 12, padding: 4 }}>
                 {[
                   { id: 'weekly', label: 'Weekly Schedules' },
                   { id: 'blocked', label: 'Blocked Dates' },
@@ -1801,11 +1804,11 @@ export default function AdminPanel() {
                     key={tab.id}
                     onClick={() => setAvailabilitySubTab(tab.id)}
                     style={{
-                      padding: '10px 20px', fontSize: 14, fontWeight: availabilitySubTab === tab.id ? 600 : 400,
-                      color: availabilitySubTab === tab.id ? brand.text : brand.textLight,
-                      background: 'transparent', border: 'none', cursor: 'pointer',
-                      borderBottom: availabilitySubTab === tab.id ? `2px solid ${brand.text}` : '2px solid transparent',
-                      marginBottom: -2,
+                      padding: '10px 20px', fontSize: 14, fontWeight: 600,
+                      color: availabilitySubTab === tab.id ? '#fff' : '#6b6b6b',
+                      background: availabilitySubTab === tab.id ? '#000' : 'transparent',
+                      border: 'none', borderRadius: 10, cursor: 'pointer',
+                      transition: 'all 0.2s ease',
                     }}
                   >
                     {tab.label}
@@ -1829,7 +1832,7 @@ export default function AdminPanel() {
                               key={w.id}
                               onClick={() => { setSelectedWorkerAvail(w.id); setEditingAvailability(getWorkerAvailability(w.id)); }}
                               style={{
-                                background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, padding: '16px 20px',
+                                background: '#fff', borderRadius: 16, border: '1px solid #f0f0f0', padding: '16px 20px',
                                 cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                                 transition: 'box-shadow 0.2s',
                               }}
@@ -1863,7 +1866,7 @@ export default function AdminPanel() {
                           );
                         })}
                         {workers.length === 0 && (
-                          <div style={{ padding: 32, textAlign: 'center', color: brand.textLight, background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}` }}>
+                          <div style={{ padding: 32, textAlign: 'center', color: brand.textLight, background: '#fff', borderRadius: 16, border: '1px solid #f0f0f0' }}>
                             No workers found. Add workers first in the Workers tab.
                           </div>
                         )}
@@ -1886,7 +1889,7 @@ export default function AdminPanel() {
                       </div>
 
                       <div className="table-wrapper">
-                        <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
+                        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #f0f0f0', overflow: 'hidden' }}>
                           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
                               <tr style={{ background: brand.bg }}>
@@ -1950,13 +1953,13 @@ export default function AdminPanel() {
                         <button
                           onClick={() => handleSaveWeeklySchedule(selectedWorkerAvail)}
                           disabled={availSaving}
-                          style={{ ...buttonStyle, background: brand.success, color: brand.white, opacity: availSaving ? 0.6 : 1 }}
+                          style={{ ...buttonStyle, background: '#000', color: '#fff', opacity: availSaving ? 0.6 : 1 }}
                         >
                           {availSaving ? 'Saving...' : 'Save Schedule'}
                         </button>
                         <button
                           onClick={() => { setSelectedWorkerAvail(''); setEditingAvailability(null); }}
-                          style={{ ...buttonStyle, background: brand.bg, color: brand.text, border: `1px solid ${brand.border}` }}
+                          style={{ ...buttonStyle, background: '#f5f5f5', color: '#000' }}
                         >
                           Cancel
                         </button>
@@ -1984,11 +1987,11 @@ export default function AdminPanel() {
                       </div>
 
                       {/* Calendar */}
-                      <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, padding: 16, marginBottom: 16 }}>
+                      <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #f0f0f0', padding: 16, marginBottom: 16 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                          <button onClick={() => { if (calendarMonth === 0) { setCalendarMonth(11); setCalendarYear(calendarYear - 1); } else setCalendarMonth(calendarMonth - 1); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, padding: '6px 12px', border: `1px solid ${brand.border}` }}>&lt;</button>
+                          <button onClick={() => { if (calendarMonth === 0) { setCalendarMonth(11); setCalendarYear(calendarYear - 1); } else setCalendarMonth(calendarMonth - 1); }} style={{ ...buttonStyle, background: '#f5f5f5', color: '#000', padding: '6px 14px' }}>&lt;</button>
                           <span style={{ fontSize: 16, fontWeight: 600, color: brand.text }}>{MONTH_NAMES[calendarMonth]} {calendarYear}</span>
-                          <button onClick={() => { if (calendarMonth === 11) { setCalendarMonth(0); setCalendarYear(calendarYear + 1); } else setCalendarMonth(calendarMonth + 1); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, padding: '6px 12px', border: `1px solid ${brand.border}` }}>&gt;</button>
+                          <button onClick={() => { if (calendarMonth === 11) { setCalendarMonth(0); setCalendarYear(calendarYear + 1); } else setCalendarMonth(calendarMonth + 1); }} style={{ ...buttonStyle, background: '#f5f5f5', color: '#000', padding: '6px 14px' }}>&gt;</button>
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
                           {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map(d => (
@@ -2025,7 +2028,7 @@ export default function AdminPanel() {
 
                       {/* Add Blocked Date Form */}
                       {blockedDateForm.worker_id && blockedDateForm.blocked_date && (
-                        <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, padding: 16 }}>
+                        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #f0f0f0', padding: 16 }}>
                           <p style={{ fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 12 }}>
                             Block {formatDate(blockedDateForm.blocked_date)} for {workers.find(w => w.id === blockedDateForm.worker_id)?.name}
                           </p>
@@ -2061,7 +2064,7 @@ export default function AdminPanel() {
                               style={inputStyle}
                             />
                           </div>
-                          <button onClick={handleAddBlockedDate} style={{ ...buttonStyle, background: brand.danger, color: brand.white }}>
+                          <button onClick={handleAddBlockedDate} style={{ ...buttonStyle, background: '#dc2626', color: '#fff' }}>
                             Block This Date
                           </button>
                         </div>
@@ -2073,7 +2076,7 @@ export default function AdminPanel() {
                       <p style={{ fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 12 }}>
                         Upcoming Blocked Dates
                       </p>
-                      <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
+                      <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #f0f0f0', overflow: 'hidden' }}>
                         {blockedDates
                           .filter(bd => !blockedDateForm.worker_id || bd.worker_id === blockedDateForm.worker_id)
                           .filter(bd => bd.blocked_date >= formatDateISO(new Date()))
@@ -2112,7 +2115,7 @@ export default function AdminPanel() {
               {availabilitySubTab === 'overrides' && (
                 <div>
                   {/* Add Override Form */}
-                  <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, padding: 20, marginBottom: 24 }}>
+                  <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #f0f0f0', padding: 24, marginBottom: 24 }}>
                     <p style={{ fontSize: 16, fontWeight: 600, color: brand.text, marginBottom: 16 }}>Add Schedule Override</p>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
                       <div>
@@ -2146,14 +2149,14 @@ export default function AdminPanel() {
                         <input type="text" value={overrideForm.reason} onChange={(e) => setOverrideForm({ ...overrideForm, reason: e.target.value })} placeholder="e.g. Working Saturday" style={inputStyle} />
                       </div>
                     </div>
-                    <button onClick={handleAddOverride} style={{ ...buttonStyle, background: brand.text, color: brand.white, marginTop: 16 }}>
+                    <button onClick={handleAddOverride} style={{ ...buttonStyle, background: '#000', color: '#fff', marginTop: 16 }}>
                       + Add Override
                     </button>
                   </div>
 
                   {/* Overrides List */}
                   <div className="table-wrapper">
-                    <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
+                    <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #f0f0f0', overflow: 'hidden' }}>
                       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                           <tr style={{ background: brand.bg }}>
@@ -2208,8 +2211,8 @@ export default function AdminPanel() {
           {/* SETTINGS TAB */}
           {activeTab === 'settings' && (
             <div>
-              <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text, marginBottom: 24 }}>Settings</h1>
-              <div style={{ background: brand.white, borderRadius: 8, border: `1px solid ${brand.border}`, padding: 24, maxWidth: 600 }}>
+              <h1 style={{ fontSize: 24, fontWeight: 800, color: '#000', letterSpacing: '-0.02em', marginBottom: 24 }}>Settings</h1>
+              <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #f0f0f0', padding: 24, maxWidth: 600 }}>
                 <p style={{ fontSize: 16, fontWeight: 600, color: brand.text, marginBottom: 20 }}>Scheduling Configuration</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
                   {[
@@ -2245,12 +2248,12 @@ export default function AdminPanel() {
                   <button
                     onClick={handleSaveServiceSettings}
                     disabled={availSaving || !editingSettings}
-                    style={{ ...buttonStyle, background: brand.success, color: brand.white, opacity: (availSaving || !editingSettings) ? 0.6 : 1 }}
+                    style={{ ...buttonStyle, background: '#000', color: '#fff', opacity: (availSaving || !editingSettings) ? 0.6 : 1 }}
                   >
                     {availSaving ? 'Saving...' : 'Save Settings'}
                   </button>
                   {editingSettings && (
-                    <button onClick={() => setEditingSettings(null)} style={{ ...buttonStyle, background: brand.bg, color: brand.text, border: `1px solid ${brand.border}` }}>
+                    <button onClick={() => setEditingSettings(null)} style={{ ...buttonStyle, background: '#f5f5f5', color: '#000' }}>
                       Cancel
                     </button>
                   )}

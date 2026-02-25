@@ -76,11 +76,18 @@ export default function WorkerLogin() {
       router.push('/worker');
     } else {
       // Sign up — create Supabase auth account using the worker's name
-      const { error: signUpError } = await signUp(email, password, workerData.name);
+      const { data: signUpData, error: signUpError } = await signUp(email, password, workerData.name);
       if (signUpError) {
         setError(signUpError.message);
         setSubmitting(false);
         return;
+      }
+      // Link the new auth account to the workers table
+      if (signUpData?.user?.id) {
+        await supabase
+          .from('workers')
+          .update({ auth_id: signUpData.user.id })
+          .eq('email', email);
       }
       setMessage('Account created! Check your email for a confirmation link.');
       setSubmitting(false);

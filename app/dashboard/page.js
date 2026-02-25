@@ -7,10 +7,10 @@ import { useAuth } from '../../lib/useAuth';
 
 function Logo() {
   return (
-    <div style={{ display: 'flex', gap: 3 }}>
-      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
-      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
-      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
+    <div style={{ display: 'flex', gap: 4 }}>
+      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
+      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
+      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
     </div>
   );
 }
@@ -140,8 +140,8 @@ export default function CustomerDashboard() {
 
   const getStatusStyle = (status) => {
     switch (status) {
-      case 'upcoming': return { background: '#000', color: '#fff' };
-      case 'scheduled': return { background: '#f0f0f0', color: '#000' };
+      case 'upcoming': return { background: '#B8C5F2', color: '#2D3748' };
+      case 'scheduled': return { background: '#E8EDFC', color: '#2D3748' };
       case 'completed': return { background: '#f0f0f0', color: '#6b6b6b' };
       case 'skipped': return { background: '#FEF3C7', color: '#92400E' };
       case 'cancelled': return { background: '#FEE2E2', color: '#DC2626' };
@@ -173,7 +173,7 @@ export default function CustomerDashboard() {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ width: 40, height: 40, border: '3px solid #f0f0f0', borderTopColor: '#000', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
+          <div style={{ width: 40, height: 40, border: '3px solid #f0f0f0', borderTopColor: '#B8C5F2', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
           <p style={{ color: '#6b6b6b', fontSize: 15 }}>Loading...</p>
         </div>
         <style jsx global>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -195,12 +195,12 @@ export default function CustomerDashboard() {
       }}>
         <div className="booking-card-header" style={{ padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <h3 style={{ fontSize: 17, fontWeight: 700, color: '#000', marginBottom: 4, letterSpacing: '-0.01em' }}>{booking.building}</h3>
+            <h3 style={{ fontSize: 17, fontWeight: 600, color: '#2D3748', marginBottom: 4 }}>{booking.building}</h3>
             <p style={{ fontSize: 14, color: '#6b6b6b' }}>Unit {booking.unit_number} · {booking.floor_plan}</p>
           </div>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
             {freqName && freqName !== 'One-Time' && (
-              <span style={{ padding: '5px 12px', borderRadius: 100, fontSize: 12, fontWeight: 600, background: '#f5f5f5', color: '#000' }}>
+              <span style={{ padding: '5px 12px', borderRadius: 100, fontSize: 12, fontWeight: 600, background: '#F5F0DC', color: '#A69028' }}>
                 {freqName}
               </span>
             )}
@@ -212,13 +212,13 @@ export default function CustomerDashboard() {
 
         <div className="booking-details-row" style={{ padding: '16px 24px', background: '#fafafa', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <p style={{ fontSize: 15, fontWeight: 600, color: '#000' }}>{formatDate(booking.booking_date)}</p>
+            <p style={{ fontSize: 15, fontWeight: 600, color: '#2D3748' }}>{formatDate(booking.booking_date)}</p>
             <p style={{ fontSize: 14, color: '#6b6b6b', marginTop: 2 }}>{booking.booking_time}</p>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <p style={{ fontSize: 20, fontWeight: 700, color: '#000' }}>${booking.total_price}</p>
+            <p style={{ fontSize: 20, fontWeight: 700, color: '#2D3748' }}>${booking.total_price}</p>
             {booking.frequency_discount > 0 && (
-              <p style={{ fontSize: 12, color: '#6b6b6b', marginTop: 2 }}>Savings: -${booking.frequency_discount}</p>
+              <p style={{ fontSize: 12, color: '#C9B037', marginTop: 2 }}>Savings: -${booking.frequency_discount}</p>
             )}
             {booking.add_ons && booking.add_ons.length > 0 && (
               <p style={{ fontSize: 13, color: '#6b6b6b', marginTop: 2 }}>+{booking.add_ons.map(a => a.name).join(', ')}</p>
@@ -231,7 +231,7 @@ export default function CustomerDashboard() {
             <>
               <button onClick={() => openReschedule(booking)} style={{
                 padding: '10px 24px', fontSize: 14, fontWeight: 600,
-                background: '#000', border: 'none', borderRadius: 100,
+                background: '#7B8DBF', border: 'none', borderRadius: 100,
                 cursor: 'pointer', color: '#fff', transition: 'opacity 0.2s',
               }}>Reschedule</button>
               <button onClick={async () => {
@@ -250,13 +250,13 @@ export default function CustomerDashboard() {
             <>
               <button onClick={() => handleBookAgain(booking)} style={{
                 padding: '10px 24px', fontSize: 14, fontWeight: 600,
-                background: '#000', border: 'none', borderRadius: 100,
+                background: '#7B8DBF', border: 'none', borderRadius: 100,
                 cursor: 'pointer', color: '#fff', transition: 'opacity 0.2s',
               }}>Book Again</button>
               <button style={{
                 padding: '10px 24px', fontSize: 14, fontWeight: 600,
                 background: '#fff', border: '1.5px solid #e5e5e5', borderRadius: 100,
-                cursor: 'pointer', color: '#000', transition: 'all 0.2s',
+                cursor: 'pointer', color: '#2D3748', transition: 'all 0.2s',
               }}>View Receipt</button>
             </>
           )}
@@ -281,21 +281,21 @@ export default function CustomerDashboard() {
       }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
           <Logo />
-          <span style={{ fontSize: 18, fontWeight: 700, color: '#000', letterSpacing: '-0.02em' }}>BetterView</span>
+          <span style={{ fontSize: 18, fontWeight: 700, color: '#2D3748', letterSpacing: '-0.02em' }}>BetterView</span>
         </Link>
         <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Link href="/book" style={{
             padding: '10px 24px', fontSize: 14, fontWeight: 600,
-            background: '#000', borderRadius: 100, color: '#fff', textDecoration: 'none',
+            background: '#7B8DBF', borderRadius: 100, color: '#fff', textDecoration: 'none',
             transition: 'opacity 0.2s',
           }}>
             Book a Cleaning
           </Link>
           <div style={{ position: 'relative' }}>
             <div onClick={() => setProfileMenuOpen(!profileMenuOpen)} style={{
-              width: 36, height: 36, background: '#000', borderRadius: '50%',
+              width: 36, height: 36, background: '#B8C5F2', borderRadius: '50%',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', userSelect: 'none',
+              fontSize: 14, fontWeight: 600, color: '#2D3748', cursor: 'pointer', userSelect: 'none',
               transition: 'opacity 0.2s',
             }}>
               {userInitial}
@@ -312,7 +312,7 @@ export default function CustomerDashboard() {
                 }}>
                   <Link href="/dashboard/settings" onClick={() => setProfileMenuOpen(false)} style={{
                     display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px',
-                    fontSize: 15, fontWeight: 500, color: '#000', textDecoration: 'none',
+                    fontSize: 15, fontWeight: 500, color: '#2D3748', textDecoration: 'none',
                     borderBottom: '1px solid #f0f0f0', transition: 'background 0.15s',
                   }}>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -348,7 +348,7 @@ export default function CustomerDashboard() {
         <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
           <Link href="/book" onClick={() => setMobileMenuOpen(false)} style={{
             padding: '16px', fontSize: 16, fontWeight: 600,
-            background: '#000', border: 'none', borderRadius: 12,
+            background: '#7B8DBF', border: 'none', borderRadius: 12,
             color: '#fff', textDecoration: 'none', textAlign: 'center'
           }}>
             Book a Cleaning
@@ -356,7 +356,7 @@ export default function CustomerDashboard() {
           <Link href="/dashboard/settings" onClick={() => setMobileMenuOpen(false)} style={{
             padding: '16px', fontSize: 16, fontWeight: 500,
             background: '#f5f5f5', border: 'none', borderRadius: 12,
-            color: '#000', textDecoration: 'none', textAlign: 'center'
+            color: '#2D3748', textDecoration: 'none', textAlign: 'center'
           }}>
             Settings
           </Link>
@@ -371,14 +371,14 @@ export default function CustomerDashboard() {
       </header>
 
       <main className="dashboard-main" style={{ maxWidth: 700, margin: '0 auto', padding: '48px 24px' }}>
-        <h1 style={{ fontSize: 32, fontWeight: 800, color: '#000', marginBottom: 8, letterSpacing: '-0.02em' }}>My Bookings</h1>
+        <h1 style={{ fontSize: 28, fontWeight: 600, color: '#2D3748', marginBottom: 8 }}>My Bookings</h1>
         <p style={{ fontSize: 15, color: '#6b6b6b', marginBottom: 32 }}>Manage your upcoming and past cleanings</p>
 
         {/* Tabs */}
         <div style={{ display: 'flex', gap: 4, marginBottom: 32, background: '#f5f5f5', borderRadius: 12, padding: 4 }}>
           <button onClick={() => setActiveTab('upcoming')} style={{
             flex: 1, padding: '12px 20px', fontSize: 14, fontWeight: 600,
-            background: activeTab === 'upcoming' ? '#000' : 'transparent',
+            background: activeTab === 'upcoming' ? '#7B8DBF' : 'transparent',
             color: activeTab === 'upcoming' ? '#fff' : '#6b6b6b',
             border: 'none', borderRadius: 10, cursor: 'pointer',
             transition: 'all 0.2s ease',
@@ -387,7 +387,7 @@ export default function CustomerDashboard() {
           </button>
           <button onClick={() => setActiveTab('past')} style={{
             flex: 1, padding: '12px 20px', fontSize: 14, fontWeight: 600,
-            background: activeTab === 'past' ? '#000' : 'transparent',
+            background: activeTab === 'past' ? '#7B8DBF' : 'transparent',
             color: activeTab === 'past' ? '#fff' : '#6b6b6b',
             border: 'none', borderRadius: 10, cursor: 'pointer',
             transition: 'all 0.2s ease',
@@ -399,7 +399,7 @@ export default function CustomerDashboard() {
         {activeTab === 'past' && cancelledSkippedCount > 0 && (
           <div style={{ marginBottom: 20 }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, color: '#6b6b6b', cursor: 'pointer' }}>
-              <input type="checkbox" checked={showCancelledSkipped} onChange={(e) => setShowCancelledSkipped(e.target.checked)} style={{ cursor: 'pointer', width: 18, height: 18, accentColor: '#000' }} />
+              <input type="checkbox" checked={showCancelledSkipped} onChange={(e) => setShowCancelledSkipped(e.target.checked)} style={{ cursor: 'pointer', width: 18, height: 18, accentColor: '#7B8DBF' }} />
               Show cancelled &amp; skipped ({cancelledSkippedCount})
             </label>
           </div>
@@ -423,7 +423,7 @@ export default function CustomerDashboard() {
             {activeTab === 'upcoming' && (
               <Link href="/book" style={{
                 padding: '14px 32px', fontSize: 15, fontWeight: 600,
-                background: '#000', border: 'none', borderRadius: 100,
+                background: '#7B8DBF', border: 'none', borderRadius: 100,
                 color: '#fff', textDecoration: 'none', display: 'inline-block',
               }}>
                 Book a Cleaning
@@ -434,10 +434,10 @@ export default function CustomerDashboard() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {/* Recurring groups */}
             {Object.entries(groups).map(([groupId, groupBookings]) => (
-              <div key={groupId} style={{ border: '2px solid #000', borderRadius: 20, overflow: 'hidden' }}>
-                <div style={{ padding: '12px 24px', background: '#000', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 14 }}>&#x21BB;</span>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>
+              <div key={groupId} style={{ border: '2px solid #C9B037', borderRadius: 20, overflow: 'hidden' }}>
+                <div style={{ padding: '12px 24px', background: '#FFFBEB', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 14, color: '#92400E' }}>&#x21BB;</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: '#92400E' }}>
                     Recurring Series ({groupBookings.length} bookings)
                   </span>
                 </div>
@@ -456,7 +456,7 @@ export default function CustomerDashboard() {
       {rescheduleBooking && (
         <div onClick={(e) => { if (e.target === e.currentTarget) setRescheduleBooking(null); }} style={{
           position: 'fixed', inset: 0,
-          background: 'rgba(0,0,0,0.6)',
+          background: 'rgba(0,0,0,0.5)',
           backdropFilter: 'blur(4px)',
           WebkitBackdropFilter: 'blur(4px)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -473,7 +473,7 @@ export default function CustomerDashboard() {
             <div style={{ padding: '24px 28px 20px', borderBottom: '1px solid #f0f0f0' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
-                  <h2 style={{ fontSize: 22, fontWeight: 700, color: '#000', marginBottom: 4, letterSpacing: '-0.02em' }}>Reschedule</h2>
+                  <h2 style={{ fontSize: 22, fontWeight: 600, color: '#2D3748', marginBottom: 4 }}>Reschedule</h2>
                   <p style={{ fontSize: 14, color: '#6b6b6b' }}>
                     {rescheduleBooking.building} · Unit {rescheduleBooking.unit_number}
                   </p>
@@ -483,7 +483,7 @@ export default function CustomerDashboard() {
                   border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center',
                   justifyContent: 'center', transition: 'background 0.15s', flexShrink: 0,
                 }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2D3748" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
               </div>
             </div>
@@ -491,19 +491,19 @@ export default function CustomerDashboard() {
             <div style={{ padding: '24px 28px' }}>
               {/* Current schedule */}
               <div style={{ background: '#fafafa', borderRadius: 14, padding: '16px 20px', marginBottom: 28, display: 'flex', alignItems: 'center', gap: 14 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 12, background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b6b6b" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <div style={{ width: 40, height: 40, borderRadius: 12, background: '#E8EDFC', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7B8DBF" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 </div>
                 <div>
                   <p style={{ fontSize: 12, fontWeight: 600, color: '#6b6b6b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Current</p>
-                  <p style={{ fontSize: 15, fontWeight: 600, color: '#000' }}>{formatDate(rescheduleBooking.booking_date)}</p>
+                  <p style={{ fontSize: 15, fontWeight: 600, color: '#2D3748' }}>{formatDate(rescheduleBooking.booking_date)}</p>
                   <p style={{ fontSize: 14, color: '#6b6b6b' }}>{rescheduleBooking.booking_time}</p>
                 </div>
               </div>
 
               {/* New Date */}
               <div style={{ marginBottom: 24 }}>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#000', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>New Date</label>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#2D3748', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.05em' }}>New Date</label>
                 <input
                   type="date"
                   value={rescheduleDate}
@@ -516,14 +516,14 @@ export default function CustomerDashboard() {
                     outline: 'none', transition: 'border-color 0.2s',
                     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#000'}
+                  onFocus={(e) => e.target.style.borderColor = '#B8C5F2'}
                   onBlur={(e) => e.target.style.borderColor = '#e5e5e5'}
                 />
               </div>
 
               {/* New Time */}
               <div style={{ marginBottom: 28 }}>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#000', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>New Time</label>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#2D3748', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.05em' }}>New Time</label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                   {timeSlots.map(slot => (
                     <button
@@ -531,10 +531,10 @@ export default function CustomerDashboard() {
                       onClick={() => setRescheduleTime(slot)}
                       style={{
                         padding: '14px 10px', fontSize: 13, fontWeight: 600,
-                        border: rescheduleTime === slot ? '2px solid #000' : '1.5px solid #e5e5e5',
+                        border: rescheduleTime === slot ? '2px solid #7B8DBF' : '1.5px solid #e5e5e5',
                         borderRadius: 14, cursor: 'pointer',
-                        background: rescheduleTime === slot ? '#000' : '#fff',
-                        color: rescheduleTime === slot ? '#fff' : '#000',
+                        background: rescheduleTime === slot ? '#7B8DBF' : '#fff',
+                        color: rescheduleTime === slot ? '#fff' : '#2D3748',
                         transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                       }}
                     >
@@ -561,7 +561,7 @@ export default function CustomerDashboard() {
                 style={{
                   flex: 1, padding: '16px', fontSize: 15, fontWeight: 600,
                   background: '#f5f5f5', border: 'none', borderRadius: 14,
-                  cursor: 'pointer', color: '#000', transition: 'background 0.15s',
+                  cursor: 'pointer', color: '#2D3748', transition: 'background 0.15s',
                 }}
               >
                 Cancel
@@ -571,7 +571,7 @@ export default function CustomerDashboard() {
                 disabled={rescheduling || !rescheduleDate || !rescheduleTime}
                 style={{
                   flex: 1, padding: '16px', fontSize: 15, fontWeight: 600,
-                  background: rescheduleDate && rescheduleTime && !rescheduling ? '#000' : '#e5e5e5',
+                  background: rescheduleDate && rescheduleTime && !rescheduling ? '#7B8DBF' : '#e5e5e5',
                   color: rescheduleDate && rescheduleTime && !rescheduling ? '#fff' : '#999',
                   border: 'none', borderRadius: 14,
                   cursor: rescheduleDate && rescheduleTime && !rescheduling ? 'pointer' : 'not-allowed',

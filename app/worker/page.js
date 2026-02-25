@@ -7,10 +7,10 @@ import { useAuth } from '../../lib/useAuth';
 
 function Logo() {
   return (
-    <div style={{ display: 'flex', gap: 4 }}>
-      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
-      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
-      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
+    <div style={{ display: 'flex', gap: 3 }}>
+      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
+      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
+      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
     </div>
   );
 }
@@ -25,11 +25,7 @@ export default function WorkerDashboard() {
   const [activeTab, setActiveTab] = useState('upcoming');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const brand = {
-    primary: '#B8C5F2', text: '#1a1a1a', textLight: '#666',
-    border: '#e0e0e0', bg: '#fafafa', white: '#ffffff',
-    success: '#22c55e', gold: '#C9B037',
-  };
+  const font = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 
   useEffect(() => {
     if (!authLoading && !user) { router.push('/worker/login'); return; }
@@ -79,10 +75,10 @@ export default function WorkerDashboard() {
 
   const getStatusStyle = (status) => {
     switch (status) {
-      case 'upcoming': return { background: brand.primary, color: brand.text };
-      case 'scheduled': return { background: '#DBEAFE', color: '#1E40AF' };
-      case 'completed': return { background: '#e8e8e8', color: brand.text };
-      default: return { background: '#e8e8e8', color: brand.text };
+      case 'upcoming': return { background: '#000', color: '#fff' };
+      case 'scheduled': return { background: '#f5f5f5', color: '#000' };
+      case 'completed': return { background: '#f0f0f0', color: '#6b6b6b' };
+      default: return { background: '#f0f0f0', color: '#6b6b6b' };
     }
   };
 
@@ -95,38 +91,83 @@ export default function WorkerDashboard() {
   const sortedDates = Object.keys(groupedByDate).sort();
 
   if (authLoading || dataLoading) {
-    return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: brand.bg }}><p style={{ color: brand.textLight }}>Loading...</p></div>;
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#fff', fontFamily: font }}>
+        <div style={{
+          width: 36, height: 36, border: '3px solid #f0f0f0', borderTop: '3px solid #000',
+          borderRadius: '50%', animation: 'workerSpin 0.8s linear infinite'
+        }} />
+        <p style={{ color: '#6b6b6b', fontSize: 14, marginTop: 16, fontWeight: 500 }}>Loading...</p>
+        <style>{`@keyframes workerSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
   }
 
   if (!worker) {
     return (
-      <div style={{ minHeight: '100vh', background: brand.bg }}>
-        <header style={{ padding: '16px 32px', background: brand.white, borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div style={{ minHeight: '100vh', background: '#fff', fontFamily: font }}>
+        <header style={{
+          padding: '16px 32px', background: '#fff', borderBottom: '1px solid #f0f0f0',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          position: 'sticky', top: 0, zIndex: 100
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Logo />
-            <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
+            <span style={{ fontSize: 18, fontWeight: 700, color: '#000', letterSpacing: '-0.02em' }}>BetterView</span>
           </div>
-          <button onClick={handleLogout} style={{ padding: '8px 16px', fontSize: 14, background: 'transparent', border: `1px solid ${brand.border}`, borderRadius: 6, cursor: 'pointer', color: brand.text }}>Log Out</button>
+          <button onClick={handleLogout} style={{
+            padding: '10px 20px', fontSize: 14, fontWeight: 600,
+            background: '#fff', border: '1.5px solid #e5e5e5', borderRadius: 100,
+            cursor: 'pointer', color: '#000', transition: 'background 0.15s'
+          }}
+          onMouseOver={(e) => e.target.style.background = '#f5f5f5'}
+          onMouseOut={(e) => e.target.style.background = '#fff'}
+          >Log Out</button>
         </header>
         <div style={{ maxWidth: 500, margin: '80px auto', textAlign: 'center', padding: '0 24px' }}>
-          <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text, marginBottom: 12 }}>Worker Access Required</h1>
-          <p style={{ color: brand.textLight }}>No worker profile is linked to <strong>{user?.email}</strong>. Ask your admin to add your email to the workers list.</p>
+          <div style={{
+            width: 56, height: 56, borderRadius: 16, background: '#f5f5f5',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 24px'
+          }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b6b6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
+          <h1 style={{ fontSize: 32, fontWeight: 800, color: '#000', letterSpacing: '-0.02em', marginBottom: 12 }}>Worker Access Required</h1>
+          <p style={{ color: '#6b6b6b', fontSize: 16, lineHeight: 1.6 }}>No worker profile is linked to <strong style={{ color: '#000' }}>{user?.email}</strong>. Ask your admin to add your email to the workers list.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: brand.bg }}>
-      <header className="worker-header" style={{ padding: '16px 32px', background: brand.white, borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+    <div style={{ minHeight: '100vh', background: '#fff', fontFamily: font }}>
+      <header className="worker-header" style={{
+        padding: '16px 32px', background: '#fff', borderBottom: '1px solid #f0f0f0',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        position: 'sticky', top: 0, zIndex: 100
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <Logo />
-          <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
-          <span style={{ marginLeft: 12, padding: '4px 10px', background: brand.gold, color: brand.white, borderRadius: 4, fontSize: 12, fontWeight: 600 }}>WORKER</span>
+          <span style={{ fontSize: 18, fontWeight: 700, color: '#000', letterSpacing: '-0.02em' }}>BetterView</span>
+          <span style={{
+            marginLeft: 8, padding: '4px 10px',
+            background: '#000', color: '#fff',
+            borderRadius: 6, fontSize: 11, fontWeight: 700,
+            letterSpacing: '0.04em'
+          }}>WORKER</span>
         </div>
         <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 14, color: brand.textLight }}>{worker.name}</span>
-          <button onClick={handleLogout} style={{ padding: '8px 16px', fontSize: 14, background: 'transparent', border: `1px solid ${brand.border}`, borderRadius: 6, cursor: 'pointer', color: brand.text }}>Log Out</button>
+          <span style={{ fontSize: 14, color: '#6b6b6b', fontWeight: 500 }}>{worker.name}</span>
+          <button onClick={handleLogout} style={{
+            padding: '10px 20px', fontSize: 14, fontWeight: 600,
+            background: '#fff', border: '1.5px solid #e5e5e5', borderRadius: 100,
+            cursor: 'pointer', color: '#000', transition: 'background 0.15s'
+          }}
+          onMouseOver={(e) => e.target.style.background = '#f5f5f5'}
+          onMouseOut={(e) => e.target.style.background = '#fff'}
+          >Log Out</button>
         </div>
 
         <button className="mobile-nav-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
@@ -142,8 +183,12 @@ export default function WorkerDashboard() {
         </button>
 
         <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
-          <span style={{ padding: '14px 16px', fontSize: 16, color: brand.textLight, textAlign: 'center' }}>{worker.name}</span>
-          <button onClick={() => { handleLogout(); setMobileMenuOpen(false); }} style={{ padding: '14px 16px', fontSize: 16, fontWeight: 500, background: 'transparent', border: `1px solid ${brand.border}`, borderRadius: 8, color: brand.text, cursor: 'pointer' }}>
+          <span style={{ padding: '14px 16px', fontSize: 16, color: '#6b6b6b', textAlign: 'center', fontWeight: 500 }}>{worker.name}</span>
+          <button onClick={() => { handleLogout(); setMobileMenuOpen(false); }} style={{
+            padding: '14px 16px', fontSize: 16, fontWeight: 600,
+            background: '#000', border: 'none', borderRadius: 100,
+            color: '#fff', cursor: 'pointer'
+          }}>
             Log Out
           </button>
         </div>
@@ -151,94 +196,155 @@ export default function WorkerDashboard() {
 
       <main style={{ maxWidth: 700, margin: '0 auto', padding: '32px 24px' }}>
         {/* Stats Cards */}
-        <div className="worker-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 32 }}>
-          <div style={{ background: brand.white, borderRadius: 12, border: `1px solid ${brand.border}`, padding: 20, textAlign: 'center' }}>
-            <p style={{ fontSize: 32, fontWeight: 700, color: brand.text }}>{upcomingBookings.length}</p>
-            <p style={{ fontSize: 14, color: brand.textLight }}>Upcoming Jobs</p>
+        <div className="worker-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 36 }}>
+          <div style={{ background: '#fafafa', borderRadius: 16, padding: 24, textAlign: 'center' }}>
+            <p style={{ fontSize: 36, fontWeight: 800, color: '#000', letterSpacing: '-0.02em', lineHeight: 1 }}>{upcomingBookings.length}</p>
+            <p style={{ fontSize: 13, color: '#6b6b6b', marginTop: 8, fontWeight: 500 }}>Upcoming</p>
           </div>
-          <div style={{ background: brand.white, borderRadius: 12, border: `1px solid ${brand.border}`, padding: 20, textAlign: 'center' }}>
-            <p style={{ fontSize: 32, fontWeight: 700, color: brand.text }}>{completedBookings.length}</p>
-            <p style={{ fontSize: 14, color: brand.textLight }}>Completed</p>
+          <div style={{ background: '#fafafa', borderRadius: 16, padding: 24, textAlign: 'center' }}>
+            <p style={{ fontSize: 36, fontWeight: 800, color: '#000', letterSpacing: '-0.02em', lineHeight: 1 }}>{completedBookings.length}</p>
+            <p style={{ fontSize: 13, color: '#6b6b6b', marginTop: 8, fontWeight: 500 }}>Completed</p>
           </div>
-          <div style={{ background: brand.white, borderRadius: 12, border: `1px solid ${brand.border}`, padding: 20, textAlign: 'center' }}>
-            <p style={{ fontSize: 32, fontWeight: 700, color: brand.success }}>
+          <div style={{ background: '#fafafa', borderRadius: 16, padding: 24, textAlign: 'center' }}>
+            <p style={{ fontSize: 36, fontWeight: 800, color: '#000', letterSpacing: '-0.02em', lineHeight: 1 }}>
               ${completedBookings.reduce((sum, b) => sum + (b.total_price || 0), 0)}
             </p>
-            <p style={{ fontSize: 14, color: brand.textLight }}>Total Revenue</p>
+            <p style={{ fontSize: 13, color: '#6b6b6b', marginTop: 8, fontWeight: 500 }}>Revenue</p>
           </div>
         </div>
 
-        <h1 style={{ fontSize: 28, fontWeight: 600, color: brand.text, marginBottom: 24 }}>My Jobs</h1>
+        <h1 style={{ fontSize: 32, fontWeight: 800, color: '#000', letterSpacing: '-0.02em', marginBottom: 20 }}>My Jobs</h1>
 
-        {/* Tabs */}
-        <div style={{ display: 'flex', gap: 0, marginBottom: 24, borderBottom: `1px solid ${brand.border}` }}>
-          <button onClick={() => setActiveTab('upcoming')} style={{ padding: '12px 24px', fontSize: 15, fontWeight: 500, background: 'none', border: 'none', borderBottom: activeTab === 'upcoming' ? `2px solid ${brand.text}` : '2px solid transparent', color: activeTab === 'upcoming' ? brand.text : brand.textLight, cursor: 'pointer', marginBottom: -1 }}>
+        {/* Tabs - Pill segmented control */}
+        <div style={{
+          display: 'inline-flex', background: '#f5f5f5', borderRadius: 12, padding: 4, marginBottom: 28
+        }}>
+          <button onClick={() => setActiveTab('upcoming')} style={{
+            padding: '10px 22px', fontSize: 14, fontWeight: 600,
+            background: activeTab === 'upcoming' ? '#000' : 'transparent',
+            color: activeTab === 'upcoming' ? '#fff' : '#6b6b6b',
+            border: 'none', borderRadius: 10, cursor: 'pointer',
+            transition: 'all 0.2s ease'
+          }}>
             Upcoming ({upcomingBookings.length})
           </button>
-          <button onClick={() => setActiveTab('completed')} style={{ padding: '12px 24px', fontSize: 15, fontWeight: 500, background: 'none', border: 'none', borderBottom: activeTab === 'completed' ? `2px solid ${brand.text}` : '2px solid transparent', color: activeTab === 'completed' ? brand.text : brand.textLight, cursor: 'pointer', marginBottom: -1 }}>
+          <button onClick={() => setActiveTab('completed')} style={{
+            padding: '10px 22px', fontSize: 14, fontWeight: 600,
+            background: activeTab === 'completed' ? '#000' : 'transparent',
+            color: activeTab === 'completed' ? '#fff' : '#6b6b6b',
+            border: 'none', borderRadius: 10, cursor: 'pointer',
+            transition: 'all 0.2s ease'
+          }}>
             Completed ({completedBookings.length})
           </button>
         </div>
 
         {/* Bookings grouped by date */}
         {sortedDates.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '64px 24px', background: brand.white, borderRadius: 12, border: `1px solid ${brand.border}` }}>
-            <p style={{ color: brand.textLight }}>
+          <div style={{
+            textAlign: 'center', padding: '64px 24px', background: '#fafafa',
+            borderRadius: 16
+          }}>
+            <div style={{
+              width: 48, height: 48, borderRadius: 14, background: '#f0f0f0',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto 16px'
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b6b6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+            </div>
+            <p style={{ color: '#6b6b6b', fontSize: 15, fontWeight: 500 }}>
               {activeTab === 'upcoming' ? 'No upcoming jobs assigned to you' : 'No completed jobs yet'}
             </p>
           </div>
         ) : (
           sortedDates.map(dateKey => (
-            <div key={dateKey} style={{ marginBottom: 24 }}>
-              <h3 style={{ fontSize: 14, fontWeight: 600, color: brand.textLight, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>
+            <div key={dateKey} style={{ marginBottom: 28 }}>
+              <h3 style={{
+                fontSize: 13, fontWeight: 700, color: '#6b6b6b',
+                textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12
+              }}>
                 {formatDate(dateKey)}
               </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {groupedByDate[dateKey].map(booking => {
                   const freqName = getFrequencyName(booking.frequency_id);
                   const statusStyle = getStatusStyle(booking.status);
 
                   return (
-                    <div key={booking.id} style={{ background: brand.white, borderRadius: 12, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
-                      <div className="worker-booking-row" style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                    <div key={booking.id} style={{
+                      background: '#fff', borderRadius: 16,
+                      border: '1px solid #f0f0f0', overflow: 'hidden',
+                      transition: 'box-shadow 0.15s ease'
+                    }}>
+                      <div className="worker-booking-row" style={{
+                        padding: '18px 20px', display: 'flex',
+                        justifyContent: 'space-between', alignItems: 'center',
+                        flexWrap: 'wrap', gap: 10
+                      }}>
                         <div>
-                          <h4 style={{ fontSize: 16, fontWeight: 600, color: brand.text, marginBottom: 4 }}>
+                          <h4 style={{ fontSize: 16, fontWeight: 700, color: '#000', marginBottom: 4, letterSpacing: '-0.01em' }}>
                             {booking.building} - Unit {booking.unit_number}
                           </h4>
-                          <p style={{ fontSize: 14, color: brand.textLight }}>{booking.booking_time} · {booking.floor_plan}</p>
+                          <p style={{ fontSize: 14, color: '#6b6b6b', fontWeight: 400 }}>{booking.booking_time} · {booking.floor_plan}</p>
                           {booking.add_ons && booking.add_ons.length > 0 && (
-                            <p style={{ fontSize: 13, color: brand.gold, marginTop: 4 }}>
-                              Add-Ons: {booking.add_ons.map(a => a.name).join(', ')}
-                            </p>
+                            <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+                              {booking.add_ons.map((a, i) => (
+                                <span key={i} style={{
+                                  fontSize: 12, fontWeight: 600, color: '#000',
+                                  background: '#f5f5f5', padding: '4px 10px', borderRadius: 100
+                                }}>
+                                  {a.name}
+                                </span>
+                              ))}
+                            </div>
                           )}
                         </div>
                         <div className="worker-booking-actions" style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: 12 }}>
-                          <span style={{ fontSize: 16, fontWeight: 600, color: brand.text }}>${booking.total_price}</span>
+                          <span style={{ fontSize: 18, fontWeight: 700, color: '#000', letterSpacing: '-0.01em' }}>${booking.total_price}</span>
                           {(booking.status === 'upcoming' || booking.status === 'scheduled') && (
                             <button onClick={() => handleMarkComplete(booking.id)} style={{
-                              padding: '8px 16px', fontSize: 13, fontWeight: 600,
-                              background: brand.success, color: brand.white,
-                              border: 'none', borderRadius: 6, cursor: 'pointer'
-                            }}>
+                              padding: '10px 20px', fontSize: 13, fontWeight: 600,
+                              background: '#000', color: '#fff',
+                              border: 'none', borderRadius: 100, cursor: 'pointer',
+                              transition: 'opacity 0.15s'
+                            }}
+                            onMouseOver={(e) => e.target.style.opacity = '0.85'}
+                            onMouseOut={(e) => e.target.style.opacity = '1'}
+                            >
                               Mark Done
                             </button>
                           )}
                           {booking.status === 'completed' && (
-                            <span style={{ padding: '6px 12px', borderRadius: 100, fontSize: 12, fontWeight: 500, ...statusStyle }}>
+                            <span style={{
+                              padding: '6px 14px', borderRadius: 100,
+                              fontSize: 12, fontWeight: 600, ...statusStyle
+                            }}>
                               Done
                             </span>
                           )}
                         </div>
                       </div>
-                      <div style={{ padding: '10px 20px', background: brand.bg, borderTop: `1px solid ${brand.border}`, fontSize: 13, color: brand.textLight }}>
+                      <div style={{
+                        padding: '12px 20px', background: '#fafafa',
+                        borderTop: '1px solid #f0f0f0',
+                        fontSize: 13, color: '#6b6b6b', fontWeight: 400
+                      }}>
                         Customer: {booking.customer_name} · {booking.neighborhood}
                         {freqName && freqName !== 'One-Time' && (
-                          <span style={{ marginLeft: 12, padding: '2px 8px', borderRadius: 4, background: '#F5F0DC', color: '#A69028', fontWeight: 600 }}>
+                          <span style={{
+                            marginLeft: 12, padding: '3px 10px', borderRadius: 100,
+                            background: '#f5f5f5', color: '#000', fontWeight: 600, fontSize: 12
+                          }}>
                             {freqName}
                           </span>
                         )}
                         {booking.status === 'scheduled' && (
-                          <span style={{ marginLeft: 8, padding: '2px 8px', borderRadius: 4, background: '#DBEAFE', color: '#1E40AF', fontWeight: 600 }}>
+                          <span style={{
+                            marginLeft: 8, padding: '3px 10px', borderRadius: 100,
+                            background: '#f0f0f0', color: '#000', fontWeight: 600, fontSize: 12
+                          }}>
                             scheduled
                           </span>
                         )}

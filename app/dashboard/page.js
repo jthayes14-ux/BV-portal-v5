@@ -7,10 +7,10 @@ import { useAuth } from '../../lib/useAuth';
 
 function Logo() {
   return (
-    <div style={{ display: 'flex', gap: 4 }}>
-      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
-      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
-      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
+    <div style={{ display: 'flex', gap: 3 }}>
+      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
+      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
+      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
     </div>
   );
 }
@@ -39,11 +39,6 @@ export default function CustomerDashboard() {
     '2:00 PM – 5:00 PM',
     '5:00 PM – 8:00 PM',
   ];
-
-  const brand = {
-    primary: '#B8C5F2', text: '#1a1a1a', textLight: '#666',
-    border: '#e0e0e0', bg: '#fafafa', success: '#22c55e', gold: '#C9B037',
-  };
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -145,12 +140,12 @@ export default function CustomerDashboard() {
 
   const getStatusStyle = (status) => {
     switch (status) {
-      case 'upcoming': return { background: brand.primary, color: brand.text };
-      case 'scheduled': return { background: '#DBEAFE', color: '#1E40AF' };
-      case 'completed': return { background: '#e8e8e8', color: brand.text };
+      case 'upcoming': return { background: '#000', color: '#fff' };
+      case 'scheduled': return { background: '#f0f0f0', color: '#000' };
+      case 'completed': return { background: '#f0f0f0', color: '#6b6b6b' };
       case 'skipped': return { background: '#FEF3C7', color: '#92400E' };
       case 'cancelled': return { background: '#FEE2E2', color: '#DC2626' };
-      default: return { background: '#e8e8e8', color: brand.text };
+      default: return { background: '#f0f0f0', color: '#6b6b6b' };
     }
   };
 
@@ -176,8 +171,12 @@ export default function CustomerDashboard() {
 
   if (authLoading || dataLoading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: brand.bg }}>
-        <p style={{ color: brand.textLight }}>Loading...</p>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ width: 40, height: 40, border: '3px solid #f0f0f0', borderTopColor: '#000', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
+          <p style={{ color: '#6b6b6b', fontSize: 15 }}>Loading...</p>
+        </div>
+        <style jsx global>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
@@ -187,56 +186,78 @@ export default function CustomerDashboard() {
     const statusStyle = getStatusStyle(booking.status);
 
     return (
-      <div key={booking.id} style={{ background: 'white', borderRadius: 12, border: `1px solid ${brand.border}`, overflow: 'hidden' }}>
-        <div className="booking-card-header" style={{ padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
+      <div key={booking.id} style={{
+        background: '#fff',
+        borderRadius: 16,
+        overflow: 'hidden',
+        border: '1px solid #f0f0f0',
+        transition: 'box-shadow 0.2s ease',
+      }}>
+        <div className="booking-card-header" style={{ padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <h3 style={{ fontSize: 18, fontWeight: 600, color: brand.text, marginBottom: 4 }}>{booking.building}</h3>
-            <p style={{ fontSize: 14, color: brand.textLight }}>Unit {booking.unit_number} · {booking.floor_plan}</p>
+            <h3 style={{ fontSize: 17, fontWeight: 700, color: '#000', marginBottom: 4, letterSpacing: '-0.01em' }}>{booking.building}</h3>
+            <p style={{ fontSize: 14, color: '#6b6b6b' }}>Unit {booking.unit_number} · {booking.floor_plan}</p>
           </div>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
             {freqName && freqName !== 'One-Time' && (
-              <span style={{ padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 600, background: '#F5F0DC', color: '#A69028' }}>
+              <span style={{ padding: '5px 12px', borderRadius: 100, fontSize: 12, fontWeight: 600, background: '#f5f5f5', color: '#000' }}>
                 {freqName}
               </span>
             )}
-            <span style={{ padding: '6px 12px', borderRadius: 100, fontSize: 13, fontWeight: 500, ...statusStyle }}>
+            <span style={{ padding: '5px 14px', borderRadius: 100, fontSize: 12, fontWeight: 600, textTransform: 'capitalize', letterSpacing: '0.01em', ...statusStyle }}>
               {booking.status}
             </span>
           </div>
         </div>
 
-        <div className="booking-details-row" style={{ padding: '16px 24px', background: brand.bg, borderTop: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="booking-details-row" style={{ padding: '16px 24px', background: '#fafafa', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <p style={{ fontSize: 15, fontWeight: 500, color: brand.text }}>{formatDate(booking.booking_date)}</p>
-            <p style={{ fontSize: 14, color: brand.textLight }}>{booking.booking_time}</p>
+            <p style={{ fontSize: 15, fontWeight: 600, color: '#000' }}>{formatDate(booking.booking_date)}</p>
+            <p style={{ fontSize: 14, color: '#6b6b6b', marginTop: 2 }}>{booking.booking_time}</p>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <p style={{ fontSize: 18, fontWeight: 600, color: brand.text }}>${booking.total_price}</p>
+            <p style={{ fontSize: 20, fontWeight: 700, color: '#000' }}>${booking.total_price}</p>
             {booking.frequency_discount > 0 && (
-              <p style={{ fontSize: 11, color: brand.gold }}>Freq. discount: -${booking.frequency_discount}</p>
+              <p style={{ fontSize: 12, color: '#6b6b6b', marginTop: 2 }}>Savings: -${booking.frequency_discount}</p>
             )}
             {booking.add_ons && booking.add_ons.length > 0 && (
-              <p style={{ fontSize: 13, color: brand.textLight }}>+{booking.add_ons.map(a => a.name).join(', ')}</p>
+              <p style={{ fontSize: 13, color: '#6b6b6b', marginTop: 2 }}>+{booking.add_ons.map(a => a.name).join(', ')}</p>
             )}
           </div>
         </div>
 
-        <div className="booking-card-actions" style={{ padding: '16px 24px', borderTop: `1px solid ${brand.border}`, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+        <div className="booking-card-actions" style={{ padding: '16px 24px', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           {(booking.status === 'upcoming' || booking.status === 'scheduled') && (
             <>
-              <button onClick={() => openReschedule(booking)} style={{ padding: '10px 20px', fontSize: 14, fontWeight: 500, background: 'white', border: `1px solid ${brand.border}`, borderRadius: 6, cursor: 'pointer', color: brand.text }}>Reschedule</button>
+              <button onClick={() => openReschedule(booking)} style={{
+                padding: '10px 24px', fontSize: 14, fontWeight: 600,
+                background: '#000', border: 'none', borderRadius: 100,
+                cursor: 'pointer', color: '#fff', transition: 'opacity 0.2s',
+              }}>Reschedule</button>
               <button onClick={async () => {
                 if (confirm('Cancel this booking?')) {
                   await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', booking.id);
                   setBookings(bookings.map(b => b.id === booking.id ? { ...b, status: 'cancelled' } : b));
                 }
-              }} style={{ padding: '10px 20px', fontSize: 14, fontWeight: 500, background: 'white', border: `1px solid ${brand.border}`, borderRadius: 6, cursor: 'pointer', color: '#dc2626' }}>Cancel</button>
+              }} style={{
+                padding: '10px 24px', fontSize: 14, fontWeight: 600,
+                background: '#fff', border: '1.5px solid #e5e5e5', borderRadius: 100,
+                cursor: 'pointer', color: '#dc2626', transition: 'all 0.2s',
+              }}>Cancel</button>
             </>
           )}
           {(booking.status === 'completed' || booking.status === 'skipped' || booking.status === 'cancelled') && (
             <>
-              <button onClick={() => handleBookAgain(booking)} style={{ padding: '10px 20px', fontSize: 14, fontWeight: 500, background: brand.primary, border: 'none', borderRadius: 6, cursor: 'pointer', color: brand.text }}>Book Again</button>
-              <button style={{ padding: '10px 20px', fontSize: 14, fontWeight: 500, background: 'white', border: `1px solid ${brand.border}`, borderRadius: 6, cursor: 'pointer', color: brand.text }}>View Receipt</button>
+              <button onClick={() => handleBookAgain(booking)} style={{
+                padding: '10px 24px', fontSize: 14, fontWeight: 600,
+                background: '#000', border: 'none', borderRadius: 100,
+                cursor: 'pointer', color: '#fff', transition: 'opacity 0.2s',
+              }}>Book Again</button>
+              <button style={{
+                padding: '10px 24px', fontSize: 14, fontWeight: 600,
+                background: '#fff', border: '1.5px solid #e5e5e5', borderRadius: 100,
+                cursor: 'pointer', color: '#000', transition: 'all 0.2s',
+              }}>View Receipt</button>
             </>
           )}
         </div>
@@ -245,30 +266,65 @@ export default function CustomerDashboard() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: brand.bg }}>
-      <header className="dashboard-header" style={{ padding: '16px 32px', background: 'white', borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
+    <div style={{ minHeight: '100vh', background: '#fff', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+      {/* Header */}
+      <header className="dashboard-header" style={{
+        padding: '14px 24px',
+        background: '#fff',
+        borderBottom: '1px solid #f0f0f0',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+      }}>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
           <Logo />
-          <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
+          <span style={{ fontSize: 18, fontWeight: 700, color: '#000', letterSpacing: '-0.02em' }}>BetterView</span>
         </Link>
-        <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <Link href="/book" style={{ padding: '10px 20px', fontSize: 14, fontWeight: 500, background: brand.primary, border: 'none', borderRadius: 6, color: brand.text, textDecoration: 'none' }}>
+        <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Link href="/book" style={{
+            padding: '10px 24px', fontSize: 14, fontWeight: 600,
+            background: '#000', borderRadius: 100, color: '#fff', textDecoration: 'none',
+            transition: 'opacity 0.2s',
+          }}>
             Book a Cleaning
           </Link>
           <div style={{ position: 'relative' }}>
-            <div onClick={() => setProfileMenuOpen(!profileMenuOpen)} style={{ width: 36, height: 36, background: brand.primary, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 600, color: brand.text, cursor: 'pointer', userSelect: 'none' }}>
+            <div onClick={() => setProfileMenuOpen(!profileMenuOpen)} style={{
+              width: 36, height: 36, background: '#000', borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', userSelect: 'none',
+              transition: 'opacity 0.2s',
+            }}>
               {userInitial}
             </div>
             {profileMenuOpen && (
               <>
                 <div onClick={() => setProfileMenuOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 99 }} />
-                <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'white', borderRadius: 10, boxShadow: '0 4px 24px rgba(0,0,0,0.12)', border: `1px solid ${brand.border}`, minWidth: 180, zIndex: 100, overflow: 'hidden' }}>
-                  <Link href="/dashboard/settings" onClick={() => setProfileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 18px', fontSize: 14, fontWeight: 500, color: brand.text, textDecoration: 'none', borderBottom: `1px solid ${brand.border}` }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                <div style={{
+                  position: 'absolute', top: 'calc(100% + 8px)', right: 0,
+                  background: '#fff', borderRadius: 16,
+                  boxShadow: '0 8px 40px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04)',
+                  minWidth: 200, zIndex: 100, overflow: 'hidden',
+                  animation: 'fadeIn 0.15s ease',
+                }}>
+                  <Link href="/dashboard/settings" onClick={() => setProfileMenuOpen(false)} style={{
+                    display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px',
+                    fontSize: 15, fontWeight: 500, color: '#000', textDecoration: 'none',
+                    borderBottom: '1px solid #f0f0f0', transition: 'background 0.15s',
+                  }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                     Settings
                   </Link>
-                  <button onClick={() => { setProfileMenuOpen(false); handleLogout(); }} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 18px', fontSize: 14, fontWeight: 500, color: '#DC2626', background: 'none', border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left' }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                  <button onClick={() => { setProfileMenuOpen(false); handleLogout(); }} style={{
+                    display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px',
+                    fontSize: 15, fontWeight: 500, color: '#dc2626', background: 'none',
+                    border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left',
+                    transition: 'background 0.15s',
+                  }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                     Log Out
                   </button>
                 </div>
@@ -290,46 +346,86 @@ export default function CustomerDashboard() {
         </button>
 
         <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
-          <Link href="/book" onClick={() => setMobileMenuOpen(false)} style={{ padding: '14px 16px', fontSize: 16, fontWeight: 500, background: brand.primary, border: 'none', borderRadius: 8, color: brand.text, textDecoration: 'none', textAlign: 'center' }}>
+          <Link href="/book" onClick={() => setMobileMenuOpen(false)} style={{
+            padding: '16px', fontSize: 16, fontWeight: 600,
+            background: '#000', border: 'none', borderRadius: 12,
+            color: '#fff', textDecoration: 'none', textAlign: 'center'
+          }}>
             Book a Cleaning
           </Link>
-          <Link href="/dashboard/settings" onClick={() => setMobileMenuOpen(false)} style={{ padding: '14px 16px', fontSize: 16, fontWeight: 500, background: 'transparent', border: `1px solid ${brand.border}`, borderRadius: 8, color: brand.text, textDecoration: 'none', textAlign: 'center' }}>
+          <Link href="/dashboard/settings" onClick={() => setMobileMenuOpen(false)} style={{
+            padding: '16px', fontSize: 16, fontWeight: 500,
+            background: '#f5f5f5', border: 'none', borderRadius: 12,
+            color: '#000', textDecoration: 'none', textAlign: 'center'
+          }}>
             Settings
           </Link>
-          <button onClick={() => { handleLogout(); setMobileMenuOpen(false); }} style={{ padding: '14px 16px', fontSize: 16, fontWeight: 500, background: 'transparent', border: `1px solid ${brand.border}`, borderRadius: 8, color: '#DC2626', cursor: 'pointer' }}>
+          <button onClick={() => { handleLogout(); setMobileMenuOpen(false); }} style={{
+            padding: '16px', fontSize: 16, fontWeight: 500,
+            background: '#fff', border: '1.5px solid #e5e5e5', borderRadius: 12,
+            color: '#dc2626', cursor: 'pointer'
+          }}>
             Log Out
           </button>
         </div>
       </header>
 
       <main className="dashboard-main" style={{ maxWidth: 700, margin: '0 auto', padding: '48px 24px' }}>
-        <h1 style={{ fontSize: 28, fontWeight: 600, color: brand.text, marginBottom: 32 }}>My Bookings</h1>
+        <h1 style={{ fontSize: 32, fontWeight: 800, color: '#000', marginBottom: 8, letterSpacing: '-0.02em' }}>My Bookings</h1>
+        <p style={{ fontSize: 15, color: '#6b6b6b', marginBottom: 32 }}>Manage your upcoming and past cleanings</p>
 
-        <div style={{ display: 'flex', gap: 0, marginBottom: 32, borderBottom: `1px solid ${brand.border}` }}>
-          <button onClick={() => setActiveTab('upcoming')} style={{ padding: '12px 24px', fontSize: 15, fontWeight: 500, background: 'none', border: 'none', borderBottom: activeTab === 'upcoming' ? `2px solid ${brand.text}` : '2px solid transparent', color: activeTab === 'upcoming' ? brand.text : brand.textLight, cursor: 'pointer', marginBottom: -1 }}>
+        {/* Tabs */}
+        <div style={{ display: 'flex', gap: 4, marginBottom: 32, background: '#f5f5f5', borderRadius: 12, padding: 4 }}>
+          <button onClick={() => setActiveTab('upcoming')} style={{
+            flex: 1, padding: '12px 20px', fontSize: 14, fontWeight: 600,
+            background: activeTab === 'upcoming' ? '#000' : 'transparent',
+            color: activeTab === 'upcoming' ? '#fff' : '#6b6b6b',
+            border: 'none', borderRadius: 10, cursor: 'pointer',
+            transition: 'all 0.2s ease',
+          }}>
             Upcoming ({upcomingBookings.length})
           </button>
-          <button onClick={() => setActiveTab('past')} style={{ padding: '12px 24px', fontSize: 15, fontWeight: 500, background: 'none', border: 'none', borderBottom: activeTab === 'past' ? `2px solid ${brand.text}` : '2px solid transparent', color: activeTab === 'past' ? brand.text : brand.textLight, cursor: 'pointer', marginBottom: -1 }}>
+          <button onClick={() => setActiveTab('past')} style={{
+            flex: 1, padding: '12px 20px', fontSize: 14, fontWeight: 600,
+            background: activeTab === 'past' ? '#000' : 'transparent',
+            color: activeTab === 'past' ? '#fff' : '#6b6b6b',
+            border: 'none', borderRadius: 10, cursor: 'pointer',
+            transition: 'all 0.2s ease',
+          }}>
             Past ({pastBookings.length})
           </button>
         </div>
 
         {activeTab === 'past' && cancelledSkippedCount > 0 && (
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: brand.textLight, cursor: 'pointer' }}>
-              <input type="checkbox" checked={showCancelledSkipped} onChange={(e) => setShowCancelledSkipped(e.target.checked)} style={{ cursor: 'pointer' }} />
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, color: '#6b6b6b', cursor: 'pointer' }}>
+              <input type="checkbox" checked={showCancelledSkipped} onChange={(e) => setShowCancelledSkipped(e.target.checked)} style={{ cursor: 'pointer', width: 18, height: 18, accentColor: '#000' }} />
               Show cancelled &amp; skipped ({cancelledSkippedCount})
             </label>
           </div>
         )}
 
         {displayedBookings.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '64px 24px', background: 'white', borderRadius: 12, border: `1px solid ${brand.border}` }}>
-            <p style={{ color: brand.textLight, marginBottom: 24 }}>
+          <div style={{
+            textAlign: 'center', padding: '80px 24px',
+            background: '#fafafa', borderRadius: 20,
+          }}>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>
+              {activeTab === 'upcoming' ? (
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              ) : (
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              )}
+            </div>
+            <p style={{ color: '#6b6b6b', marginBottom: 24, fontSize: 16, fontWeight: 500 }}>
               {activeTab === 'upcoming' ? 'No upcoming bookings' : 'No past bookings'}
             </p>
             {activeTab === 'upcoming' && (
-              <Link href="/book" style={{ padding: '12px 24px', fontSize: 15, fontWeight: 500, background: brand.primary, border: 'none', borderRadius: 6, color: brand.text, textDecoration: 'none' }}>
+              <Link href="/book" style={{
+                padding: '14px 32px', fontSize: 15, fontWeight: 600,
+                background: '#000', border: 'none', borderRadius: 100,
+                color: '#fff', textDecoration: 'none', display: 'inline-block',
+              }}>
                 Book a Cleaning
               </Link>
             )}
@@ -338,10 +434,10 @@ export default function CustomerDashboard() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {/* Recurring groups */}
             {Object.entries(groups).map(([groupId, groupBookings]) => (
-              <div key={groupId} style={{ border: `2px solid ${brand.gold}`, borderRadius: 14, overflow: 'hidden' }}>
-                <div style={{ padding: '10px 20px', background: '#FFFBEB', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div key={groupId} style={{ border: '2px solid #000', borderRadius: 20, overflow: 'hidden' }}>
+                <div style={{ padding: '12px 24px', background: '#000', display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontSize: 14 }}>&#x21BB;</span>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: '#92400E' }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>
                     Recurring Series ({groupBookings.length} bookings)
                   </span>
                 </div>
@@ -358,64 +454,115 @@ export default function CustomerDashboard() {
 
       {/* Reschedule Modal */}
       {rescheduleBooking && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 24 }}>
-          <div style={{ background: 'white', borderRadius: 16, maxWidth: 440, width: '100%', padding: 32, position: 'relative' }}>
-            <button onClick={() => setRescheduleBooking(null)} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: brand.textLight, lineHeight: 1 }}>
-              &times;
-            </button>
-
-            <h2 style={{ fontSize: 22, fontWeight: 600, color: brand.text, marginBottom: 4 }}>Reschedule Booking</h2>
-            <p style={{ fontSize: 14, color: brand.textLight, marginBottom: 24 }}>
-              {rescheduleBooking.building} &middot; Unit {rescheduleBooking.unit_number}
-            </p>
-
-            <div style={{ background: brand.bg, borderRadius: 10, padding: 16, marginBottom: 24 }}>
-              <p style={{ fontSize: 13, color: brand.textLight, marginBottom: 4 }}>CURRENT DATE & TIME</p>
-              <p style={{ fontSize: 15, fontWeight: 500, color: brand.text }}>{formatDate(rescheduleBooking.booking_date)}</p>
-              <p style={{ fontSize: 14, color: brand.textLight }}>{rescheduleBooking.booking_time}</p>
-            </div>
-
-            <div style={{ marginBottom: 20 }}>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: brand.textLight, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>New Date</label>
-              <input
-                type="date"
-                value={rescheduleDate}
-                onChange={(e) => setRescheduleDate(e.target.value)}
-                min={today}
-                style={{ width: '100%', padding: '14px 16px', fontSize: 15, border: `1px solid ${brand.border}`, borderRadius: 10, boxSizing: 'border-box', background: 'white' }}
-              />
-            </div>
-
-            <div style={{ marginBottom: 24 }}>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: brand.textLight, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>New Time</label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                {timeSlots.map(slot => (
-                  <button
-                    key={slot}
-                    onClick={() => setRescheduleTime(slot)}
-                    style={{
-                      padding: '12px 10px', fontSize: 13, fontWeight: 500,
-                      border: rescheduleTime === slot ? `2px solid ${brand.gold}` : `1px solid ${brand.border}`,
-                      borderRadius: 10, cursor: 'pointer',
-                      background: rescheduleTime === slot ? '#FFFBEB' : 'white',
-                      color: rescheduleTime === slot ? '#92400E' : brand.text,
-                      transition: 'all 0.2s ease',
-                    }}
-                  >
-                    {slot}
-                  </button>
-                ))}
+        <div onClick={(e) => { if (e.target === e.currentTarget) setRescheduleBooking(null); }} style={{
+          position: 'fixed', inset: 0,
+          background: 'rgba(0,0,0,0.6)',
+          backdropFilter: 'blur(4px)',
+          WebkitBackdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 1000, padding: 24,
+          animation: 'fadeIn 0.2s ease',
+        }}>
+          <div style={{
+            background: '#fff', borderRadius: 24, maxWidth: 440, width: '100%',
+            padding: 0, position: 'relative', overflow: 'hidden',
+            boxShadow: '0 24px 80px rgba(0,0,0,0.2)',
+            animation: 'scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}>
+            {/* Modal header */}
+            <div style={{ padding: '24px 28px 20px', borderBottom: '1px solid #f0f0f0' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <h2 style={{ fontSize: 22, fontWeight: 700, color: '#000', marginBottom: 4, letterSpacing: '-0.02em' }}>Reschedule</h2>
+                  <p style={{ fontSize: 14, color: '#6b6b6b' }}>
+                    {rescheduleBooking.building} · Unit {rescheduleBooking.unit_number}
+                  </p>
+                </div>
+                <button onClick={() => setRescheduleBooking(null)} style={{
+                  width: 36, height: 36, borderRadius: '50%', background: '#f5f5f5',
+                  border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', transition: 'background 0.15s', flexShrink: 0,
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
               </div>
             </div>
 
-            {rescheduleError && (
-              <p style={{ fontSize: 13, color: '#DC2626', marginBottom: 16 }}>{rescheduleError}</p>
-            )}
+            <div style={{ padding: '24px 28px' }}>
+              {/* Current schedule */}
+              <div style={{ background: '#fafafa', borderRadius: 14, padding: '16px 20px', marginBottom: 28, display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div style={{ width: 40, height: 40, borderRadius: 12, background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b6b6b" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+                <div>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: '#6b6b6b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Current</p>
+                  <p style={{ fontSize: 15, fontWeight: 600, color: '#000' }}>{formatDate(rescheduleBooking.booking_date)}</p>
+                  <p style={{ fontSize: 14, color: '#6b6b6b' }}>{rescheduleBooking.booking_time}</p>
+                </div>
+              </div>
 
-            <div style={{ display: 'flex', gap: 12 }}>
+              {/* New Date */}
+              <div style={{ marginBottom: 24 }}>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#000', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>New Date</label>
+                <input
+                  type="date"
+                  value={rescheduleDate}
+                  onChange={(e) => setRescheduleDate(e.target.value)}
+                  min={today}
+                  style={{
+                    width: '100%', padding: '16px 18px', fontSize: 15,
+                    border: '1.5px solid #e5e5e5', borderRadius: 14,
+                    boxSizing: 'border-box', background: '#fff',
+                    outline: 'none', transition: 'border-color 0.2s',
+                    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = '#000'}
+                  onBlur={(e) => e.target.style.borderColor = '#e5e5e5'}
+                />
+              </div>
+
+              {/* New Time */}
+              <div style={{ marginBottom: 28 }}>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#000', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>New Time</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  {timeSlots.map(slot => (
+                    <button
+                      key={slot}
+                      onClick={() => setRescheduleTime(slot)}
+                      style={{
+                        padding: '14px 10px', fontSize: 13, fontWeight: 600,
+                        border: rescheduleTime === slot ? '2px solid #000' : '1.5px solid #e5e5e5',
+                        borderRadius: 14, cursor: 'pointer',
+                        background: rescheduleTime === slot ? '#000' : '#fff',
+                        color: rescheduleTime === slot ? '#fff' : '#000',
+                        transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                      }}
+                    >
+                      {slot}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {rescheduleError && (
+                <div style={{
+                  padding: '12px 16px', background: '#FEE2E2', borderRadius: 12,
+                  marginBottom: 20, fontSize: 14, color: '#DC2626', fontWeight: 500,
+                }}>
+                  {rescheduleError}
+                </div>
+              )}
+            </div>
+
+            {/* Modal footer */}
+            <div style={{ padding: '20px 28px', borderTop: '1px solid #f0f0f0', display: 'flex', gap: 10 }}>
               <button
                 onClick={() => setRescheduleBooking(null)}
-                style={{ flex: 1, padding: '14px', fontSize: 15, fontWeight: 500, background: 'white', border: `1px solid ${brand.border}`, borderRadius: 10, cursor: 'pointer', color: brand.text }}
+                style={{
+                  flex: 1, padding: '16px', fontSize: 15, fontWeight: 600,
+                  background: '#f5f5f5', border: 'none', borderRadius: 14,
+                  cursor: 'pointer', color: '#000', transition: 'background 0.15s',
+                }}
               >
                 Cancel
               </button>
@@ -423,11 +570,12 @@ export default function CustomerDashboard() {
                 onClick={handleReschedule}
                 disabled={rescheduling || !rescheduleDate || !rescheduleTime}
                 style={{
-                  flex: 1, padding: '14px', fontSize: 15, fontWeight: 600,
-                  background: rescheduleDate && rescheduleTime && !rescheduling ? brand.text : brand.border,
-                  color: rescheduleDate && rescheduleTime && !rescheduling ? 'white' : '#999',
-                  border: 'none', borderRadius: 10,
+                  flex: 1, padding: '16px', fontSize: 15, fontWeight: 600,
+                  background: rescheduleDate && rescheduleTime && !rescheduling ? '#000' : '#e5e5e5',
+                  color: rescheduleDate && rescheduleTime && !rescheduling ? '#fff' : '#999',
+                  border: 'none', borderRadius: 14,
                   cursor: rescheduleDate && rescheduleTime && !rescheduling ? 'pointer' : 'not-allowed',
+                  transition: 'all 0.2s ease',
                 }}
               >
                 {rescheduling ? 'Updating...' : 'Confirm'}
@@ -436,6 +584,17 @@ export default function CustomerDashboard() {
           </div>
         </div>
       )}
+
+      <style jsx global>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes scaleIn {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+      `}</style>
     </div>
   );
 }

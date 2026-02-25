@@ -7,10 +7,10 @@ import { useAuth } from '../../../lib/useAuth';
 
 function Logo() {
   return (
-    <div style={{ display: 'flex', gap: 4 }}>
-      <div style={{ width: 8, height: 28, background: '#C9B037', borderRadius: 0 }} />
-      <div style={{ width: 8, height: 28, background: '#C9B037', borderRadius: 0 }} />
-      <div style={{ width: 8, height: 28, background: '#C9B037', borderRadius: 0 }} />
+    <div style={{ display: 'flex', gap: 3 }}>
+      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
+      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
+      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
     </div>
   );
 }
@@ -26,14 +26,7 @@ export default function WorkerLogin() {
   const [submitting, setSubmitting] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const brand = {
-    primary: '#C9B037',
-    primaryDark: '#A69028',
-    primaryLight: '#F5F0DC',
-    text: '#2D3748',
-    textLight: '#718096',
-    bg: '#FAFAF5',
-  };
+  const font = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 
   useEffect(() => {
     if (!loading && user) {
@@ -96,8 +89,17 @@ export default function WorkerLogin() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: brand.bg }}>
-        <p style={{ color: brand.textLight }}>Loading...</p>
+      <div style={{
+        minHeight: '100vh', display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center', background: '#fff',
+        fontFamily: font
+      }}>
+        <div style={{
+          width: 36, height: 36, border: '3px solid #f0f0f0', borderTop: '3px solid #000',
+          borderRadius: '50%', animation: 'loginSpin 0.8s linear infinite'
+        }} />
+        <p style={{ color: '#6b6b6b', fontSize: 14, marginTop: 16, fontWeight: 500 }}>Loading...</p>
+        <style>{`@keyframes loginSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
@@ -105,33 +107,38 @@ export default function WorkerLogin() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: `linear-gradient(180deg, ${brand.bg} 0%, ${brand.primaryLight} 100%)`,
-      fontFamily: "'Cormorant Garamond', Georgia, serif"
+      background: '#f5f5f5',
+      fontFamily: font
     }}>
       <header className="auth-header" style={{
-        padding: '20px 32px',
+        padding: '16px 32px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        background: 'white',
-        borderBottom: `1px solid ${brand.primaryLight}`,
-        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+        background: '#fff',
+        borderBottom: '1px solid #f0f0f0',
+        position: 'sticky', top: 0, zIndex: 100
       }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
           <Logo />
-          <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
+          <span style={{ fontSize: 18, fontWeight: 700, color: '#000', letterSpacing: '-0.02em' }}>BetterView</span>
           <span style={{
             marginLeft: 4, padding: '4px 10px',
-            background: brand.primary, color: 'white',
-            borderRadius: 4, fontSize: 12, fontWeight: 600
+            background: '#000', color: '#fff',
+            borderRadius: 6, fontSize: 11, fontWeight: 700,
+            letterSpacing: '0.04em'
           }}>WORKER</span>
         </Link>
         <div className="desktop-nav">
           <Link href="/login" style={{
-            padding: '10px 24px', fontSize: 16, fontWeight: 500,
-            background: 'transparent', border: 'none', color: brand.text,
-            cursor: 'pointer', textDecoration: 'none'
-          }}>
+            padding: '10px 20px', fontSize: 14, fontWeight: 600,
+            background: '#fff', border: '1.5px solid #e5e5e5', borderRadius: 100,
+            color: '#000', cursor: 'pointer', textDecoration: 'none',
+            display: 'inline-block', transition: 'background 0.15s'
+          }}
+          onMouseOver={(e) => e.target.style.background = '#f5f5f5'}
+          onMouseOut={(e) => e.target.style.background = '#fff'}
+          >
             Customer Login
           </Link>
         </div>
@@ -150,9 +157,9 @@ export default function WorkerLogin() {
 
         <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
           <Link href="/login" onClick={() => setMobileMenuOpen(false)} style={{
-            padding: '14px 16px', fontSize: 16, fontWeight: 500,
-            color: brand.text, textDecoration: 'none', textAlign: 'center',
-            borderRadius: 8, border: `1px solid ${brand.primaryLight}`
+            padding: '14px 16px', fontSize: 16, fontWeight: 600,
+            color: '#000', textDecoration: 'none', textAlign: 'center',
+            borderRadius: 100, background: '#f5f5f5', display: 'block'
           }}>
             Customer Login
           </Link>
@@ -161,105 +168,145 @@ export default function WorkerLogin() {
 
       <main style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 80px)', padding: '40px 24px' }}>
         <div style={{
-          background: 'white', borderRadius: 20, padding: '48px 40px', width: '100%', maxWidth: 420,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
+          background: '#fff', borderRadius: 24, padding: '48px 40px', width: '100%', maxWidth: 420,
+          boxShadow: '0 8px 40px rgba(0,0,0,0.08)'
         }}>
           {/* Worker badge header */}
           <div style={{ textAlign: 'center', marginBottom: 24 }}>
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
-              padding: '8px 20px', background: brand.primaryLight,
+              padding: '8px 20px', background: '#000',
               borderRadius: 100, marginBottom: 20
             }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={brand.primary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
               </svg>
-              <span style={{ fontSize: 14, fontWeight: 600, color: brand.primaryDark }}>Worker Portal</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: '#fff', letterSpacing: '0.02em' }}>Worker Portal</span>
             </div>
           </div>
 
           {/* Toggle */}
-          <div style={{ display: 'flex', background: brand.primaryLight, borderRadius: 10, padding: 4, marginBottom: 24 }}>
+          <div style={{ display: 'flex', background: '#f5f5f5', borderRadius: 12, padding: 4, marginBottom: 28 }}>
             <button
               onClick={() => { setView('login'); setError(''); setMessage(''); }}
-              style={{ flex: 1, padding: '12px 24px', fontSize: 16, fontWeight: 600, background: view === 'login' ? 'white' : 'transparent', border: 'none', borderRadius: 8, color: brand.text, cursor: 'pointer', transition: 'background 0.2s' }}
+              style={{
+                flex: 1, padding: '12px 24px', fontSize: 14, fontWeight: 600,
+                background: view === 'login' ? '#000' : 'transparent',
+                color: view === 'login' ? '#fff' : '#6b6b6b',
+                border: 'none', borderRadius: 10, cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
             >
               Sign In
             </button>
             <button
               onClick={() => { setView('signup'); setError(''); setMessage(''); }}
-              style={{ flex: 1, padding: '12px 24px', fontSize: 16, fontWeight: 600, background: view === 'signup' ? 'white' : 'transparent', border: 'none', borderRadius: 8, color: brand.text, cursor: 'pointer', transition: 'background 0.2s' }}
+              style={{
+                flex: 1, padding: '12px 24px', fontSize: 14, fontWeight: 600,
+                background: view === 'signup' ? '#000' : 'transparent',
+                color: view === 'signup' ? '#fff' : '#6b6b6b',
+                border: 'none', borderRadius: 10, cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
             >
               Create Account
             </button>
           </div>
 
-          <h1 style={{ fontSize: 32, fontWeight: 600, color: brand.text, marginBottom: 8, textAlign: 'center' }}>
+          <h1 style={{ fontSize: 32, fontWeight: 800, color: '#000', marginBottom: 8, textAlign: 'center', letterSpacing: '-0.02em' }}>
             {view === 'login' ? 'Welcome back' : 'Set up your account'}
           </h1>
-          <p style={{ fontSize: 16, color: brand.textLight, marginBottom: 32, textAlign: 'center' }}>
+          <p style={{ fontSize: 15, color: '#6b6b6b', marginBottom: 32, textAlign: 'center', lineHeight: 1.5 }}>
             {view === 'login' ? 'Sign in to view your assigned jobs' : 'Your admin must add you before you can create an account'}
           </p>
 
           {error && (
-            <div style={{ padding: '12px 16px', background: '#FEE2E2', borderRadius: 8, marginBottom: 20, fontSize: 14, color: '#DC2626' }}>
+            <div style={{
+              padding: '14px 16px', background: '#FEF2F2', borderRadius: 12,
+              marginBottom: 20, fontSize: 14, color: '#DC2626', fontWeight: 500
+            }}>
               {error}
             </div>
           )}
           {message && (
-            <div style={{ padding: '12px 16px', background: '#DCFCE7', borderRadius: 8, marginBottom: 20, fontSize: 14, color: '#16A34A' }}>
+            <div style={{
+              padding: '14px 16px', background: '#F0FDF4', borderRadius: 12,
+              marginBottom: 20, fontSize: 14, color: '#16A34A', fontWeight: 500
+            }}>
               {message}
             </div>
           )}
 
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: 20 }}>
-              <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 8 }}>Email Address</label>
+              <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#000', marginBottom: 8 }}>Email Address</label>
               <input
                 type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com"
                 required
-                style={{ width: '100%', padding: '14px 16px', border: `1px solid ${brand.primaryLight}`, borderRadius: 10, fontSize: 16, boxSizing: 'border-box', outline: 'none' }}
-                onFocus={(e) => e.target.style.borderColor = brand.primary}
-                onBlur={(e) => e.target.style.borderColor = brand.primaryLight}
+                style={{
+                  width: '100%', padding: '14px 16px',
+                  border: '1.5px solid #e5e5e5', borderRadius: 14,
+                  fontSize: 16, boxSizing: 'border-box', outline: 'none',
+                  fontFamily: font, transition: 'border-color 0.15s',
+                  color: '#000'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#000'}
+                onBlur={(e) => e.target.style.borderColor = '#e5e5e5'}
               />
             </div>
 
-            <div style={{ marginBottom: 24 }}>
-              <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 8 }}>Password</label>
+            <div style={{ marginBottom: 28 }}>
+              <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#000', marginBottom: 8 }}>Password</label>
               <input
                 type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••"
                 required minLength={6}
-                style={{ width: '100%', padding: '14px 16px', border: `1px solid ${brand.primaryLight}`, borderRadius: 10, fontSize: 16, boxSizing: 'border-box', outline: 'none' }}
-                onFocus={(e) => e.target.style.borderColor = brand.primary}
-                onBlur={(e) => e.target.style.borderColor = brand.primaryLight}
+                style={{
+                  width: '100%', padding: '14px 16px',
+                  border: '1.5px solid #e5e5e5', borderRadius: 14,
+                  fontSize: 16, boxSizing: 'border-box', outline: 'none',
+                  fontFamily: font, transition: 'border-color 0.15s',
+                  color: '#000'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#000'}
+                onBlur={(e) => e.target.style.borderColor = '#e5e5e5'}
               />
             </div>
 
             <button
               type="submit" disabled={submitting}
               style={{
-                width: '100%', padding: '16px 24px', fontSize: 18, fontWeight: 600,
-                background: submitting ? brand.primaryLight : brand.primary,
-                border: 'none', borderRadius: 10, color: 'white',
+                width: '100%', padding: '16px 24px', fontSize: 16, fontWeight: 600,
+                background: submitting ? '#6b6b6b' : '#000',
+                border: 'none', borderRadius: 14, color: '#fff',
                 cursor: submitting ? 'not-allowed' : 'pointer',
-                transition: 'transform 0.2s, box-shadow 0.2s'
+                transition: 'opacity 0.15s', fontFamily: font,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10
               }}
-              onMouseOver={(e) => { if (!submitting) { e.target.style.transform = 'translateY(-1px)'; e.target.style.boxShadow = `0 4px 12px rgba(201, 176, 55, 0.4)`; }}}
-              onMouseOut={(e) => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = 'none'; }}
+              onMouseOver={(e) => { if (!submitting) e.target.style.opacity = '0.85'; }}
+              onMouseOut={(e) => { e.target.style.opacity = '1'; }}
             >
+              {submitting && (
+                <span style={{
+                  display: 'inline-block', width: 18, height: 18,
+                  border: '2.5px solid rgba(255,255,255,0.3)', borderTop: '2.5px solid #fff',
+                  borderRadius: '50%', animation: 'btnSpin 0.8s linear infinite'
+                }} />
+              )}
               {submitting ? 'Please wait...' : (view === 'login' ? 'Sign In' : 'Create Account')}
             </button>
           </form>
 
-          <p style={{ fontSize: 14, color: brand.textLight, marginTop: 24, textAlign: 'center' }}>
+          <p style={{ fontSize: 14, color: '#6b6b6b', marginTop: 28, textAlign: 'center' }}>
             Not a worker?{' '}
-            <Link href="/login" style={{ color: brand.primaryDark, fontWeight: 500, textDecoration: 'none' }}>
+            <Link href="/login" style={{ color: '#000', fontWeight: 600, textDecoration: 'none' }}>
               Customer login
             </Link>
           </p>
         </div>
       </main>
+
+      <style>{`@keyframes btnSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

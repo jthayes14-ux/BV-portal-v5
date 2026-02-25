@@ -8,9 +8,9 @@ import { useAuth } from '../../lib/useAuth';
 function Logo() {
   return (
     <div style={{ display: 'flex', gap: 3 }}>
-      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
-      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
-      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
+      <div style={{ width: 4, height: 22, background: '#B8C5F2', borderRadius: 1 }} />
+      <div style={{ width: 4, height: 22, background: '#B8C5F2', borderRadius: 1 }} />
+      <div style={{ width: 4, height: 22, background: '#B8C5F2', borderRadius: 1 }} />
     </div>
   );
 }
@@ -75,10 +75,10 @@ export default function WorkerDashboard() {
 
   const getStatusStyle = (status) => {
     switch (status) {
-      case 'upcoming': return { background: '#000', color: '#fff' };
-      case 'scheduled': return { background: '#f5f5f5', color: '#000' };
-      case 'completed': return { background: '#f0f0f0', color: '#6b6b6b' };
-      default: return { background: '#f0f0f0', color: '#6b6b6b' };
+      case 'upcoming': return { background: '#9AA8E0', color: '#fff' };
+      case 'scheduled': return { background: '#EEF1FC', color: '#2D3748' };
+      case 'completed': return { background: '#E8EDFC', color: '#718096' };
+      default: return { background: '#E8EDFC', color: '#718096' };
     }
   };
 
@@ -94,10 +94,10 @@ export default function WorkerDashboard() {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#fff', fontFamily: font }}>
         <div style={{
-          width: 36, height: 36, border: '3px solid #f0f0f0', borderTop: '3px solid #000',
+          width: 36, height: 36, border: '3px solid #E8EDFC', borderTop: '3px solid #9AA8E0',
           borderRadius: '50%', animation: 'workerSpin 0.8s linear infinite'
         }} />
-        <p style={{ color: '#6b6b6b', fontSize: 14, marginTop: 16, fontWeight: 500 }}>Loading...</p>
+        <p style={{ color: '#718096', fontSize: 14, marginTop: 16, fontWeight: 500 }}>Loading...</p>
         <style>{`@keyframes workerSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
       </div>
     );
@@ -107,35 +107,35 @@ export default function WorkerDashboard() {
     return (
       <div style={{ minHeight: '100vh', background: '#fff', fontFamily: font }}>
         <header style={{
-          padding: '16px 32px', background: '#fff', borderBottom: '1px solid #f0f0f0',
+          padding: '16px 32px', background: '#fff', borderBottom: '1px solid #E8EDFC',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           position: 'sticky', top: 0, zIndex: 100
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Logo />
-            <span style={{ fontSize: 18, fontWeight: 700, color: '#000', letterSpacing: '-0.02em' }}>BetterView</span>
+            <span style={{ fontSize: 18, fontWeight: 700, color: '#2D3748', letterSpacing: '-0.02em' }}>BetterView</span>
           </div>
           <button onClick={handleLogout} style={{
             padding: '10px 20px', fontSize: 14, fontWeight: 600,
             background: '#fff', border: '1.5px solid #e5e5e5', borderRadius: 100,
-            cursor: 'pointer', color: '#000', transition: 'background 0.15s'
+            cursor: 'pointer', color: '#2D3748', transition: 'background 0.15s'
           }}
-          onMouseOver={(e) => e.target.style.background = '#f5f5f5'}
+          onMouseOver={(e) => e.target.style.background = '#EEF1FC'}
           onMouseOut={(e) => e.target.style.background = '#fff'}
           >Log Out</button>
         </header>
         <div style={{ maxWidth: 500, margin: '80px auto', textAlign: 'center', padding: '0 24px' }}>
           <div style={{
-            width: 56, height: 56, borderRadius: 16, background: '#f5f5f5',
+            width: 56, height: 56, borderRadius: 16, background: '#EEF1FC',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             margin: '0 auto 24px'
           }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b6b6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#718096" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
             </svg>
           </div>
-          <h1 style={{ fontSize: 32, fontWeight: 800, color: '#000', letterSpacing: '-0.02em', marginBottom: 12 }}>Worker Access Required</h1>
-          <p style={{ color: '#6b6b6b', fontSize: 16, lineHeight: 1.6 }}>No worker profile is linked to <strong style={{ color: '#000' }}>{user?.email}</strong>. Ask your admin to add your email to the workers list.</p>
+          <h1 style={{ fontSize: 32, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em', marginBottom: 12 }}>Worker Access Required</h1>
+          <p style={{ color: '#718096', fontSize: 16, lineHeight: 1.6 }}>No worker profile is linked to <strong style={{ color: '#2D3748' }}>{user?.email}</strong>. Ask your admin to add your email to the workers list.</p>
         </div>
       </div>
     );
@@ -144,28 +144,28 @@ export default function WorkerDashboard() {
   return (
     <div style={{ minHeight: '100vh', background: '#fff', fontFamily: font }}>
       <header className="worker-header" style={{
-        padding: '16px 32px', background: '#fff', borderBottom: '1px solid #f0f0f0',
+        padding: '16px 32px', background: '#fff', borderBottom: '1px solid #E8EDFC',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         position: 'sticky', top: 0, zIndex: 100
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <Logo />
-          <span style={{ fontSize: 18, fontWeight: 700, color: '#000', letterSpacing: '-0.02em' }}>BetterView</span>
+          <span style={{ fontSize: 18, fontWeight: 700, color: '#2D3748', letterSpacing: '-0.02em' }}>BetterView</span>
           <span style={{
             marginLeft: 8, padding: '4px 10px',
-            background: '#000', color: '#fff',
+            background: '#9AA8E0', color: '#fff',
             borderRadius: 6, fontSize: 11, fontWeight: 700,
             letterSpacing: '0.04em'
           }}>WORKER</span>
         </div>
         <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 14, color: '#6b6b6b', fontWeight: 500 }}>{worker.name}</span>
+          <span style={{ fontSize: 14, color: '#718096', fontWeight: 500 }}>{worker.name}</span>
           <button onClick={handleLogout} style={{
             padding: '10px 20px', fontSize: 14, fontWeight: 600,
             background: '#fff', border: '1.5px solid #e5e5e5', borderRadius: 100,
-            cursor: 'pointer', color: '#000', transition: 'background 0.15s'
+            cursor: 'pointer', color: '#2D3748', transition: 'background 0.15s'
           }}
-          onMouseOver={(e) => e.target.style.background = '#f5f5f5'}
+          onMouseOver={(e) => e.target.style.background = '#EEF1FC'}
           onMouseOut={(e) => e.target.style.background = '#fff'}
           >Log Out</button>
         </div>
@@ -183,10 +183,10 @@ export default function WorkerDashboard() {
         </button>
 
         <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
-          <span style={{ padding: '14px 16px', fontSize: 16, color: '#6b6b6b', textAlign: 'center', fontWeight: 500 }}>{worker.name}</span>
+          <span style={{ padding: '14px 16px', fontSize: 16, color: '#718096', textAlign: 'center', fontWeight: 500 }}>{worker.name}</span>
           <button onClick={() => { handleLogout(); setMobileMenuOpen(false); }} style={{
             padding: '14px 16px', fontSize: 16, fontWeight: 600,
-            background: '#000', border: 'none', borderRadius: 100,
+            background: '#9AA8E0', border: 'none', borderRadius: 100,
             color: '#fff', cursor: 'pointer'
           }}>
             Log Out
@@ -197,32 +197,32 @@ export default function WorkerDashboard() {
       <main style={{ maxWidth: 700, margin: '0 auto', padding: '32px 24px' }}>
         {/* Stats Cards */}
         <div className="worker-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 36 }}>
-          <div style={{ background: '#fafafa', borderRadius: 16, padding: 24, textAlign: 'center' }}>
-            <p style={{ fontSize: 36, fontWeight: 800, color: '#000', letterSpacing: '-0.02em', lineHeight: 1 }}>{upcomingBookings.length}</p>
-            <p style={{ fontSize: 13, color: '#6b6b6b', marginTop: 8, fontWeight: 500 }}>Upcoming</p>
+          <div style={{ background: '#F8FAFF', borderRadius: 16, padding: 24, textAlign: 'center' }}>
+            <p style={{ fontSize: 36, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em', lineHeight: 1 }}>{upcomingBookings.length}</p>
+            <p style={{ fontSize: 13, color: '#718096', marginTop: 8, fontWeight: 500 }}>Upcoming</p>
           </div>
-          <div style={{ background: '#fafafa', borderRadius: 16, padding: 24, textAlign: 'center' }}>
-            <p style={{ fontSize: 36, fontWeight: 800, color: '#000', letterSpacing: '-0.02em', lineHeight: 1 }}>{completedBookings.length}</p>
-            <p style={{ fontSize: 13, color: '#6b6b6b', marginTop: 8, fontWeight: 500 }}>Completed</p>
+          <div style={{ background: '#F8FAFF', borderRadius: 16, padding: 24, textAlign: 'center' }}>
+            <p style={{ fontSize: 36, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em', lineHeight: 1 }}>{completedBookings.length}</p>
+            <p style={{ fontSize: 13, color: '#718096', marginTop: 8, fontWeight: 500 }}>Completed</p>
           </div>
-          <div style={{ background: '#fafafa', borderRadius: 16, padding: 24, textAlign: 'center' }}>
-            <p style={{ fontSize: 36, fontWeight: 800, color: '#000', letterSpacing: '-0.02em', lineHeight: 1 }}>
+          <div style={{ background: '#F8FAFF', borderRadius: 16, padding: 24, textAlign: 'center' }}>
+            <p style={{ fontSize: 36, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em', lineHeight: 1 }}>
               ${completedBookings.reduce((sum, b) => sum + (b.total_price || 0), 0)}
             </p>
-            <p style={{ fontSize: 13, color: '#6b6b6b', marginTop: 8, fontWeight: 500 }}>Revenue</p>
+            <p style={{ fontSize: 13, color: '#718096', marginTop: 8, fontWeight: 500 }}>Revenue</p>
           </div>
         </div>
 
-        <h1 style={{ fontSize: 32, fontWeight: 800, color: '#000', letterSpacing: '-0.02em', marginBottom: 20 }}>My Jobs</h1>
+        <h1 style={{ fontSize: 32, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em', marginBottom: 20 }}>My Jobs</h1>
 
         {/* Tabs - Pill segmented control */}
         <div style={{
-          display: 'inline-flex', background: '#f5f5f5', borderRadius: 12, padding: 4, marginBottom: 28
+          display: 'inline-flex', background: '#EEF1FC', borderRadius: 12, padding: 4, marginBottom: 28
         }}>
           <button onClick={() => setActiveTab('upcoming')} style={{
             padding: '10px 22px', fontSize: 14, fontWeight: 600,
-            background: activeTab === 'upcoming' ? '#000' : 'transparent',
-            color: activeTab === 'upcoming' ? '#fff' : '#6b6b6b',
+            background: activeTab === 'upcoming' ? '#9AA8E0' : 'transparent',
+            color: activeTab === 'upcoming' ? '#fff' : '#718096',
             border: 'none', borderRadius: 10, cursor: 'pointer',
             transition: 'all 0.2s ease'
           }}>
@@ -230,8 +230,8 @@ export default function WorkerDashboard() {
           </button>
           <button onClick={() => setActiveTab('completed')} style={{
             padding: '10px 22px', fontSize: 14, fontWeight: 600,
-            background: activeTab === 'completed' ? '#000' : 'transparent',
-            color: activeTab === 'completed' ? '#fff' : '#6b6b6b',
+            background: activeTab === 'completed' ? '#9AA8E0' : 'transparent',
+            color: activeTab === 'completed' ? '#fff' : '#718096',
             border: 'none', borderRadius: 10, cursor: 'pointer',
             transition: 'all 0.2s ease'
           }}>
@@ -242,19 +242,19 @@ export default function WorkerDashboard() {
         {/* Bookings grouped by date */}
         {sortedDates.length === 0 ? (
           <div style={{
-            textAlign: 'center', padding: '64px 24px', background: '#fafafa',
+            textAlign: 'center', padding: '64px 24px', background: '#F8FAFF',
             borderRadius: 16
           }}>
             <div style={{
-              width: 48, height: 48, borderRadius: 14, background: '#f0f0f0',
+              width: 48, height: 48, borderRadius: 14, background: '#E8EDFC',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               margin: '0 auto 16px'
             }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b6b6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#718096" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
               </svg>
             </div>
-            <p style={{ color: '#6b6b6b', fontSize: 15, fontWeight: 500 }}>
+            <p style={{ color: '#718096', fontSize: 15, fontWeight: 500 }}>
               {activeTab === 'upcoming' ? 'No upcoming jobs assigned to you' : 'No completed jobs yet'}
             </p>
           </div>
@@ -262,7 +262,7 @@ export default function WorkerDashboard() {
           sortedDates.map(dateKey => (
             <div key={dateKey} style={{ marginBottom: 28 }}>
               <h3 style={{
-                fontSize: 13, fontWeight: 700, color: '#6b6b6b',
+                fontSize: 13, fontWeight: 700, color: '#718096',
                 textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12
               }}>
                 {formatDate(dateKey)}
@@ -275,7 +275,7 @@ export default function WorkerDashboard() {
                   return (
                     <div key={booking.id} style={{
                       background: '#fff', borderRadius: 16,
-                      border: '1px solid #f0f0f0', overflow: 'hidden',
+                      border: '1px solid #E8EDFC', overflow: 'hidden',
                       transition: 'box-shadow 0.15s ease'
                     }}>
                       <div className="worker-booking-row" style={{
@@ -284,16 +284,16 @@ export default function WorkerDashboard() {
                         flexWrap: 'wrap', gap: 10
                       }}>
                         <div>
-                          <h4 style={{ fontSize: 16, fontWeight: 700, color: '#000', marginBottom: 4, letterSpacing: '-0.01em' }}>
+                          <h4 style={{ fontSize: 16, fontWeight: 700, color: '#2D3748', marginBottom: 4, letterSpacing: '-0.01em' }}>
                             {booking.building} - Unit {booking.unit_number}
                           </h4>
-                          <p style={{ fontSize: 14, color: '#6b6b6b', fontWeight: 400 }}>{booking.booking_time} · {booking.floor_plan}</p>
+                          <p style={{ fontSize: 14, color: '#718096', fontWeight: 400 }}>{booking.booking_time} · {booking.floor_plan}</p>
                           {booking.add_ons && booking.add_ons.length > 0 && (
                             <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
                               {booking.add_ons.map((a, i) => (
                                 <span key={i} style={{
-                                  fontSize: 12, fontWeight: 600, color: '#000',
-                                  background: '#f5f5f5', padding: '4px 10px', borderRadius: 100
+                                  fontSize: 12, fontWeight: 600, color: '#2D3748',
+                                  background: '#EEF1FC', padding: '4px 10px', borderRadius: 100
                                 }}>
                                   {a.name}
                                 </span>
@@ -302,11 +302,11 @@ export default function WorkerDashboard() {
                           )}
                         </div>
                         <div className="worker-booking-actions" style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: 12 }}>
-                          <span style={{ fontSize: 18, fontWeight: 700, color: '#000', letterSpacing: '-0.01em' }}>${booking.total_price}</span>
+                          <span style={{ fontSize: 18, fontWeight: 700, color: '#2D3748', letterSpacing: '-0.01em' }}>${booking.total_price}</span>
                           {(booking.status === 'upcoming' || booking.status === 'scheduled') && (
                             <button onClick={() => handleMarkComplete(booking.id)} style={{
                               padding: '10px 20px', fontSize: 13, fontWeight: 600,
-                              background: '#000', color: '#fff',
+                              background: '#9AA8E0', color: '#fff',
                               border: 'none', borderRadius: 100, cursor: 'pointer',
                               transition: 'opacity 0.15s'
                             }}
@@ -327,15 +327,15 @@ export default function WorkerDashboard() {
                         </div>
                       </div>
                       <div style={{
-                        padding: '12px 20px', background: '#fafafa',
-                        borderTop: '1px solid #f0f0f0',
-                        fontSize: 13, color: '#6b6b6b', fontWeight: 400
+                        padding: '12px 20px', background: '#F8FAFF',
+                        borderTop: '1px solid #E8EDFC',
+                        fontSize: 13, color: '#718096', fontWeight: 400
                       }}>
                         Customer: {booking.customer_name} · {booking.neighborhood}
                         {freqName && freqName !== 'One-Time' && (
                           <span style={{
                             marginLeft: 12, padding: '3px 10px', borderRadius: 100,
-                            background: '#f5f5f5', color: '#000', fontWeight: 600, fontSize: 12
+                            background: '#EEF1FC', color: '#2D3748', fontWeight: 600, fontSize: 12
                           }}>
                             {freqName}
                           </span>
@@ -343,7 +343,7 @@ export default function WorkerDashboard() {
                         {booking.status === 'scheduled' && (
                           <span style={{
                             marginLeft: 8, padding: '3px 10px', borderRadius: 100,
-                            background: '#f0f0f0', color: '#000', fontWeight: 600, fontSize: 12
+                            background: '#E8EDFC', color: '#2D3748', fontWeight: 600, fontSize: 12
                           }}>
                             scheduled
                           </span>

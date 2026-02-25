@@ -8,9 +8,9 @@ import { useAuth } from '../../../lib/useAuth';
 function Logo() {
   return (
     <div style={{ display: 'flex', gap: 3 }}>
-      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
-      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
-      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
+      <div style={{ width: 4, height: 22, background: '#B8C5F2', borderRadius: 1 }} />
+      <div style={{ width: 4, height: 22, background: '#B8C5F2', borderRadius: 1 }} />
+      <div style={{ width: 4, height: 22, background: '#B8C5F2', borderRadius: 1 }} />
     </div>
   );
 }
@@ -124,8 +124,8 @@ export default function SettingsPage() {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ width: 40, height: 40, border: '3px solid #f0f0f0', borderTopColor: '#000', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
-          <p style={{ color: '#6b6b6b', fontSize: 15 }}>Loading...</p>
+          <div style={{ width: 40, height: 40, border: '3px solid #E8EDFC', borderTopColor: '#9AA8E0', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
+          <p style={{ color: '#718096', fontSize: 15 }}>Loading...</p>
         </div>
         <style jsx global>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
@@ -138,7 +138,7 @@ export default function SettingsPage() {
       <header className="dashboard-header" style={{
         padding: '14px 24px',
         background: '#fff',
-        borderBottom: '1px solid #f0f0f0',
+        borderBottom: '1px solid #E8EDFC',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -148,19 +148,19 @@ export default function SettingsPage() {
       }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
           <Logo />
-          <span style={{ fontSize: 18, fontWeight: 700, color: '#000', letterSpacing: '-0.02em' }}>BetterView</span>
+          <span style={{ fontSize: 18, fontWeight: 700, color: '#2D3748', letterSpacing: '-0.02em' }}>BetterView</span>
         </Link>
         <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Link href="/book" style={{
             padding: '10px 24px', fontSize: 14, fontWeight: 600,
-            background: '#000', borderRadius: 100, color: '#fff', textDecoration: 'none',
+            background: '#9AA8E0', borderRadius: 100, color: '#fff', textDecoration: 'none',
             transition: 'opacity 0.2s',
           }}>
             Book a Cleaning
           </Link>
           <div style={{ position: 'relative' }}>
             <div onClick={() => setProfileMenuOpen(!profileMenuOpen)} style={{
-              width: 36, height: 36, background: '#000', borderRadius: '50%',
+              width: 36, height: 36, background: '#9AA8E0', borderRadius: '50%',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', userSelect: 'none',
               transition: 'opacity 0.2s',
@@ -179,8 +179,8 @@ export default function SettingsPage() {
                 }}>
                   <Link href="/dashboard/settings" onClick={() => setProfileMenuOpen(false)} style={{
                     display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px',
-                    fontSize: 15, fontWeight: 500, color: '#000', textDecoration: 'none',
-                    borderBottom: '1px solid #f0f0f0', transition: 'background 0.15s',
+                    fontSize: 15, fontWeight: 500, color: '#2D3748', textDecoration: 'none',
+                    borderBottom: '1px solid #E8EDFC', transition: 'background 0.15s',
                   }}>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                     Settings
@@ -215,15 +215,15 @@ export default function SettingsPage() {
         <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
           <Link href="/book" onClick={() => setMobileMenuOpen(false)} style={{
             padding: '16px', fontSize: 16, fontWeight: 600,
-            background: '#000', border: 'none', borderRadius: 12,
+            background: '#9AA8E0', border: 'none', borderRadius: 12,
             color: '#fff', textDecoration: 'none', textAlign: 'center'
           }}>
             Book a Cleaning
           </Link>
           <Link href="/dashboard/settings" onClick={() => setMobileMenuOpen(false)} style={{
             padding: '16px', fontSize: 16, fontWeight: 500,
-            background: '#f5f5f5', border: 'none', borderRadius: 12,
-            color: '#000', textDecoration: 'none', textAlign: 'center'
+            background: '#EEF1FC', border: 'none', borderRadius: 12,
+            color: '#2D3748', textDecoration: 'none', textAlign: 'center'
           }}>
             Settings
           </Link>
@@ -242,7 +242,7 @@ export default function SettingsPage() {
         <div style={{ marginBottom: 32 }}>
           <Link href="/dashboard" style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,
-            fontSize: 14, fontWeight: 500, color: '#6b6b6b', textDecoration: 'none',
+            fontSize: 14, fontWeight: 500, color: '#718096', textDecoration: 'none',
             transition: 'color 0.15s',
           }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -252,35 +252,35 @@ export default function SettingsPage() {
           </Link>
         </div>
 
-        <h1 style={{ fontSize: 32, fontWeight: 800, color: '#000', marginBottom: 8, letterSpacing: '-0.02em' }}>Settings</h1>
-        <p style={{ fontSize: 15, color: '#6b6b6b', marginBottom: 32 }}>Manage your address and payment information</p>
+        <h1 style={{ fontSize: 32, fontWeight: 800, color: '#2D3748', marginBottom: 8, letterSpacing: '-0.02em' }}>Settings</h1>
+        <p style={{ fontSize: 15, color: '#718096', marginBottom: 32 }}>Manage your address and payment information</p>
 
         {/* Profile info */}
         <div style={{
-          background: '#fafafa', borderRadius: 20, padding: '28px',
+          background: '#F8FAFF', borderRadius: 20, padding: '28px',
           marginBottom: 28,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <div style={{
-              width: 52, height: 52, background: '#000', borderRadius: '50%',
+              width: 52, height: 52, background: '#9AA8E0', borderRadius: '50%',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 20, fontWeight: 700, color: '#fff', flexShrink: 0,
             }}>
               {userInitial}
             </div>
             <div>
-              {userName && <p style={{ fontSize: 17, fontWeight: 700, color: '#000', letterSpacing: '-0.01em' }}>{userName}</p>}
-              <p style={{ fontSize: 14, color: '#6b6b6b', marginTop: 2 }}>{userEmail}</p>
+              {userName && <p style={{ fontSize: 17, fontWeight: 700, color: '#2D3748', letterSpacing: '-0.01em' }}>{userName}</p>}
+              <p style={{ fontSize: 14, color: '#718096', marginTop: 2 }}>{userEmail}</p>
             </div>
           </div>
         </div>
 
         {/* Section tabs - pill-style segmented control */}
-        <div style={{ display: 'flex', gap: 4, marginBottom: 28, background: '#f5f5f5', borderRadius: 12, padding: 4 }}>
+        <div style={{ display: 'flex', gap: 4, marginBottom: 28, background: '#EEF1FC', borderRadius: 12, padding: 4 }}>
           <button onClick={() => { setActiveSection('address'); setMessage(''); setError(''); }} style={{
             flex: 1, padding: '12px 20px', fontSize: 14, fontWeight: 600,
-            background: activeSection === 'address' ? '#000' : 'transparent',
-            color: activeSection === 'address' ? '#fff' : '#6b6b6b',
+            background: activeSection === 'address' ? '#9AA8E0' : 'transparent',
+            color: activeSection === 'address' ? '#fff' : '#718096',
             border: 'none', borderRadius: 10, cursor: 'pointer',
             transition: 'all 0.2s ease',
           }}>
@@ -288,8 +288,8 @@ export default function SettingsPage() {
           </button>
           <button onClick={() => { setActiveSection('payment'); setMessage(''); setError(''); }} style={{
             flex: 1, padding: '12px 20px', fontSize: 14, fontWeight: 600,
-            background: activeSection === 'payment' ? '#000' : 'transparent',
-            color: activeSection === 'payment' ? '#fff' : '#6b6b6b',
+            background: activeSection === 'payment' ? '#9AA8E0' : 'transparent',
+            color: activeSection === 'payment' ? '#fff' : '#718096',
             border: 'none', borderRadius: 10, cursor: 'pointer',
             transition: 'all 0.2s ease',
           }}>
@@ -315,16 +315,16 @@ export default function SettingsPage() {
         )}
 
         {activeSection === 'address' && (
-          <div style={{ background: '#fafafa', borderRadius: 20, padding: '32px 28px' }}>
+          <div style={{ background: '#F8FAFF', borderRadius: 20, padding: '32px 28px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 700, color: '#000', letterSpacing: '-0.01em' }}>Address</h2>
+              <h2 style={{ fontSize: 20, fontWeight: 700, color: '#2D3748', letterSpacing: '-0.01em' }}>Address</h2>
               {!editingAddress && (
                 <button
                   onClick={() => { setEditingAddress(true); setMessage(''); setError(''); }}
                   style={{
                     padding: '10px 24px', fontSize: 14, fontWeight: 600,
                     background: '#fff', border: '1.5px solid #e5e5e5', borderRadius: 100,
-                    cursor: 'pointer', color: '#000', transition: 'all 0.2s',
+                    cursor: 'pointer', color: '#2D3748', transition: 'all 0.2s',
                   }}
                 >
                   Edit
@@ -340,17 +340,17 @@ export default function SettingsPage() {
                   padding: '20px', background: '#fff', borderRadius: 16,
                 }}>
                   <div style={{
-                    width: 40, height: 40, borderRadius: 12, background: '#f0f0f0',
+                    width: 40, height: 40, borderRadius: 12, background: '#E8EDFC',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                   }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b6b6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#718096" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
                     </svg>
                   </div>
                   <div>
-                    {address && <p style={{ fontSize: 15, fontWeight: 600, color: '#000', marginBottom: 4 }}>{address}</p>}
+                    {address && <p style={{ fontSize: 15, fontWeight: 600, color: '#2D3748', marginBottom: 4 }}>{address}</p>}
                     {(city || state || zip) && (
-                      <p style={{ fontSize: 14, color: '#6b6b6b' }}>
+                      <p style={{ fontSize: 14, color: '#718096' }}>
                         {[city, state].filter(Boolean).join(', ')}{zip ? ` ${zip}` : ''}
                       </p>
                     )}
@@ -359,21 +359,21 @@ export default function SettingsPage() {
               ) : (
                 <div style={{ textAlign: 'center', padding: '48px 24px' }}>
                   <div style={{
-                    width: 64, height: 64, borderRadius: 20, background: '#f0f0f0',
+                    width: 64, height: 64, borderRadius: 20, background: '#E8EDFC',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     margin: '0 auto 20px',
                   }}>
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b6b6b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#718096" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
                     </svg>
                   </div>
-                  <p style={{ fontSize: 16, fontWeight: 600, color: '#000', marginBottom: 6 }}>No address on file</p>
-                  <p style={{ fontSize: 14, color: '#6b6b6b', marginBottom: 24, lineHeight: 1.5 }}>Your address will be added automatically when you complete your first booking</p>
+                  <p style={{ fontSize: 16, fontWeight: 600, color: '#2D3748', marginBottom: 6 }}>No address on file</p>
+                  <p style={{ fontSize: 14, color: '#718096', marginBottom: 24, lineHeight: 1.5 }}>Your address will be added automatically when you complete your first booking</p>
                   <button
                     onClick={() => setEditingAddress(true)}
                     style={{
                       padding: '14px 32px', fontSize: 15, fontWeight: 600,
-                      background: '#000', border: 'none', borderRadius: 100,
+                      background: '#9AA8E0', border: 'none', borderRadius: 100,
                       cursor: 'pointer', color: '#fff', transition: 'opacity 0.2s',
                     }}
                   >
@@ -386,7 +386,7 @@ export default function SettingsPage() {
               <form onSubmit={handleSaveAddress}>
                 <div style={{ marginBottom: 24 }}>
                   <label style={{
-                    display: 'block', fontSize: 13, fontWeight: 700, color: '#000',
+                    display: 'block', fontSize: 13, fontWeight: 700, color: '#2D3748',
                     marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em',
                   }}>Street Address</label>
                   <input
@@ -398,14 +398,14 @@ export default function SettingsPage() {
                       background: '#fff', transition: 'border-color 0.2s',
                       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
                     }}
-                    onFocus={(e) => e.target.style.borderColor = '#000'}
+                    onFocus={(e) => e.target.style.borderColor = '#9AA8E0'}
                     onBlur={(e) => e.target.style.borderColor = '#e5e5e5'}
                   />
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
                   <div>
                     <label style={{
-                      display: 'block', fontSize: 13, fontWeight: 700, color: '#000',
+                      display: 'block', fontSize: 13, fontWeight: 700, color: '#2D3748',
                       marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em',
                     }}>City</label>
                     <input
@@ -417,13 +417,13 @@ export default function SettingsPage() {
                         background: '#fff', transition: 'border-color 0.2s',
                         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
                       }}
-                      onFocus={(e) => e.target.style.borderColor = '#000'}
+                      onFocus={(e) => e.target.style.borderColor = '#9AA8E0'}
                       onBlur={(e) => e.target.style.borderColor = '#e5e5e5'}
                     />
                   </div>
                   <div>
                     <label style={{
-                      display: 'block', fontSize: 13, fontWeight: 700, color: '#000',
+                      display: 'block', fontSize: 13, fontWeight: 700, color: '#2D3748',
                       marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em',
                     }}>State</label>
                     <input
@@ -435,14 +435,14 @@ export default function SettingsPage() {
                         background: '#fff', transition: 'border-color 0.2s',
                         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
                       }}
-                      onFocus={(e) => e.target.style.borderColor = '#000'}
+                      onFocus={(e) => e.target.style.borderColor = '#9AA8E0'}
                       onBlur={(e) => e.target.style.borderColor = '#e5e5e5'}
                     />
                   </div>
                 </div>
                 <div style={{ marginBottom: 32 }}>
                   <label style={{
-                    display: 'block', fontSize: 13, fontWeight: 700, color: '#000',
+                    display: 'block', fontSize: 13, fontWeight: 700, color: '#2D3748',
                     marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em',
                   }}>ZIP Code</label>
                   <input
@@ -454,7 +454,7 @@ export default function SettingsPage() {
                       background: '#fff', transition: 'border-color 0.2s',
                       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
                     }}
-                    onFocus={(e) => e.target.style.borderColor = '#000'}
+                    onFocus={(e) => e.target.style.borderColor = '#9AA8E0'}
                     onBlur={(e) => e.target.style.borderColor = '#e5e5e5'}
                   />
                 </div>
@@ -463,7 +463,7 @@ export default function SettingsPage() {
                     type="submit" disabled={saving}
                     style={{
                       padding: '14px 32px', fontSize: 15, fontWeight: 600,
-                      background: saving ? '#e5e5e5' : '#000',
+                      background: saving ? '#e5e5e5' : '#9AA8E0',
                       color: saving ? '#999' : '#fff',
                       border: 'none', borderRadius: 100,
                       cursor: saving ? 'not-allowed' : 'pointer',
@@ -476,7 +476,7 @@ export default function SettingsPage() {
                     type="button" onClick={handleCancelEdit}
                     style={{
                       padding: '14px 24px', fontSize: 15, fontWeight: 600,
-                      background: '#fff', color: '#000',
+                      background: '#fff', color: '#2D3748',
                       border: '1.5px solid #e5e5e5', borderRadius: 100,
                       cursor: 'pointer', transition: 'all 0.2s',
                     }}
@@ -490,39 +490,39 @@ export default function SettingsPage() {
         )}
 
         {activeSection === 'payment' && (
-          <div style={{ background: '#fafafa', borderRadius: 20, padding: '32px 28px' }}>
-            <h2 style={{ fontSize: 20, fontWeight: 700, color: '#000', letterSpacing: '-0.01em', marginBottom: 24 }}>Payment Method</h2>
+          <div style={{ background: '#F8FAFF', borderRadius: 20, padding: '32px 28px' }}>
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: '#2D3748', letterSpacing: '-0.01em', marginBottom: 24 }}>Payment Method</h2>
             {cardLast4 ? (
               <div style={{
                 display: 'flex', alignItems: 'center', gap: 16,
                 padding: '20px', background: '#fff', borderRadius: 16,
               }}>
                 <div style={{
-                  width: 48, height: 48, borderRadius: 14, background: '#f0f0f0',
+                  width: 48, height: 48, borderRadius: 14, background: '#E8EDFC',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                 }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2D3748" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
                   </svg>
                 </div>
                 <div>
-                  <p style={{ fontSize: 15, fontWeight: 700, color: '#000' }}>{cardBrand || 'Card'} ending in {cardLast4}</p>
-                  <p style={{ fontSize: 13, color: '#6b6b6b', marginTop: 4 }}>Update your payment method during your next booking</p>
+                  <p style={{ fontSize: 15, fontWeight: 700, color: '#2D3748' }}>{cardBrand || 'Card'} ending in {cardLast4}</p>
+                  <p style={{ fontSize: 13, color: '#718096', marginTop: 4 }}>Update your payment method during your next booking</p>
                 </div>
               </div>
             ) : (
               <div style={{ textAlign: 'center', padding: '48px 24px' }}>
                 <div style={{
-                  width: 64, height: 64, borderRadius: 20, background: '#f0f0f0',
+                  width: 64, height: 64, borderRadius: 20, background: '#E8EDFC',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   margin: '0 auto 20px',
                 }}>
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b6b6b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#718096" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
                   </svg>
                 </div>
-                <p style={{ fontSize: 16, fontWeight: 600, color: '#000', marginBottom: 6 }}>No payment method on file</p>
-                <p style={{ fontSize: 14, color: '#6b6b6b', lineHeight: 1.5 }}>Your payment information will be saved when you complete your first booking</p>
+                <p style={{ fontSize: 16, fontWeight: 600, color: '#2D3748', marginBottom: 6 }}>No payment method on file</p>
+                <p style={{ fontSize: 14, color: '#718096', lineHeight: 1.5 }}>Your payment information will be saved when you complete your first booking</p>
               </div>
             )}
           </div>

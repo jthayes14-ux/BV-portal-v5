@@ -7,10 +7,10 @@ import { useAuth } from '../../lib/useAuth';
 
 function Logo() {
   return (
-    <div style={{ display: 'flex', gap: 3 }}>
-      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
-      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
-      <div style={{ width: 4, height: 22, background: '#000', borderRadius: 1 }} />
+    <div style={{ display: 'flex', gap: 4 }}>
+      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
+      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
+      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
     </div>
   );
 }

@@ -217,6 +217,19 @@ function CheckoutForm({ booking, brand, user, signUp }) {
         }
       }
 
+      // If guest booking (no logged-in user), check if a user account exists with this email
+      if (!user) {
+        const { data: existingUserId } = await supabase.rpc('find_user_id_by_email', {
+          lookup_email: booking.guest_email,
+        });
+        if (existingUserId) {
+          await supabase.rpc('link_guest_bookings', {
+            user_uuid: existingUserId,
+            user_email: booking.guest_email,
+          });
+        }
+      }
+
       // Auto-populate profile data from booking for logged-in users
       if (user?.id) {
         const { data: existingProfile } = await supabase
@@ -311,12 +324,11 @@ function CheckoutForm({ booking, brand, user, signUp }) {
 
       await supabase.from('user_profiles').insert(profileData);
 
-      if (savedBookingId) {
-        await supabase
-          .from('bookings')
-          .update({ user_id: newUserId })
-          .eq('id', savedBookingId);
-      }
+      // Link ALL guest bookings with this email to the new account
+      await supabase.rpc('link_guest_bookings', {
+        user_uuid: newUserId,
+        user_email: booking.guest_email,
+      });
     }
 
     setCreatingAccount(false);

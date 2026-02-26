@@ -483,6 +483,40 @@ export default function AdminPanel() {
 
   const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
+  const [chargingBookingId, setChargingBookingId] = useState(null);
+
+  const handleChargeBooking = async (bookingId) => {
+    if (!confirm('Charge this booking now? The customer\'s saved card will be charged.')) return;
+    setChargingBookingId(bookingId);
+    try {
+      const res = await fetch('/api/charge-booking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ booking_id: bookingId }),
+      });
+      const data = await res.json();
+      if (res.ok && data.payment_status === 'paid') {
+        setBookings(bookings.map(b => b.id === bookingId ? { ...b, payment_status: 'paid' } : b));
+      } else {
+        setBookings(bookings.map(b => b.id === bookingId ? { ...b, payment_status: 'failed' } : b));
+        alert('Charge failed: ' + (data.error || 'Unknown error'));
+      }
+    } catch (err) {
+      alert('Charge failed: ' + err.message);
+      setBookings(bookings.map(b => b.id === bookingId ? { ...b, payment_status: 'failed' } : b));
+    }
+    setChargingBookingId(null);
+  };
+
+  const getPaymentStatusStyle = (status) => {
+    switch (status) {
+      case 'paid': return { background: '#D1FAE5', color: '#065F46' };
+      case 'failed': return { background: '#FEE2E2', color: '#DC2626' };
+      case 'pending': return { background: '#FEF3C7', color: '#92400E' };
+      default: return { background: '#F3F4F6', color: '#6B7280' };
+    }
+  };
+
   const handleWorkerAssign = async (bookingId, workerId) => {
     await supabase.from('bookings').update({ worker_id: workerId || null }).eq('id', bookingId);
     setBookings(bookings.map(b => b.id === bookingId ? { ...b, worker_id: workerId || null } : b));
@@ -607,6 +641,10 @@ export default function AdminPanel() {
       case 'status':
         aVal = (a.status || '').toLowerCase();
         bVal = (b.status || '').toLowerCase();
+        return aVal < bVal ? -dir : aVal > bVal ? dir : 0;
+      case 'payment_status':
+        aVal = (a.payment_status || '').toLowerCase();
+        bVal = (b.payment_status || '').toLowerCase();
         return aVal < bVal ? -dir : aVal > bVal ? dir : 0;
       case 'worker_id':
         aVal = (workers.find(w => w.id === a.worker_id)?.name || 'zzz').toLowerCase();
@@ -784,6 +822,7 @@ export default function AdminPanel() {
                           { field: 'booking_date', label: 'Date & Time' },
                           { field: 'total_price', label: 'Total' },
                           { field: 'status', label: 'Status' },
+                          { field: 'payment_status', label: 'Payment' },
                           { field: 'worker_id', label: 'Worker' },
                         ].map(col => (
                           <th key={col.field} onClick={() => handleSort(col.field)} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight, cursor: 'pointer', userSelect: 'none' }}>
@@ -830,6 +869,22 @@ export default function AdminPanel() {
                               <span style={{ padding: '4px 10px', borderRadius: 100, fontSize: 13, fontWeight: 500, ...statusStyle }}>
                                 {booking.status}
                               </span>
+                            </td>
+                            <td style={{ padding: '16px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                                <span style={{ padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 500, ...getPaymentStatusStyle(booking.payment_status) }}>
+                                  {booking.payment_status || 'n/a'}
+                                </span>
+                                {booking.payment_status === 'pending' && booking.stripe_customer_id && (
+                                  <button
+                                    onClick={() => handleChargeBooking(booking.id)}
+                                    disabled={chargingBookingId === booking.id}
+                                    style={{ ...buttonStyle, background: '#065F46', color: '#fff', fontSize: 11, padding: '5px 10px', opacity: chargingBookingId === booking.id ? 0.6 : 1 }}
+                                  >
+                                    {chargingBookingId === booking.id ? 'Charging...' : 'Charge Now'}
+                                  </button>
+                                )}
+                              </div>
                             </td>
                             <td style={{ padding: '16px' }}>
                               <select

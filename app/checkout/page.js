@@ -2,8 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../lib/useAuth';
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
 function Logo() {
   return (
@@ -15,22 +19,18 @@ function Logo() {
   );
 }
 
-export default function PaymentFlow() {
+function CheckoutForm({ booking, brand, user, signUp }) {
   const router = useRouter();
-  const { user, signUp } = useAuth();
+  const stripe = useStripe();
+  const elements = useElements();
   const [step, setStep] = useState('payment');
-  const [cardNumber, setCardNumber] = useState('');
-  const [expiry, setExpiry] = useState('');
-  const [cvc, setCvc] = useState('');
-  const [nameOnCard, setNameOnCard] = useState('');
-  const [saveCard, setSaveCard] = useState(true);
   const [processing, setProcessing] = useState(false);
-  const [booking, setBooking] = useState(null);
   const [error, setError] = useState('');
   const [discountCode, setDiscountCode] = useState('');
   const [appliedDiscount, setAppliedDiscount] = useState(null);
   const [discountError, setDiscountError] = useState('');
   const [applyingDiscount, setApplyingDiscount] = useState(false);
+  const [cardComplete, setCardComplete] = useState(false);
 
   // Account creation state
   const [savedBookingId, setSavedBookingId] = useState(null);
@@ -39,29 +39,6 @@ export default function PaymentFlow() {
   const [accountError, setAccountError] = useState('');
   const [creatingAccount, setCreatingAccount] = useState(false);
   const [accountCreated, setAccountCreated] = useState(false);
-
-  const brand = {
-    primary: '#B8C5F2', text: '#1a1a1a', textLight: '#666',
-    border: '#e0e0e0', bg: '#fafafa', white: '#ffffff', success: '#22c55e',
-    gold: '#C9B037', goldDark: '#A69028',
-  };
-
-  useEffect(() => {
-    const stored = localStorage.getItem('pendingBooking');
-    if (stored) {
-      setBooking(JSON.parse(stored));
-    } else {
-      router.push('/book');
-    }
-  }, []);
-
-  if (!booking) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: brand.bg }}>
-        <p style={{ color: brand.textLight }}>Loading...</p>
-      </div>
-    );
-  }
 
   const addOnsTotal = booking.add_ons_total || 0;
   const baseSubtotal = booking.subtotal || booking.total || 0;
@@ -115,149 +92,179 @@ export default function PaymentFlow() {
     setDiscountError('');
   };
 
-  const formatCardNumber = (value) => {
-    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-    const parts = [];
-    for (let i = 0; i < v.length && i < 16; i += 4) {
-      parts.push(v.substring(i, i + 4));
-    }
-    return parts.join(' ');
-  };
-
-  const formatExpiry = (value) => {
-    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-    if (v.length >= 2) return v.substring(0, 2) + ' / ' + v.substring(2, 4);
-    return v;
-  };
-
   const handleSubmit = async () => {
+    if (!stripe || !elements) return;
+
     setProcessing(true);
     setError('');
 
-    const recurringGroupId = (booking.frequency_interval_days > 0)
-      ? crypto.randomUUID()
-      : null;
+    try {
+      // 1. Create Stripe customer + SetupIntent via our API
+      const setupRes = await fetch('/api/create-setup-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: booking.guest_email,
+          name: `${booking.guest_first_name} ${booking.guest_last_name}`,
+        }),
+      });
 
-    const bookingRecord = {
-      user_id: user?.id || null,
-      customer_name: `${booking.guest_first_name} ${booking.guest_last_name}`,
-      customer_email: booking.guest_email,
-      neighborhood: booking.neighborhood_name,
-      building: booking.building_name,
-      building_id: booking.building_id,
-      floor_plan: booking.floor_plan_name,
-      floor_plan_id: booking.floor_plan_id,
-      unit_number: booking.unit,
-      booking_date: booking.date,
-      booking_time: booking.time_slot,
-      frequency_id: booking.frequency_id || null,
-      frequency_discount: frequencyDiscountAmount,
-      recurring_group_id: recurringGroupId,
-      base_price: booking.base_price,
-      add_ons: booking.selected_add_ons,
-      add_ons_total: booking.add_ons_total,
-      total_price: total,
-      status: 'upcoming',
-      guest_first_name: booking.guest_first_name,
-      guest_last_name: booking.guest_last_name,
-      guest_email: booking.guest_email,
-      guest_phone: booking.guest_phone,
-      special_instructions: booking.special_instructions || null,
-      worker_id: booking.assigned_worker_id || null,
-    };
-
-    if (appliedDiscount) {
-      bookingRecord.discount_code = appliedDiscount.code;
-      bookingRecord.discount_amount = codeDiscountAmount;
-    }
-
-    const { data: insertedBooking, error: insertError } = await supabase
-      .from('bookings')
-      .insert(bookingRecord)
-      .select('id')
-      .single();
-
-    if (!insertError && appliedDiscount) {
-      await supabase.rpc('decrement_discount_uses', { code_id: appliedDiscount.id });
-    }
-
-    if (insertError) {
-      setError('Failed to save booking: ' + insertError.message);
-      setProcessing(false);
-      return;
-    }
-
-    // Auto-generate next 4 recurring bookings if interval_days > 0
-    if (booking.frequency_interval_days > 0 && recurringGroupId) {
-      const futureBookings = [];
-      const startDate = new Date(booking.date + 'T00:00:00');
-
-      for (let i = 1; i <= 4; i++) {
-        const nextDate = new Date(startDate);
-        nextDate.setDate(nextDate.getDate() + (booking.frequency_interval_days * i));
-        const y = nextDate.getFullYear();
-        const m = String(nextDate.getMonth() + 1).padStart(2, '0');
-        const d = String(nextDate.getDate()).padStart(2, '0');
-
-        futureBookings.push({
-          ...bookingRecord,
-          booking_date: `${y}-${m}-${d}`,
-          status: 'scheduled',
-        });
+      const setupData = await setupRes.json();
+      if (!setupRes.ok) {
+        setError(setupData.error || 'Failed to initialize payment');
+        setProcessing(false);
+        return;
       }
 
-      if (futureBookings.length > 0) {
-        await supabase.from('bookings').insert(futureBookings);
-      }
-    }
+      // 2. Confirm the SetupIntent with the card element (saves card without charging)
+      const { error: stripeError, setupIntent } = await stripe.confirmCardSetup(
+        setupData.clientSecret,
+        {
+          payment_method: {
+            card: elements.getElement(CardElement),
+            billing_details: {
+              name: `${booking.guest_first_name} ${booking.guest_last_name}`,
+              email: booking.guest_email,
+            },
+          },
+        }
+      );
 
-    // Auto-populate profile data from booking for logged-in users
-    if (user?.id) {
-      const { data: existingProfile } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('user_id', user.id)
+      if (stripeError) {
+        setError(stripeError.message);
+        setProcessing(false);
+        return;
+      }
+
+      // 3. Save booking with Stripe info
+      const recurringGroupId = (booking.frequency_interval_days > 0)
+        ? crypto.randomUUID()
+        : null;
+
+      const bookingRecord = {
+        user_id: user?.id || null,
+        customer_name: `${booking.guest_first_name} ${booking.guest_last_name}`,
+        customer_email: booking.guest_email,
+        neighborhood: booking.neighborhood_name,
+        building: booking.building_name,
+        building_id: booking.building_id,
+        floor_plan: booking.floor_plan_name,
+        floor_plan_id: booking.floor_plan_id,
+        unit_number: booking.unit,
+        booking_date: booking.date,
+        booking_time: booking.time_slot,
+        frequency_id: booking.frequency_id || null,
+        frequency_discount: frequencyDiscountAmount,
+        recurring_group_id: recurringGroupId,
+        base_price: booking.base_price,
+        add_ons: booking.selected_add_ons,
+        add_ons_total: booking.add_ons_total,
+        total_price: total,
+        status: 'upcoming',
+        guest_first_name: booking.guest_first_name,
+        guest_last_name: booking.guest_last_name,
+        guest_email: booking.guest_email,
+        guest_phone: booking.guest_phone,
+        special_instructions: booking.special_instructions || null,
+        worker_id: booking.assigned_worker_id || null,
+        stripe_customer_id: setupData.customerId,
+        stripe_payment_method_id: setupIntent.payment_method,
+        payment_status: 'pending',
+      };
+
+      if (appliedDiscount) {
+        bookingRecord.discount_code = appliedDiscount.code;
+        bookingRecord.discount_amount = codeDiscountAmount;
+      }
+
+      const { data: insertedBooking, error: insertError } = await supabase
+        .from('bookings')
+        .insert(bookingRecord)
+        .select('id')
         .single();
 
-      const profileUpdates = {};
-
-      // Save name and phone if not already in profile
-      if (!existingProfile?.first_name && booking.guest_first_name) {
-        profileUpdates.first_name = booking.guest_first_name;
-      }
-      if (!existingProfile?.last_name && booking.guest_last_name) {
-        profileUpdates.last_name = booking.guest_last_name;
-      }
-      if (!existingProfile?.phone && booking.guest_phone) {
-        profileUpdates.phone = booking.guest_phone;
+      if (!insertError && appliedDiscount) {
+        await supabase.rpc('decrement_discount_uses', { code_id: appliedDiscount.id });
       }
 
-      // Save address if not already set
-      if (!existingProfile?.address && booking.building_address) {
-        profileUpdates.address = booking.unit
-          ? `${booking.building_address}, Unit ${booking.unit}`
-          : booking.building_address;
+      if (insertError) {
+        setError('Failed to save booking: ' + insertError.message);
+        setProcessing(false);
+        return;
       }
 
-      if (Object.keys(profileUpdates).length > 0) {
-        profileUpdates.updated_at = new Date().toISOString();
+      // Auto-generate next 4 recurring bookings if interval_days > 0
+      if (booking.frequency_interval_days > 0 && recurringGroupId) {
+        const futureBookings = [];
+        const startDate = new Date(booking.date + 'T00:00:00');
 
-        if (existingProfile) {
-          await supabase.from('user_profiles')
-            .update(profileUpdates)
-            .eq('user_id', user.id);
-        } else {
-          // Create profile if it doesn't exist yet
-          await supabase.from('user_profiles')
-            .insert({ user_id: user.id, ...profileUpdates });
+        for (let i = 1; i <= 4; i++) {
+          const nextDate = new Date(startDate);
+          nextDate.setDate(nextDate.getDate() + (booking.frequency_interval_days * i));
+          const y = nextDate.getFullYear();
+          const m = String(nextDate.getMonth() + 1).padStart(2, '0');
+          const d = String(nextDate.getDate()).padStart(2, '0');
+
+          futureBookings.push({
+            ...bookingRecord,
+            booking_date: `${y}-${m}-${d}`,
+            status: 'scheduled',
+          });
+        }
+
+        if (futureBookings.length > 0) {
+          await supabase.from('bookings').insert(futureBookings);
         }
       }
-    }
 
-    setSavedBookingId(insertedBooking?.id || null);
-    localStorage.removeItem('pendingBooking');
-    setProcessing(false);
-    setStep('confirmation');
+      // Auto-populate profile data from booking for logged-in users
+      if (user?.id) {
+        const { data: existingProfile } = await supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+
+        const profileUpdates = {};
+
+        if (!existingProfile?.first_name && booking.guest_first_name) {
+          profileUpdates.first_name = booking.guest_first_name;
+        }
+        if (!existingProfile?.last_name && booking.guest_last_name) {
+          profileUpdates.last_name = booking.guest_last_name;
+        }
+        if (!existingProfile?.phone && booking.guest_phone) {
+          profileUpdates.phone = booking.guest_phone;
+        }
+
+        if (!existingProfile?.address && booking.building_address) {
+          profileUpdates.address = booking.unit
+            ? `${booking.building_address}, Unit ${booking.unit}`
+            : booking.building_address;
+        }
+
+        if (Object.keys(profileUpdates).length > 0) {
+          profileUpdates.updated_at = new Date().toISOString();
+
+          if (existingProfile) {
+            await supabase.from('user_profiles')
+              .update(profileUpdates)
+              .eq('user_id', user.id);
+          } else {
+            await supabase.from('user_profiles')
+              .insert({ user_id: user.id, ...profileUpdates });
+          }
+        }
+      }
+
+      setSavedBookingId(insertedBooking?.id || null);
+      localStorage.removeItem('pendingBooking');
+      setProcessing(false);
+      setStep('confirmation');
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.');
+      setProcessing(false);
+    }
   };
 
   const handleCreateAccount = async () => {
@@ -289,7 +296,6 @@ export default function PaymentFlow() {
     const newUserId = signUpData?.user?.id;
 
     if (newUserId) {
-      // Save to user_profiles with address from booking
       const profileData = {
         user_id: newUserId,
         first_name: booking.guest_first_name,
@@ -305,7 +311,6 @@ export default function PaymentFlow() {
 
       await supabase.from('user_profiles').insert(profileData);
 
-      // Link booking to new user
       if (savedBookingId) {
         await supabase
           .from('bookings')
@@ -318,7 +323,7 @@ export default function PaymentFlow() {
     setAccountCreated(true);
   };
 
-  const isFormValid = cardNumber.length >= 19 && expiry.length >= 7 && cvc.length >= 3 && nameOnCard.length > 0;
+  const isFormValid = cardComplete;
 
   const inputStyle = {
     width: '100%', padding: '16px', fontSize: 16,
@@ -333,16 +338,20 @@ export default function PaymentFlow() {
 
   const hasFrequencyDiscount = frequencyDiscountAmount > 0;
 
-  return (
-    <div style={{ minHeight: '100vh', background: brand.bg }}>
-      <header className="checkout-header" style={{ padding: '16px 32px', background: brand.white, borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
-          <Logo />
-          <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
-        </Link>
-        <div style={{ fontSize: 14, color: brand.textLight }}>Secure checkout</div>
-      </header>
+  const cardElementOptions = {
+    style: {
+      base: {
+        fontSize: '16px',
+        color: '#1a1a1a',
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        '::placeholder': { color: '#999' },
+      },
+      invalid: { color: '#DC2626' },
+    },
+  };
 
+  return (
+    <>
       {step === 'payment' && (
         <main className="checkout-grid" style={{ maxWidth: 900, margin: '0 auto', padding: '48px 24px', display: 'grid', gridTemplateColumns: '1fr 340px', gap: 48 }}>
           <div>
@@ -356,38 +365,30 @@ export default function PaymentFlow() {
             )}
 
             <div style={{ background: brand.white, borderRadius: 12, border: `1px solid ${brand.border}`, padding: 24 }}>
-              <div style={{ marginBottom: 20 }}>
-                <label style={labelStyle}>Name on card</label>
-                <input type="text" value={nameOnCard} onChange={(e) => setNameOnCard(e.target.value)} placeholder="John Smith" style={inputStyle} />
-              </div>
-              <div style={{ marginBottom: 20 }}>
-                <label style={labelStyle}>Card number</label>
-                <input type="text" value={cardNumber} onChange={(e) => setCardNumber(formatCardNumber(e.target.value))} placeholder="1234 5678 9012 3456" maxLength={19} style={inputStyle} />
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
-                <div>
-                  <label style={labelStyle}>Expiry date</label>
-                  <input type="text" value={expiry} onChange={(e) => setExpiry(formatExpiry(e.target.value))} placeholder="MM / YY" maxLength={7} style={inputStyle} />
-                </div>
-                <div>
-                  <label style={labelStyle}>CVC</label>
-                  <input type="text" value={cvc} onChange={(e) => setCvc(e.target.value.replace(/\D/g, '').slice(0, 4))} placeholder="123" maxLength={4} style={inputStyle} />
+              <div>
+                <label style={labelStyle}>Card details</label>
+                <div style={{
+                  padding: '16px',
+                  border: `1px solid ${brand.border}`,
+                  borderRadius: 8,
+                  background: brand.white,
+                }}>
+                  <CardElement
+                    options={cardElementOptions}
+                    onChange={(e) => setCardComplete(e.complete)}
+                  />
                 </div>
               </div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', paddingTop: 16, borderTop: `1px solid ${brand.border}` }}>
-                <input type="checkbox" checked={saveCard} onChange={(e) => setSaveCard(e.target.checked)} style={{ width: 18, height: 18 }} />
-                <span style={{ fontSize: 14, color: brand.text }}>Save card for future bookings</span>
-              </label>
             </div>
 
-            <button onClick={handleSubmit} disabled={!isFormValid || processing} style={{
+            <button onClick={handleSubmit} disabled={!isFormValid || processing || !stripe} style={{
               width: '100%', marginTop: 24, padding: 18, fontSize: 16, fontWeight: 600,
               background: isFormValid && !processing ? brand.text : brand.border,
               border: 'none', borderRadius: 8,
               color: isFormValid && !processing ? brand.white : '#999',
               cursor: isFormValid && !processing ? 'pointer' : 'not-allowed'
             }}>
-              {processing ? 'Processing...' : 'Confirm Booking'}
+              {processing ? 'Saving payment method...' : 'Confirm Booking'}
             </button>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 16 }}>
@@ -715,6 +716,51 @@ export default function PaymentFlow() {
           <p style={{ fontSize: 13, color: brand.textLight, marginTop: 32 }}>Questions? Contact us at hello@betterview.com</p>
         </main>
       )}
+    </>
+  );
+}
+
+export default function PaymentFlow() {
+  const router = useRouter();
+  const { user, signUp } = useAuth();
+  const [booking, setBooking] = useState(null);
+
+  const brand = {
+    primary: '#B8C5F2', text: '#1a1a1a', textLight: '#666',
+    border: '#e0e0e0', bg: '#fafafa', white: '#ffffff', success: '#22c55e',
+    gold: '#C9B037', goldDark: '#A69028',
+  };
+
+  useEffect(() => {
+    const stored = localStorage.getItem('pendingBooking');
+    if (stored) {
+      setBooking(JSON.parse(stored));
+    } else {
+      router.push('/book');
+    }
+  }, []);
+
+  if (!booking) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: brand.bg }}>
+        <p style={{ color: brand.textLight }}>Loading...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ minHeight: '100vh', background: brand.bg }}>
+      <header className="checkout-header" style={{ padding: '16px 32px', background: brand.white, borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
+          <Logo />
+          <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
+        </Link>
+        <div style={{ fontSize: 14, color: brand.textLight }}>Secure checkout</div>
+      </header>
+
+      <Elements stripe={stripePromise}>
+        <CheckoutForm booking={booking} brand={brand} user={user} signUp={signUp} />
+      </Elements>
     </div>
   );
 }

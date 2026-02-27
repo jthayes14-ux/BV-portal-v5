@@ -8,9 +8,9 @@ import { useAuth } from '../../lib/useAuth';
 function Logo() {
   return (
     <div style={{ display: 'flex', gap: 4 }}>
-      <div style={{ width: 8, height: 28, background: '#6366F1', borderRadius: 0 }} />
-      <div style={{ width: 8, height: 28, background: '#6366F1', borderRadius: 0 }} />
-      <div style={{ width: 8, height: 28, background: '#6366F1', borderRadius: 0 }} />
+      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
+      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
+      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
     </div>
   );
 }
@@ -74,10 +74,10 @@ function BookingFlowInner() {
   const [rebookBuildingName, setRebookBuildingName] = useState('');
 
   const brand = {
-    primary: '#6366F1', primaryDark: '#4F46E5', primaryLight: '#EEF2FF',
-    gold: '#6366F1', goldLight: '#EEF2FF', goldDark: '#4F46E5',
-    text: '#111827', textLight: '#6B7280', textMuted: '#9CA3AF',
-    border: '#E5E7EB', borderLight: '#F3F4F6', bg: '#F9FAFB', bgCard: '#FFFFFF',
+    primary: '#B8C5F2', primaryDark: '#9AA8E0', primaryLight: '#E8EDFC',
+    gold: '#C9B037', goldLight: '#F5F0DC', goldDark: '#A69028',
+    text: '#1F2937', textLight: '#6B7280', textMuted: '#9CA3AF',
+    border: '#E5E7EB', borderLight: '#F3F4F6', bg: '#FAFBFF', bgCard: '#FFFFFF',
   };
 
   // Track whether rebook data was used so we don't overwrite it with profile data
@@ -604,26 +604,26 @@ function BookingFlowInner() {
   const getSelectStyle = (fieldName) => ({
     width: '100%', padding: '18px 20px', fontSize: 16,
     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-    border: focusedField === fieldName ? `2px solid #6366F1` : `1px solid #E5E7EB`,
+    border: focusedField === fieldName ? `2px solid ${brand.gold}` : `1px solid ${brand.border}`,
     borderRadius: 12, background: brand.bgCard, color: brand.text, cursor: 'pointer',
     appearance: 'none',
-    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236366F1' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23C9B037' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
     backgroundRepeat: 'no-repeat', backgroundPosition: 'right 18px center', backgroundSize: '18px',
-    boxShadow: focusedField === fieldName ? '0 0 0 4px rgba(99, 102, 241, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05)' : '0 2px 8px rgba(0, 0, 0, 0.04)',
+    boxShadow: focusedField === fieldName ? '0 0 0 4px rgba(201, 176, 55, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05)' : '0 2px 8px rgba(0, 0, 0, 0.04)',
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', outline: 'none',
   });
 
   const getInputStyle = (fieldName) => ({
     width: '100%', padding: '18px 20px', fontSize: 16,
     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-    border: focusedField === fieldName ? `2px solid #6366F1` : `1px solid #E5E7EB`,
+    border: focusedField === fieldName ? `2px solid ${brand.gold}` : `1px solid ${brand.border}`,
     borderRadius: 12, background: brand.bgCard, color: brand.text, boxSizing: 'border-box',
-    boxShadow: focusedField === fieldName ? '0 0 0 4px rgba(99, 102, 241, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05)' : '0 2px 8px rgba(0, 0, 0, 0.04)',
+    boxShadow: focusedField === fieldName ? '0 0 0 4px rgba(201, 176, 55, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05)' : '0 2px 8px rgba(0, 0, 0, 0.04)',
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', outline: 'none',
   });
 
   const labelStyle = {
-    display: 'block', fontSize: 13, fontWeight: 600, color: '#111827',
+    display: 'block', fontSize: 13, fontWeight: 600, color: brand.textLight,
     marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.08em',
     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
   };
@@ -642,10 +642,10 @@ function BookingFlowInner() {
 
   return (
     <div style={{ minHeight: '100vh', background: `linear-gradient(180deg, ${brand.bg} 0%, ${brand.primaryLight} 100%)`, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
-      <header className="booking-header" style={{ padding: '20px 40px', background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', borderBottom: `1px solid ${brand.borderLight}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+      <header className="booking-header" style={{ padding: '20px 40px', background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(20px)', borderBottom: `1px solid ${brand.borderLight}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
           <Logo />
-          <span style={{ fontSize: 24, fontWeight: 600, color: '#111827' }}>BetterView</span>
+          <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
         </Link>
         <div className="desktop-nav">
           <Link href="/dashboard" style={{ padding: '12px 28px', fontSize: 14, fontWeight: 500, background: 'transparent', border: `1px solid ${brand.border}`, borderRadius: 8, textDecoration: 'none', color: brand.text, letterSpacing: '0.02em' }}>
@@ -674,7 +674,7 @@ function BookingFlowInner() {
 
       <main className="booking-main" style={{ maxWidth: 580, margin: '0 auto', padding: '64px 24px 100px' }}>
         <div style={{ width: 60, height: 3, background: `linear-gradient(90deg, ${brand.gold}, ${brand.primary})`, margin: '0 auto 32px', borderRadius: 2 }} />
-        <h1 style={{ fontSize: 28, fontWeight: 700, textAlign: 'center', marginBottom: 12, color: '#111827', letterSpacing: '-0.025em', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>Schedule Your Service</h1>
+        <h1 style={{ fontSize: 42, fontWeight: 300, textAlign: 'center', marginBottom: 12, color: brand.text, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>Schedule Your Service</h1>
         <p style={{ textAlign: 'center', color: brand.textLight, marginBottom: 56, fontSize: 17 }}>Premium window care for discerning residences</p>
 
         {/* Rebook Banner */}
@@ -704,7 +704,7 @@ function BookingFlowInner() {
           </div>
         )}
 
-        <div className="booking-form" style={{ background: '#fff', borderRadius: 16, padding: '40px 36px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', border: '1px solid #E5E7EB' }}>
+        <div className="booking-form" style={{ background: brand.bgCard, borderRadius: 24, padding: '40px 36px', boxShadow: '0 8px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04)', border: `1px solid ${brand.borderLight}` }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
             {/* Neighborhood */}
             <div>
@@ -851,7 +851,7 @@ function BookingFlowInner() {
                   ))}
                 </select>
                 {selectedFrequency && Number(selectedFrequency.discount_percent) > 0 && (
-                  <p style={{ fontSize: 13, color: '#6366F1', fontWeight: 600, marginTop: 8 }}>
+                  <p style={{ fontSize: 13, color: brand.gold, fontWeight: 600, marginTop: 8 }}>
                     Save {selectedFrequency.discount_percent}% with {selectedFrequency.name.toLowerCase()} service
                   </p>
                 )}
@@ -866,18 +866,18 @@ function BookingFlowInner() {
                   {addOns.map(addon => (
                     <div key={addon.id} onClick={() => toggleAddOn(addon.id)} style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderRadius: 12,
-                      border: selectedAddOns.includes(addon.id) ? '2px solid #6366F1' : '1px solid #E5E7EB',
-                      background: selectedAddOns.includes(addon.id) ? '#EEF2FF' : '#fff',
+                      border: selectedAddOns.includes(addon.id) ? `2px solid ${brand.gold}` : `1px solid ${brand.border}`,
+                      background: selectedAddOns.includes(addon.id) ? brand.goldLight : brand.bgCard,
                       cursor: 'pointer', transition: 'all 0.3s ease',
-                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.02)',
+                      boxShadow: selectedAddOns.includes(addon.id) ? '0 4px 12px rgba(201, 176, 55, 0.15)' : '0 2px 8px rgba(0, 0, 0, 0.02)',
                     }}>
                       <span style={{ fontSize: 15, fontWeight: 500, color: brand.text }}>{addon.name}</span>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <span style={{ fontSize: 15, fontWeight: 600, color: selectedAddOns.includes(addon.id) ? '#4F46E5' : brand.textLight }}>+${addon.price}</span>
+                        <span style={{ fontSize: 15, fontWeight: 600, color: selectedAddOns.includes(addon.id) ? brand.goldDark : brand.textLight }}>+${addon.price}</span>
                         <div style={{
                           width: 22, height: 22, borderRadius: 6,
-                          border: selectedAddOns.includes(addon.id) ? '2px solid #6366F1' : '2px solid #E5E7EB',
-                          background: selectedAddOns.includes(addon.id) ? '#6366F1' : 'transparent',
+                          border: selectedAddOns.includes(addon.id) ? `2px solid ${brand.gold}` : `2px solid ${brand.border}`,
+                          background: selectedAddOns.includes(addon.id) ? brand.gold : 'transparent',
                           display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease'
                         }}>
                           {selectedAddOns.includes(addon.id) && (
@@ -895,10 +895,10 @@ function BookingFlowInner() {
 
         {/* Contact Information */}
         {serviceSelected && (
-          <div style={{ marginTop: 32, background: '#fff', borderRadius: 16, padding: '40px 36px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', border: '1px solid #E5E7EB', animation: 'fadeIn 0.4s ease' }}>
+          <div style={{ marginTop: 32, background: brand.bgCard, borderRadius: 24, padding: '40px 36px', boxShadow: '0 8px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04)', border: `1px solid ${brand.borderLight}`, animation: 'fadeIn 0.4s ease' }}>
             <div style={{ marginBottom: 28 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111827', marginBottom: 4, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>Your Information</h2>
-              <p style={{ fontSize: 14, color: '#6B7280' }}>How can we reach you about your booking?</p>
+              <h2 style={{ fontSize: 20, fontWeight: 600, color: brand.text, marginBottom: 4, fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 28, fontWeight: 400 }}>Your Information</h2>
+              <p style={{ fontSize: 14, color: brand.textLight }}>How can we reach you about your booking?</p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
@@ -929,46 +929,46 @@ function BookingFlowInner() {
 
         {/* Total & Book */}
         {time && (
-          <div style={{ marginTop: 32, padding: 32, background: '#fff', borderRadius: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.05)', border: '1px solid #E5E7EB', animation: 'fadeIn 0.4s ease' }}>
+          <div style={{ marginTop: 32, padding: 32, background: brand.bgCard, borderRadius: 20, boxShadow: '0 8px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04)', border: `1px solid ${brand.borderLight}`, animation: 'fadeIn 0.4s ease' }}>
             <div style={{ marginBottom: 24 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, fontSize: 15, color: '#6B7280' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, fontSize: 15, color: brand.textLight }}>
                 <span>Window Cleaning ({unitLookupResult?.found ? unitLookupResult.floorPlan.name : selectedPlan?.name})</span>
-                <span style={{ color: '#111827', fontWeight: 700 }}>${basePrice}</span>
+                <span>${basePrice}</span>
               </div>
               {selectedAddOns.length > 0 && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, fontSize: 15, color: '#6B7280' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, fontSize: 15, color: brand.textLight }}>
                   <span>Add-Ons ({selectedAddOns.length})</span>
-                  <span style={{ color: '#111827', fontWeight: 700 }}>${addOnsTotal}</span>
+                  <span>${addOnsTotal}</span>
                 </div>
               )}
               {selectedFrequency && Number(selectedFrequency.interval_days) > 0 && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, fontSize: 15, color: '#6366F1', fontWeight: 500 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, fontSize: 15, color: brand.gold, fontWeight: 500 }}>
                   <span>Frequency: {selectedFrequency.name}</span>
                   <span>-{selectedFrequency.discount_percent}% (−${frequencyDiscount.toFixed(2)})</span>
                 </div>
               )}
-              <div style={{ borderTop: '1px solid #E5E7EB', margin: '16px 0' }} />
+              <div style={{ height: 1, background: `linear-gradient(90deg, transparent, ${brand.border}, transparent)`, margin: '16px 0' }} />
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                <span style={{ fontSize: 14, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Total</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: brand.textLight, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Total</span>
                 <div style={{ textAlign: 'right' }}>
                   {frequencyDiscount > 0 && (
                     <span style={{ fontSize: 16, color: brand.textMuted, textDecoration: 'line-through', marginRight: 12 }}>${subtotal}</span>
                   )}
-                  <span style={{ fontSize: 36, fontWeight: 700, color: '#111827', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>${total.toFixed(2)}</span>
+                  <span style={{ fontSize: 36, fontWeight: 300, color: brand.text, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>${total.toFixed(2)}</span>
                 </div>
               </div>
             </div>
 
             <button disabled={!canBook} onClick={handleContinue} style={{
-              width: '100%', padding: '16px 24px', fontSize: 16, fontWeight: 600,
-              background: canBook ? '#6366F1' : '#E5E7EB',
-              border: 'none', borderRadius: 10, color: canBook ? '#fff' : '#9CA3AF',
+              width: '100%', padding: '20px 32px', fontSize: 16, fontWeight: 600,
+              background: canBook ? `linear-gradient(135deg, ${brand.gold} 0%, ${brand.goldDark} 100%)` : brand.border,
+              border: 'none', borderRadius: 12, color: canBook ? '#FFFFFF' : '#999',
               cursor: canBook ? 'pointer' : 'not-allowed', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              boxShadow: canBook ? '0 4px 20px rgba(99, 102, 241, 0.35)' : 'none',
+              boxShadow: canBook ? '0 4px 20px rgba(201, 176, 55, 0.35)' : 'none',
               letterSpacing: '0.04em', textTransform: 'uppercase'
             }}
-            onMouseOver={(e) => { if (canBook) { e.target.style.background = '#4F46E5'; e.target.style.boxShadow = '0 8px 30px rgba(99, 102, 241, 0.45)'; }}}
-            onMouseOut={(e) => { if (canBook) { e.target.style.background = '#6366F1'; e.target.style.boxShadow = '0 4px 20px rgba(99, 102, 241, 0.35)'; }}}>
+            onMouseOver={(e) => { if (canBook) { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = '0 8px 30px rgba(201, 176, 55, 0.45)'; }}}
+            onMouseOut={(e) => { if (canBook) { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = '0 4px 20px rgba(201, 176, 55, 0.35)'; }}}>
               Continue to Payment
             </button>
 
@@ -981,20 +981,20 @@ function BookingFlowInner() {
           </div>
         )}
 
-        <div className="trust-indicators" style={{ marginTop: 48, display: 'flex', justifyContent: 'center', gap: 40, opacity: 0.8 }}>
+        <div className="trust-indicators" style={{ marginTop: 48, display: 'flex', justifyContent: 'center', gap: 40, opacity: 0.6 }}>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#6B7280', marginBottom: 4 }}>Insured</div>
-            <div style={{ fontSize: 11, color: '#6B7280' }}>&amp; Bonded</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: brand.textLight, marginBottom: 4 }}>Insured</div>
+            <div style={{ fontSize: 11, color: brand.textMuted }}>&amp; Bonded</div>
           </div>
-          <div style={{ width: 1, background: '#E5E7EB' }} />
+          <div style={{ width: 1, background: brand.border }} />
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#6B7280', marginBottom: 4 }}>5-Star</div>
-            <div style={{ fontSize: 11, color: '#6B7280' }}>Service</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: brand.textLight, marginBottom: 4 }}>5-Star</div>
+            <div style={{ fontSize: 11, color: brand.textMuted }}>Service</div>
           </div>
-          <div style={{ width: 1, background: '#E5E7EB' }} />
+          <div style={{ width: 1, background: brand.border }} />
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#6B7280', marginBottom: 4 }}>24hr</div>
-            <div style={{ fontSize: 11, color: '#6B7280' }}>Cancellation</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: brand.textLight, marginBottom: 4 }}>24hr</div>
+            <div style={{ fontSize: 11, color: brand.textMuted }}>Cancellation</div>
           </div>
         </div>
       </main>
@@ -1015,7 +1015,7 @@ function BookingFlowInner() {
 export default function BookingFlow() {
   return (
     <Suspense fallback={
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F9FAFB' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FAFBFF' }}>
         <p style={{ color: '#6B7280' }}>Loading...</p>
       </div>
     }>

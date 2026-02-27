@@ -7,9 +7,9 @@ import { useAuth } from '../../lib/useAuth';
 function Logo() {
   return (
     <div style={{ display: 'flex', gap: 4 }}>
-      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
-      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
-      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
+      <div style={{ width: 8, height: 28, background: '#6366F1', borderRadius: 0 }} />
+      <div style={{ width: 8, height: 28, background: '#6366F1', borderRadius: 0 }} />
+      <div style={{ width: 8, height: 28, background: '#6366F1', borderRadius: 0 }} />
     </div>
   );
 }
@@ -27,12 +27,12 @@ export default function AuthPages() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const brand = {
-    primary: '#B8C5F2',
-    primaryDark: '#9AA8E0',
-    primaryLight: '#E8EDFC',
-    text: '#2D3748',
-    textLight: '#718096',
-    bg: '#F8FAFF',
+    primary: '#6366F1',
+    primaryDark: '#4F46E5',
+    primaryLight: '#EEF2FF',
+    text: '#111827',
+    textLight: '#6B7280',
+    bg: '#F9FAFB',
   };
 
   useEffect(() => {
@@ -93,8 +93,8 @@ export default function AuthPages() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: `linear-gradient(180deg, ${brand.bg} 0%, ${brand.primaryLight} 100%)`,
-      fontFamily: "'Cormorant Garamond', Georgia, serif"
+      background: '#F9FAFB',
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
     }}>
       <header className="auth-header" style={{
         padding: '20px 32px',
@@ -103,6 +103,7 @@ export default function AuthPages() {
         alignItems: 'center',
         background: 'white',
         borderBottom: `1px solid ${brand.primaryLight}`,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
       }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
@@ -118,7 +119,7 @@ export default function AuthPages() {
           </button>
           <button
             onClick={() => { setView('signup'); setError(''); setMessage(''); }}
-            style={{ padding: '10px 24px', fontSize: 16, fontWeight: 500, background: brand.primary, border: 'none', borderRadius: 8, color: brand.text, cursor: 'pointer' }}
+            style={{ padding: '10px 24px', fontSize: 16, fontWeight: 500, background: brand.primary, border: 'none', borderRadius: 8, color: '#fff', cursor: 'pointer' }}
           >
             Get Started
           </button>
@@ -145,7 +146,7 @@ export default function AuthPages() {
           </button>
           <button
             onClick={() => { setView('signup'); setError(''); setMessage(''); setMobileMenuOpen(false); }}
-            style={{ padding: '14px 16px', fontSize: 16, fontWeight: 500, background: brand.primary, border: 'none', color: brand.text, cursor: 'pointer', borderRadius: 8 }}
+            style={{ padding: '14px 16px', fontSize: 16, fontWeight: 500, background: '#6366F1', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: 8 }}
           >
             Get Started
           </button>
@@ -154,26 +155,26 @@ export default function AuthPages() {
 
       <main style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 80px)', padding: '40px 24px' }}>
         <div className="auth-form-card" style={{
-          background: 'white', borderRadius: 20, padding: '48px 40px', width: '100%', maxWidth: 420,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
+          background: 'white', borderRadius: 16, padding: '48px 40px', width: '100%', maxWidth: 420,
+          boxShadow: '0 4px 24px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.03)'
         }}>
           {/* Toggle */}
-          <div style={{ display: 'flex', background: brand.primaryLight, borderRadius: 10, padding: 4, marginBottom: 32 }}>
+          <div style={{ display: 'flex', background: brand.primaryLight, borderRadius: 8, padding: 4, marginBottom: 32 }}>
             <button
               onClick={() => { setView('login'); setError(''); setMessage(''); }}
-              style={{ flex: 1, padding: '12px 24px', fontSize: 16, fontWeight: 600, background: view === 'login' ? 'white' : 'transparent', border: 'none', borderRadius: 8, color: brand.text, cursor: 'pointer', transition: 'background 0.2s' }}
+              style={{ flex: 1, padding: '12px 24px', fontSize: 16, fontWeight: 600, background: view === 'login' ? 'white' : 'transparent', border: 'none', borderRadius: 6, color: brand.text, cursor: 'pointer', transition: 'background 0.2s' }}
             >
               Log In
             </button>
             <button
               onClick={() => { setView('signup'); setError(''); setMessage(''); }}
-              style={{ flex: 1, padding: '12px 24px', fontSize: 16, fontWeight: 600, background: view === 'signup' ? 'white' : 'transparent', border: 'none', borderRadius: 8, color: brand.text, cursor: 'pointer', transition: 'background 0.2s' }}
+              style={{ flex: 1, padding: '12px 24px', fontSize: 16, fontWeight: 600, background: view === 'signup' ? 'white' : 'transparent', border: 'none', borderRadius: 6, color: brand.text, cursor: 'pointer', transition: 'background 0.2s' }}
             >
               Sign Up
             </button>
           </div>
 
-          <h1 style={{ fontSize: 32, fontWeight: 600, color: brand.text, marginBottom: 8, textAlign: 'center' }}>
+          <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.025em', color: brand.text, marginBottom: 8, textAlign: 'center' }}>
             {view === 'login' ? 'Welcome back' : 'Create your account'}
           </h1>
           <p style={{ fontSize: 16, color: brand.textLight, marginBottom: 32, textAlign: 'center' }}>
@@ -239,13 +240,10 @@ export default function AuthPages() {
               type="submit" disabled={submitting}
               style={{
                 width: '100%', padding: '16px 24px', fontSize: 18, fontWeight: 600,
-                background: submitting ? brand.primaryLight : brand.primary,
-                border: 'none', borderRadius: 10, color: brand.text,
-                cursor: submitting ? 'not-allowed' : 'pointer',
-                transition: 'transform 0.2s, box-shadow 0.2s'
+                background: submitting ? '#EEF2FF' : '#6366F1',
+                border: 'none', borderRadius: 10, color: submitting ? '#9CA3AF' : '#fff',
+                cursor: submitting ? 'not-allowed' : 'pointer'
               }}
-              onMouseOver={(e) => { if (!submitting) { e.target.style.transform = 'translateY(-1px)'; e.target.style.boxShadow = '0 4px 12px rgba(184, 197, 242, 0.4)'; }}}
-              onMouseOut={(e) => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = 'none'; }}
             >
               {submitting ? 'Please wait...' : (view === 'login' ? 'Log In' : 'Create Account')}
             </button>
@@ -260,7 +258,7 @@ export default function AuthPages() {
 
           {/* Social Login */}
           <div className="social-login-row" style={{ display: 'flex', gap: 12 }}>
-            <button style={{ flex: 1, padding: '14px 24px', fontSize: 16, fontWeight: 500, background: 'white', border: `1px solid ${brand.primaryLight}`, borderRadius: 10, color: brand.text, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            <button style={{ flex: 1, padding: '14px 24px', fontSize: 16, fontWeight: 500, background: 'white', border: '1px solid #E5E7EB', borderRadius: 10, color: brand.text, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
               <svg width="20" height="20" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -269,7 +267,7 @@ export default function AuthPages() {
               </svg>
               Google
             </button>
-            <button style={{ flex: 1, padding: '14px 24px', fontSize: 16, fontWeight: 500, background: 'white', border: `1px solid ${brand.primaryLight}`, borderRadius: 10, color: brand.text, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            <button style={{ flex: 1, padding: '14px 24px', fontSize: 16, fontWeight: 500, background: 'white', border: '1px solid #E5E7EB', borderRadius: 10, color: brand.text, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="#000">
                 <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
               </svg>

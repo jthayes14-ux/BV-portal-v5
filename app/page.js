@@ -9,19 +9,19 @@ function Logo({ size = 'normal' }) {
       <div style={{
         width: isLarge ? 20 : 8,
         height: isLarge ? 56 : 28,
-        background: '#B8C5F2',
+        background: '#6366F1',
         borderRadius: 0
       }} />
       <div style={{
         width: isLarge ? 20 : 8,
         height: isLarge ? 56 : 28,
-        background: '#B8C5F2',
+        background: '#6366F1',
         borderRadius: 0
       }} />
       <div style={{
         width: isLarge ? 20 : 8,
         height: isLarge ? 56 : 28,
-        background: '#B8C5F2',
+        background: '#6366F1',
         borderRadius: 0
       }} />
     </div>
@@ -32,7 +32,7 @@ function FAQItem({ question, answer }) {
   const [open, setOpen] = useState(false);
   return (
     <div style={{
-      borderBottom: '1px solid #E8EDFC',
+      borderBottom: '1px solid #E5E7EB',
       padding: '20px 0'
     }}>
       <button
@@ -48,14 +48,14 @@ function FAQItem({ question, answer }) {
           textAlign: 'left'
         }}
       >
-        <span style={{ fontSize: 18, fontWeight: 600, color: '#2D3748' }}>{question}</span>
-        <span style={{ fontSize: 24, color: '#B8C5F2' }}>{open ? '−' : '+'}</span>
+        <span style={{ fontSize: 18, fontWeight: 600, color: '#111827' }}>{question}</span>
+        <span style={{ fontSize: 24, color: '#6366F1' }}>{open ? '−' : '+'}</span>
       </button>
       {open && (
         <p style={{
           marginTop: 12,
           fontSize: 16,
-          color: '#718096',
+          color: '#6B7280',
           lineHeight: 1.6
         }}>
           {answer}
@@ -82,11 +82,11 @@ export default function LandingPage() {
   }, []);
 
   const brand = {
-    primary: '#B8C5F2',
-    primaryDark: '#9AA8E0',
-    primaryLight: '#E8EDFC',
-    text: '#2D3748',
-    textLight: '#718096',
+    primary: '#6366F1',
+    primaryDark: '#4F46E5',
+    primaryLight: '#EEF2FF',
+    text: '#111827',
+    textLight: '#6B7280',
     bg: '#FFFFFF',
   };
 
@@ -94,7 +94,7 @@ export default function LandingPage() {
     <div style={{
       minHeight: '100vh',
       background: brand.bg,
-      fontFamily: "'Cormorant Garamond', Georgia, serif"
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
     }}>
       {/* Header */}
       <header className="landing-header" style={{
@@ -103,7 +103,8 @@ export default function LandingPage() {
         justifyContent: 'space-between',
         alignItems: 'center',
         background: 'white',
-        borderBottom: `1px solid ${brand.primaryLight}`,
+        borderBottom: '1px solid #E5E7EB',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
         position: 'sticky',
         top: 0,
         zIndex: 100,
@@ -111,7 +112,7 @@ export default function LandingPage() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Logo />
-          <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
+          <span style={{ fontSize: 24, fontWeight: 600, color: '#111827' }}>BetterView</span>
         </div>
 
         <div className="desktop-nav" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
@@ -121,7 +122,7 @@ export default function LandingPage() {
             fontWeight: 500,
             background: 'transparent',
             border: 'none',
-            color: brand.textLight,
+            color: '#6B7280',
             cursor: 'pointer',
             textDecoration: 'none'
           }}>
@@ -131,10 +132,10 @@ export default function LandingPage() {
             padding: '12px 28px',
             fontSize: 16,
             fontWeight: 600,
-            background: '#B8C5F2',
+            background: '#6366F1',
             border: 'none',
             borderRadius: 9999,
-            color: brand.text,
+            color: '#fff',
             cursor: 'pointer',
             textDecoration: 'none',
             letterSpacing: '0.02em'
@@ -158,7 +159,7 @@ export default function LandingPage() {
         <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
           <Link href="/book" onClick={() => setMobileMenuOpen(false)} style={{
             padding: '14px 16px', fontSize: 16, fontWeight: 600,
-            background: '#B8C5F2', color: '#2D3748', textDecoration: 'none',
+            background: '#6366F1', color: '#fff', textDecoration: 'none',
             textAlign: 'center', borderRadius: 9999
           }}>
             Book Now
@@ -214,10 +215,10 @@ export default function LandingPage() {
             padding: '18px 48px',
             fontSize: 18,
             fontWeight: 600,
-            background: '#B8C5F2',
+            background: '#6366F1',
             border: 'none',
             borderRadius: 9999,
-            color: brand.text,
+            color: '#fff',
             cursor: 'pointer',
             textDecoration: 'none',
             letterSpacing: '0.02em',
@@ -261,7 +262,7 @@ export default function LandingPage() {
               <div style={{
                 width: 64,
                 height: 64,
-                background: '#8E9FD9',
+                background: '#6366F1',
                 borderRadius: 16,
                 display: 'flex',
                 alignItems: 'center',
@@ -293,7 +294,7 @@ export default function LandingPage() {
               <div style={{
                 width: 64,
                 height: 64,
-                background: '#8E9FD9',
+                background: '#6366F1',
                 borderRadius: 16,
                 display: 'flex',
                 alignItems: 'center',
@@ -316,7 +317,7 @@ export default function LandingPage() {
               <div style={{
                 width: 64,
                 height: 64,
-                background: '#8E9FD9',
+                background: '#6366F1',
                 borderRadius: 16,
                 display: 'flex',
                 alignItems: 'center',
@@ -380,7 +381,7 @@ export default function LandingPage() {
                 margin: '0 auto 16px',
                 fontSize: 20,
                 fontWeight: 600,
-                color: brand.text
+                color: '#fff'
               }}>
                 1
               </div>
@@ -404,7 +405,7 @@ export default function LandingPage() {
                 margin: '0 auto 16px',
                 fontSize: 20,
                 fontWeight: 600,
-                color: brand.text
+                color: '#fff'
               }}>
                 2
               </div>
@@ -428,7 +429,7 @@ export default function LandingPage() {
                 margin: '0 auto 16px',
                 fontSize: 20,
                 fontWeight: 600,
-                color: brand.text
+                color: '#fff'
               }}>
                 3
               </div>
@@ -452,7 +453,7 @@ export default function LandingPage() {
                 margin: '0 auto 16px',
                 fontSize: 20,
                 fontWeight: 600,
-                color: brand.text
+                color: '#fff'
               }}>
                 4
               </div>
@@ -470,10 +471,10 @@ export default function LandingPage() {
               padding: '18px 48px',
               fontSize: 18,
               fontWeight: 600,
-              background: '#B8C5F2',
+              background: '#6366F1',
               border: 'none',
               borderRadius: 9999,
-              color: brand.text,
+              color: '#fff',
               cursor: 'pointer',
               textDecoration: 'none',
               display: 'inline-block',
@@ -532,7 +533,7 @@ export default function LandingPage() {
       {/* CTA Section */}
       <section className="cta-section" style={{
         padding: '80px 24px',
-        background: 'linear-gradient(135deg, #2D3748 0%, #1a202c 100%)',
+        background: 'linear-gradient(135deg, #312E81 0%, #1E1B4B 100%)',
         textAlign: 'center'
       }}>
         <h2 style={{
@@ -554,10 +555,10 @@ export default function LandingPage() {
           padding: '20px 56px',
           fontSize: 20,
           fontWeight: 600,
-          background: '#B8C5F2',
+          background: '#6366F1',
           border: 'none',
           borderRadius: 9999,
-          color: '#2D3748',
+          color: '#fff',
           cursor: 'pointer',
           textDecoration: 'none',
           display: 'inline-block',
@@ -571,7 +572,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer style={{
         padding: '40px 24px',
-        background: brand.text,
+        background: '#111827',
         color: 'white'
       }}>
         <div className="footer-content" style={{
@@ -627,10 +628,10 @@ export default function LandingPage() {
           padding: '16px',
           fontSize: 17,
           fontWeight: 600,
-          background: '#B8C5F2',
+          background: '#6366F1',
           border: 'none',
           borderRadius: 9999,
-          color: '#2D3748',
+          color: '#fff',
           cursor: 'pointer',
           textDecoration: 'none',
           textAlign: 'center',

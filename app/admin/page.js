@@ -8,9 +8,9 @@ import { useAuth } from '../../lib/useAuth';
 function Logo() {
   return (
     <div style={{ display: 'flex', gap: 3 }}>
-      <div style={{ width: 4, height: 22, background: '#B8C5F2', borderRadius: 1 }} />
-      <div style={{ width: 4, height: 22, background: '#B8C5F2', borderRadius: 1 }} />
-      <div style={{ width: 4, height: 22, background: '#B8C5F2', borderRadius: 1 }} />
+      <div style={{ width: 4, height: 22, background: '#6366F1', borderRadius: 1 }} />
+      <div style={{ width: 4, height: 22, background: '#6366F1', borderRadius: 1 }} />
+      <div style={{ width: 4, height: 22, background: '#6366F1', borderRadius: 1 }} />
     </div>
   );
 }
@@ -94,11 +94,24 @@ export default function AdminPanel() {
   const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
 
   const brand = {
-    primary: '#9AA8E0', text: '#2D3748', textLight: '#718096',
-    border: '#E8EDFC', bg: '#F8FAFF', white: '#ffffff',
-    danger: '#dc2626', success: '#9AA8E0', gold: '#9AA8E0',
+    primary: '#6366F1', text: '#111827', textLight: '#6B7280',
+    border: '#E5E7EB', bg: '#F9FAFB', white: '#ffffff',
+    danger: '#DC2626', success: '#059669', gold: '#6366F1',
   };
 
+  const tabIcons = {
+    bookings: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+    customers: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+    frequencies: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>,
+    neighborhoods: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+    buildings: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/><line x1="9" y1="10" x2="9" y2="10.01"/><line x1="15" y1="10" x2="15" y2="10.01"/><line x1="9" y1="14" x2="9" y2="14.01"/><line x1="15" y1="14" x2="15" y2="14.01"/><line x1="9" y1="18" x2="15" y2="18"/></svg>,
+    floorplans: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>,
+    unitlines: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>,
+    addons: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>,
+    workers: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+    availability: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+    settings: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+  };
   const tabs = [
     { id: 'bookings', label: 'Bookings' },
     { id: 'customers', label: 'Customers' },
@@ -146,8 +159,8 @@ export default function AdminPanel() {
     { value: '90', label: '90 days' },
   ];
 
-  const buttonStyle = { padding: '8px 18px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 100, cursor: 'pointer', transition: 'all 0.15s ease' };
-  const inputStyle = { padding: '10px 14px', fontSize: 14, border: '1.5px solid #e5e5e5', borderRadius: 10, width: '100%', boxSizing: 'border-box', outline: 'none', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" };
+  const buttonStyle = { padding: '7px 14px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8, cursor: 'pointer', transition: 'all 150ms ease', display: 'inline-flex', alignItems: 'center', gap: 6 };
+  const inputStyle = { padding: '9px 12px', fontSize: 13, border: '1px solid #E5E7EB', borderRadius: 8, width: '100%', boxSizing: 'border-box', outline: 'none', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif", background: '#fff', transition: 'border-color 150ms, box-shadow 150ms' };
 
   useEffect(() => {
     if (!authLoading && !user) { router.push('/login'); return; }
@@ -511,7 +524,7 @@ export default function AdminPanel() {
   const getPaymentStatusStyle = (status) => {
     switch (status) {
       case 'paid': return { background: '#D1FAE5', color: '#065F46' };
-      case 'failed': return { background: '#FEE2E2', color: '#DC2626' };
+      case 'failed': return { background: '#FEE2E2', color: '#991B1B' };
       case 'pending': return { background: '#FEF3C7', color: '#92400E' };
       default: return { background: '#F3F4F6', color: '#6B7280' };
     }
@@ -716,33 +729,33 @@ export default function AdminPanel() {
 
   const getStatusStyle = (status) => {
     switch (status) {
-      case 'upcoming': return { background: '#9AA8E0', color: '#fff' };
-      case 'scheduled': return { background: '#E8EDFC', color: '#2D3748' };
-      case 'completed': return { background: '#E8EDFC', color: '#718096' };
+      case 'upcoming': return { background: '#DBEAFE', color: '#1E40AF' };
+      case 'scheduled': return { background: '#EEF2FF', color: '#4338CA' };
+      case 'completed': return { background: '#D1FAE5', color: '#065F46' };
       case 'skipped': return { background: '#FEF3C7', color: '#92400E' };
-      case 'cancelled': return { background: '#FEE2E2', color: '#DC2626' };
-      default: return { background: '#E8EDFC', color: '#718096' };
+      case 'cancelled': return { background: '#FEE2E2', color: '#991B1B' };
+      default: return { background: '#F3F4F6', color: '#6B7280' };
     }
   };
 
   if (authLoading || dataLoading) {
-    return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}><div style={{ textAlign: 'center' }}><div style={{ width: 40, height: 40, border: '3px solid #E8EDFC', borderTopColor: '#9AA8E0', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} /><p style={{ color: '#718096', fontSize: 15 }}>Loading...</p></div><style jsx global>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style></div>;
+    return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}><div style={{ textAlign: 'center' }}><div style={{ width: 40, height: 40, border: '3px solid #E5E7EB', borderTopColor: '#6366F1', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} /><p style={{ color: '#6B7280', fontSize: 15 }}>Loading...</p></div><style jsx global>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style></div>;
   }
 
   return (
     <div style={{ minHeight: '100vh', background: '#fff', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
-      <header className="admin-header" style={{ padding: '14px 24px', background: '#fff', borderBottom: '1px solid #E8EDFC', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
+      <header className="admin-header" style={{ padding: '14px 24px', background: '#fff', borderBottom: '1px solid #E5E7EB', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <Logo />
-          <span style={{ fontSize: 18, fontWeight: 700, color: '#2D3748', letterSpacing: '-0.02em' }}>BetterView</span>
-          <span style={{ marginLeft: 8, padding: '4px 10px', background: '#9AA8E0', color: '#fff', borderRadius: 6, fontSize: 11, fontWeight: 700, letterSpacing: '0.04em' }}>ADMIN</span>
+          <span style={{ fontSize: 18, fontWeight: 700, color: '#111827', letterSpacing: '-0.02em' }}>BetterView</span>
+          <span style={{ marginLeft: 8, padding: '4px 10px', background: '#6366F1', color: '#fff', borderRadius: 6, fontSize: 11, fontWeight: 700, letterSpacing: '0.04em' }}>ADMIN</span>
         </div>
         <div className="admin-header-right" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Link href="/admin/calendar" style={{ fontSize: 14, color: '#2D3748', textDecoration: 'none', fontWeight: 600, padding: '8px 20px', background: '#EEF1FC', borderRadius: 100, transition: 'background 0.15s' }}>
+          <Link href="/admin/calendar" style={{ fontSize: 14, color: '#6366F1', textDecoration: 'none', fontWeight: 600, padding: '8px 20px', background: '#EEF2FF', borderRadius: 100, transition: 'background 0.15s' }}>
             Calendar View
           </Link>
-          <span style={{ fontSize: 13, color: '#718096' }}>{user?.email}</span>
-          <button onClick={handleLogout} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748' }}>Log Out</button>
+          <span style={{ fontSize: 13, color: '#6B7280' }}>{user?.email}</span>
+          <button onClick={handleLogout} style={{ ...buttonStyle, background: '#EEF2FF', color: '#111827' }}>Log Out</button>
         </div>
 
         <button className="mobile-nav-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
@@ -758,34 +771,36 @@ export default function AdminPanel() {
         </button>
 
         <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
-          <Link href="/admin/calendar" onClick={() => setMobileMenuOpen(false)} style={{ padding: '16px', fontSize: 16, fontWeight: 600, color: '#fff', textDecoration: 'none', textAlign: 'center', borderRadius: 12, background: '#9AA8E0' }}>
+          <Link href="/admin/calendar" onClick={() => setMobileMenuOpen(false)} style={{ padding: '16px', fontSize: 16, fontWeight: 600, color: '#fff', textDecoration: 'none', textAlign: 'center', borderRadius: 12, background: '#6366F1' }}>
             Calendar View
           </Link>
-          <span style={{ padding: '14px 16px', fontSize: 13, color: '#718096', textAlign: 'center' }}>{user?.email}</span>
-          <button onClick={() => { handleLogout(); setMobileMenuOpen(false); }} style={{ padding: '16px', fontSize: 16, fontWeight: 600, background: '#EEF1FC', border: 'none', borderRadius: 12, color: '#2D3748', cursor: 'pointer' }}>
+          <span style={{ padding: '14px 16px', fontSize: 13, color: '#6B7280', textAlign: 'center' }}>{user?.email}</span>
+          <button onClick={() => { handleLogout(); setMobileMenuOpen(false); }} style={{ padding: '16px', fontSize: 16, fontWeight: 600, background: '#EEF2FF', border: 'none', borderRadius: 12, color: '#111827', cursor: 'pointer' }}>
             Log Out
           </button>
         </div>
       </header>
 
       <div className="admin-layout" style={{ display: 'flex' }}>
-        <aside className="admin-sidebar" style={{ width: 200, background: '#fff', borderRight: '1px solid #E8EDFC', minHeight: 'calc(100vh - 57px)', padding: '16px 0', position: 'sticky', top: 57, alignSelf: 'flex-start' }}>
+        <aside className="admin-sidebar" style={{ width: 220, background: '#fff', borderRight: '1px solid #E5E7EB', minHeight: 'calc(100vh - 57px)', padding: '12px 8px', position: 'sticky', top: 57, alignSelf: 'flex-start' }}>
           {tabs.map(tab => (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
-              display: 'block', width: '100%', padding: '10px 20px', textAlign: 'left',
-              background: activeTab === tab.id ? '#EEF1FC' : 'transparent', border: 'none',
-              borderLeft: activeTab === tab.id ? '3px solid #9AA8E0' : '3px solid transparent',
-              fontSize: 14, fontWeight: activeTab === tab.id ? 700 : 500,
-              color: activeTab === tab.id ? '#2D3748' : '#718096',
-              cursor: 'pointer', transition: 'all 0.15s ease',
-              letterSpacing: activeTab === tab.id ? '-0.01em' : '0',
+              display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+              padding: '9px 12px', textAlign: 'left',
+              background: activeTab === tab.id ? '#EEF2FF' : 'transparent', border: 'none',
+              borderRadius: 8,
+              fontSize: 13, fontWeight: activeTab === tab.id ? 600 : 500,
+              color: activeTab === tab.id ? '#6366F1' : '#6B7280',
+              cursor: 'pointer', transition: 'all 150ms ease',
+              marginBottom: 2,
             }}>
+              <span style={{ width: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, opacity: activeTab === tab.id ? 1 : 0.5 }}>{tabIcons[tab.id]}</span>
               {tab.label}
             </button>
           ))}
         </aside>
 
-        <main className="admin-main" style={{ flex: 1, padding: 32 }}>
+        <main className="admin-main" style={{ flex: 1, padding: 28, background: '#F9FAFB' }}>
 
           {crudError && (
             <div style={{ padding: '14px 20px', background: '#FEE2E2', borderRadius: 14, marginBottom: 20, fontSize: 14, color: '#DC2626', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 500 }}>
@@ -798,7 +813,7 @@ export default function AdminPanel() {
           {activeTab === 'bookings' && (
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em' }}>Bookings</h1>
+                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111827', letterSpacing: '-0.02em' }}>Bookings</h1>
                 <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input type="text" placeholder="Search bookings..." value={searchBookings} onChange={(e) => setSearchBookings(e.target.value)} style={{ ...inputStyle, width: 220 }} />
                   <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
@@ -812,10 +827,10 @@ export default function AdminPanel() {
                 </div>
               </div>
               <div className="table-wrapper">
-                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', overflow: 'hidden', minWidth: 800 }}>
+                <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', overflow: 'hidden', minWidth: 800 }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
-                      <tr style={{ background: brand.bg }}>
+                      <tr style={{ background: '#F9FAFB' }}>
                         {[
                           { field: 'customer_name', label: 'Customer' },
                           { field: 'building', label: 'Property' },
@@ -900,7 +915,7 @@ export default function AdminPanel() {
                               <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                                 {isActionable && (
                                   <>
-                                    <button onClick={() => handleMarkComplete(booking.id)} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', fontSize: 12, padding: '6px 12px' }}>
+                                    <button onClick={() => handleMarkComplete(booking.id)} style={{ ...buttonStyle, background: '#6366F1', color: '#fff', fontSize: 12, padding: '6px 12px' }}>
                                       Complete
                                     </button>
                                     <button onClick={() => handleSkipBooking(booking.id)} style={{ ...buttonStyle, background: '#FEF3C7', color: '#92400E', fontSize: 12, padding: '6px 12px' }}>
@@ -991,7 +1006,7 @@ export default function AdminPanel() {
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
                   <div>
-                    <h1 style={{ fontSize: 24, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em' }}>Customers</h1>
+                    <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111827', letterSpacing: '-0.02em' }}>Customers</h1>
                     <p style={{ fontSize: 14, color: brand.textLight, marginTop: 4 }}>{customers.length} customer{customers.length !== 1 ? 's' : ''} found</p>
                   </div>
                   <input
@@ -1003,10 +1018,10 @@ export default function AdminPanel() {
                   />
                 </div>
                 <div className="table-wrapper">
-                  <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', overflow: 'hidden', minWidth: 700 }}>
+                  <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', overflow: 'hidden', minWidth: 700 }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                       <thead>
-                        <tr style={{ background: brand.bg }}>
+                        <tr style={{ background: '#F9FAFB' }}>
                           <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight, width: 30 }}></th>
                           <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Customer</th>
                           <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Account</th>
@@ -1064,16 +1079,16 @@ export default function AdminPanel() {
                                     <div style={{ padding: '0 16px 16px 48px', background: brand.bg }}>
 
                                       {/* Customer Info Section */}
-                                      <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', padding: 16, marginBottom: 16, marginTop: 8 }}>
+                                      <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: 16, marginBottom: 16, marginTop: 8 }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                                           <p style={{ fontSize: 14, fontWeight: 600, color: brand.text }}>Customer Info</p>
                                           {editingCustomerEmail === c.email ? (
                                             <div style={{ display: 'flex', gap: 6 }}>
-                                              <button onClick={() => handleSaveCustomerInfo(c.email, c.bookings, c.user_id)} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', fontSize: 12, padding: '6px 12px' }}>Save</button>
-                                              <button onClick={() => { setEditingCustomerEmail(null); setEditingCustomerValue({}); }} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748', fontSize: 12, padding: '6px 14px' }}>Cancel</button>
+                                              <button onClick={() => handleSaveCustomerInfo(c.email, c.bookings, c.user_id)} style={{ ...buttonStyle, background: '#6366F1', color: '#fff', fontSize: 12, padding: '6px 12px' }}>Save</button>
+                                              <button onClick={() => { setEditingCustomerEmail(null); setEditingCustomerValue({}); }} style={{ ...buttonStyle, background: '#EEF2FF', color: '#111827', fontSize: 12, padding: '6px 14px' }}>Cancel</button>
                                             </div>
                                           ) : (
-                                            <button onClick={() => { setEditingCustomerEmail(c.email); setEditingCustomerValue({ customer_name: c.name || '', customer_email: c.email, phone: c.phone || '' }); }} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748', fontSize: 12, padding: '6px 14px' }}>Edit</button>
+                                            <button onClick={() => { setEditingCustomerEmail(c.email); setEditingCustomerValue({ customer_name: c.name || '', customer_email: c.email, phone: c.phone || '' }); }} style={{ ...buttonStyle, background: '#EEF2FF', color: '#111827', fontSize: 12, padding: '6px 14px' }}>Edit</button>
                                           )}
                                         </div>
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
@@ -1108,7 +1123,7 @@ export default function AdminPanel() {
                                       <p style={{ fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 12 }}>
                                         Booking History ({c.bookings.length})
                                       </p>
-                                      <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', overflow: 'hidden' }}>
+                                      <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', overflow: 'hidden' }}>
                                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                           <thead>
                                             <tr style={{ background: '#f9fafb' }}>
@@ -1188,15 +1203,15 @@ export default function AdminPanel() {
                                                       <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                                                         {isEditing ? (
                                                           <>
-                                                            <button onClick={() => handleSaveBookingEdit(b.id)} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', fontSize: 11, padding: '5px 10px' }}>Save</button>
+                                                            <button onClick={() => handleSaveBookingEdit(b.id)} style={{ ...buttonStyle, background: '#6366F1', color: '#fff', fontSize: 11, padding: '5px 10px' }}>Save</button>
                                                             <button onClick={() => { setEditingBookingId(null); setEditingBookingValue({}); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, fontSize: 11, padding: '5px 10px', border: `1px solid ${brand.border}` }}>Cancel</button>
                                                           </>
                                                         ) : (
                                                           <>
-                                                            <button onClick={(e) => { e.stopPropagation(); setEditingBookingId(b.id); setEditingBookingValue({ booking_date: b.booking_date, booking_time: b.booking_time || '', worker_id: b.worker_id || '', unit_number: b.unit_number || '', special_instructions: b.special_instructions || '' }); }} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748', fontSize: 11, padding: '5px 10px' }}>Edit</button>
+                                                            <button onClick={(e) => { e.stopPropagation(); setEditingBookingId(b.id); setEditingBookingValue({ booking_date: b.booking_date, booking_time: b.booking_time || '', worker_id: b.worker_id || '', unit_number: b.unit_number || '', special_instructions: b.special_instructions || '' }); }} style={{ ...buttonStyle, background: '#EEF2FF', color: '#111827', fontSize: 11, padding: '5px 10px' }}>Edit</button>
                                                             {isActionable && (
                                                               <>
-                                                                <button onClick={(e) => { e.stopPropagation(); handleMarkComplete(b.id); }} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', fontSize: 11, padding: '5px 10px' }}>Complete</button>
+                                                                <button onClick={(e) => { e.stopPropagation(); handleMarkComplete(b.id); }} style={{ ...buttonStyle, background: '#6366F1', color: '#fff', fontSize: 11, padding: '5px 10px' }}>Complete</button>
                                                                 <button onClick={(e) => { e.stopPropagation(); handleSkipBooking(b.id); }} style={{ ...buttonStyle, background: '#FEF3C7', color: '#92400E', fontSize: 11, padding: '5px 10px' }}>Skip</button>
                                                                 <button onClick={(e) => { e.stopPropagation(); handleCancelBooking(b.id); }} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger, fontSize: 11, padding: '5px 10px' }}>Cancel</button>
                                                               </>
@@ -1237,21 +1252,21 @@ export default function AdminPanel() {
           {activeTab === 'frequencies' && (
             <div>
               <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em' }}>Frequencies</h1>
+                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111827', letterSpacing: '-0.02em' }}>Frequencies</h1>
                 <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input type="text" placeholder="Search frequencies..." value={searchFrequencies} onChange={(e) => setSearchFrequencies(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
                     <input type="checkbox" checked={showArchivedFrequencies} onChange={(e) => setShowArchivedFrequencies(e.target.checked)} />
                     Show archived
                   </label>
-                  <button onClick={() => handleAdd('frequencies')} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff' }}>+ Add Frequency</button>
+                  <button onClick={() => handleAdd('frequencies')} style={{ ...buttonStyle, background: '#6366F1', color: '#fff' }}>+ Add Frequency</button>
                 </div>
               </div>
               <div className="table-wrapper">
-                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', overflow: 'hidden' }}>
+                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
-                      <tr style={{ background: brand.bg }}>
+                      <tr style={{ background: '#F9FAFB' }}>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Name</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Discount %</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Interval (days)</th>
@@ -1298,9 +1313,9 @@ export default function AdminPanel() {
                           </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
                             {editingId === `frequency-${f.id}` ? (
-                              <button onClick={() => handleSave('frequencies', f.id)} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', marginRight: 8 }}>Save</button>
+                              <button onClick={() => handleSave('frequencies', f.id)} style={{ ...buttonStyle, background: '#6366F1', color: '#fff', marginRight: 8 }}>Save</button>
                             ) : (
-                              <button onClick={() => { setEditingId(`frequency-${f.id}`); setEditValue({ name: f.name, discount_percent: f.discount_percent, interval_days: f.interval_days, sort_order: f.sort_order }); }} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748', marginRight: 8 }}>Edit</button>
+                              <button onClick={() => { setEditingId(`frequency-${f.id}`); setEditValue({ name: f.name, discount_percent: f.discount_percent, interval_days: f.interval_days, sort_order: f.sort_order }); }} style={{ ...buttonStyle, background: '#EEF2FF', color: '#111827', marginRight: 8 }}>Edit</button>
                             )}
                             <button onClick={() => handleToggleArchive('frequencies', f.id, f.archived)} style={{ ...buttonStyle, background: f.archived ? '#dbeafe' : '#fef3c7', color: f.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
                               {f.archived ? 'Unarchive' : 'Archive'}
@@ -1323,21 +1338,21 @@ export default function AdminPanel() {
           {activeTab === 'neighborhoods' && (
             <div>
               <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em' }}>Neighborhoods</h1>
+                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111827', letterSpacing: '-0.02em' }}>Neighborhoods</h1>
                 <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input type="text" placeholder="Search neighborhoods..." value={searchNeighborhoods} onChange={(e) => setSearchNeighborhoods(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
                     <input type="checkbox" checked={showArchivedNeighborhoods} onChange={(e) => setShowArchivedNeighborhoods(e.target.checked)} />
                     Show archived
                   </label>
-                  <button onClick={() => handleAdd('neighborhoods')} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff' }}>+ Add Neighborhood</button>
+                  <button onClick={() => handleAdd('neighborhoods')} style={{ ...buttonStyle, background: '#6366F1', color: '#fff' }}>+ Add Neighborhood</button>
                 </div>
               </div>
               <div className="table-wrapper">
-                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', overflow: 'hidden' }}>
+                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
-                      <tr style={{ background: brand.bg }}>
+                      <tr style={{ background: '#F9FAFB' }}>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Name</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Buildings</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Status</th>
@@ -1362,9 +1377,9 @@ export default function AdminPanel() {
                           </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
                             {editingId === `neighborhood-${n.id}` ? (
-                              <button onClick={() => handleSave('neighborhoods', n.id)} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', marginRight: 8 }}>Save</button>
+                              <button onClick={() => handleSave('neighborhoods', n.id)} style={{ ...buttonStyle, background: '#6366F1', color: '#fff', marginRight: 8 }}>Save</button>
                             ) : (
-                              <button onClick={() => { setEditingId(`neighborhood-${n.id}`); setEditValue({ name: n.name }); }} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748', marginRight: 8 }}>Edit</button>
+                              <button onClick={() => { setEditingId(`neighborhood-${n.id}`); setEditValue({ name: n.name }); }} style={{ ...buttonStyle, background: '#EEF2FF', color: '#111827', marginRight: 8 }}>Edit</button>
                             )}
                             <button onClick={() => handleToggleArchive('neighborhoods', n.id, n.archived)} style={{ ...buttonStyle, background: n.archived ? '#dbeafe' : '#fef3c7', color: n.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
                               {n.archived ? 'Unarchive' : 'Archive'}
@@ -1387,7 +1402,7 @@ export default function AdminPanel() {
           {activeTab === 'buildings' && (
             <div>
               <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em' }}>Buildings</h1>
+                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111827', letterSpacing: '-0.02em' }}>Buildings</h1>
                 <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input type="text" placeholder="Search buildings..." value={searchBuildings} onChange={(e) => setSearchBuildings(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <select value={selectedNeighborhood} onChange={(e) => setSelectedNeighborhood(e.target.value)} style={{ ...inputStyle, width: 180 }}>
@@ -1398,14 +1413,14 @@ export default function AdminPanel() {
                     <input type="checkbox" checked={showArchivedBuildings} onChange={(e) => setShowArchivedBuildings(e.target.checked)} />
                     Show archived
                   </label>
-                  <button onClick={() => handleAdd('buildings')} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff' }}>+ Add Building</button>
+                  <button onClick={() => handleAdd('buildings')} style={{ ...buttonStyle, background: '#6366F1', color: '#fff' }}>+ Add Building</button>
                 </div>
               </div>
               <div className="table-wrapper">
-                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', overflow: 'hidden' }}>
+                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
-                      <tr style={{ background: brand.bg }}>
+                      <tr style={{ background: '#F9FAFB' }}>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Name</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Address</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Neighborhood</th>
@@ -1446,9 +1461,9 @@ export default function AdminPanel() {
                           </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
                             {editingId === `building-${b.id}` ? (
-                              <button onClick={() => handleSave('buildings', b.id)} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', marginRight: 8 }}>Save</button>
+                              <button onClick={() => handleSave('buildings', b.id)} style={{ ...buttonStyle, background: '#6366F1', color: '#fff', marginRight: 8 }}>Save</button>
                             ) : (
-                              <button onClick={() => { setEditingId(`building-${b.id}`); setEditValue({ name: b.name, address: b.address, neighborhood_id: b.neighborhood_id }); }} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748', marginRight: 8 }}>Edit</button>
+                              <button onClick={() => { setEditingId(`building-${b.id}`); setEditValue({ name: b.name, address: b.address, neighborhood_id: b.neighborhood_id }); }} style={{ ...buttonStyle, background: '#EEF2FF', color: '#111827', marginRight: 8 }}>Edit</button>
                             )}
                             <button onClick={() => handleToggleArchive('buildings', b.id, b.archived)} style={{ ...buttonStyle, background: b.archived ? '#dbeafe' : '#fef3c7', color: b.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
                               {b.archived ? 'Unarchive' : 'Archive'}
@@ -1471,7 +1486,7 @@ export default function AdminPanel() {
           {activeTab === 'floorplans' && (
             <div>
               <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em' }}>Floor Plans</h1>
+                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111827', letterSpacing: '-0.02em' }}>Floor Plans</h1>
                 <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input type="text" placeholder="Search floor plans..." value={searchFloorPlans} onChange={(e) => setSearchFloorPlans(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <select value={selectedBuilding} onChange={(e) => setSelectedBuilding(e.target.value)} style={{ ...inputStyle, width: 200 }}>
@@ -1482,14 +1497,14 @@ export default function AdminPanel() {
                     <input type="checkbox" checked={showArchivedFloorPlans} onChange={(e) => setShowArchivedFloorPlans(e.target.checked)} />
                     Show archived
                   </label>
-                  <button onClick={() => handleAdd('floorplans')} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff' }}>+ Add Floor Plan</button>
+                  <button onClick={() => handleAdd('floorplans')} style={{ ...buttonStyle, background: '#6366F1', color: '#fff' }}>+ Add Floor Plan</button>
                 </div>
               </div>
               <div className="table-wrapper">
-                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', overflow: 'hidden' }}>
+                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
-                      <tr style={{ background: brand.bg }}>
+                      <tr style={{ background: '#F9FAFB' }}>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Name</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Building</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Price</th>
@@ -1538,9 +1553,9 @@ export default function AdminPanel() {
                           </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
                             {editingId === `floorplan-${f.id}` ? (
-                              <button onClick={() => handleSave('floorplans', f.id)} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', marginRight: 8 }}>Save</button>
+                              <button onClick={() => handleSave('floorplans', f.id)} style={{ ...buttonStyle, background: '#6366F1', color: '#fff', marginRight: 8 }}>Save</button>
                             ) : (
-                              <button onClick={() => { setEditingId(`floorplan-${f.id}`); setEditValue({ name: f.name, price: f.price, duration_minutes: f.duration_minutes || 60, building_id: f.building_id }); }} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748', marginRight: 8 }}>Edit</button>
+                              <button onClick={() => { setEditingId(`floorplan-${f.id}`); setEditValue({ name: f.name, price: f.price, duration_minutes: f.duration_minutes || 60, building_id: f.building_id }); }} style={{ ...buttonStyle, background: '#EEF2FF', color: '#111827', marginRight: 8 }}>Edit</button>
                             )}
                             <button onClick={() => handleToggleArchive('floorplans', f.id, f.archived)} style={{ ...buttonStyle, background: f.archived ? '#dbeafe' : '#fef3c7', color: f.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
                               {f.archived ? 'Unarchive' : 'Archive'}
@@ -1563,7 +1578,7 @@ export default function AdminPanel() {
           {activeTab === 'unitlines' && (
             <div>
               <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em' }}>Unit Lines</h1>
+                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111827', letterSpacing: '-0.02em' }}>Unit Lines</h1>
                 <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input type="text" placeholder="Search unit lines..." value={searchUnitLines} onChange={(e) => setSearchUnitLines(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <select value={selectedBuildingUL} onChange={(e) => setSelectedBuildingUL(e.target.value)} style={{ ...inputStyle, width: 200 }}>
@@ -1574,14 +1589,14 @@ export default function AdminPanel() {
                     <input type="checkbox" checked={showArchivedUnitLines} onChange={(e) => setShowArchivedUnitLines(e.target.checked)} />
                     Show archived
                   </label>
-                  <button onClick={() => handleAdd('unitlines')} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff' }}>+ Add Unit Line</button>
+                  <button onClick={() => handleAdd('unitlines')} style={{ ...buttonStyle, background: '#6366F1', color: '#fff' }}>+ Add Unit Line</button>
                 </div>
               </div>
               <div className="table-wrapper">
-                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', overflow: 'hidden' }}>
+                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
-                      <tr style={{ background: brand.bg }}>
+                      <tr style={{ background: '#F9FAFB' }}>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Building</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Line Number</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Floor Range</th>
@@ -1652,9 +1667,9 @@ export default function AdminPanel() {
                             </td>
                             <td style={{ padding: '16px', textAlign: 'right' }}>
                               {isEditing ? (
-                                <button onClick={() => handleSave('unitlines', ul.id)} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', marginRight: 8 }}>Save</button>
+                                <button onClick={() => handleSave('unitlines', ul.id)} style={{ ...buttonStyle, background: '#6366F1', color: '#fff', marginRight: 8 }}>Save</button>
                               ) : (
-                                <button onClick={() => { setEditingId(`unitline-${ul.id}`); setEditValue({ building_id: ul.building_id, line_number: ul.line_number, floor_min: ul.floor_min, floor_max: ul.floor_max, floor_plan_id: ul.floor_plan_id || '', custom_price: ul.custom_price ?? '' }); }} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748', marginRight: 8 }}>Edit</button>
+                                <button onClick={() => { setEditingId(`unitline-${ul.id}`); setEditValue({ building_id: ul.building_id, line_number: ul.line_number, floor_min: ul.floor_min, floor_max: ul.floor_max, floor_plan_id: ul.floor_plan_id || '', custom_price: ul.custom_price ?? '' }); }} style={{ ...buttonStyle, background: '#EEF2FF', color: '#111827', marginRight: 8 }}>Edit</button>
                               )}
                               <button onClick={() => handleToggleArchive('unitlines', ul.id, ul.archived)} style={{ ...buttonStyle, background: ul.archived ? '#dbeafe' : '#fef3c7', color: ul.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
                                 {ul.archived ? 'Unarchive' : 'Archive'}
@@ -1678,17 +1693,17 @@ export default function AdminPanel() {
           {activeTab === 'addons' && (
             <div>
               <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em' }}>Add-Ons</h1>
+                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111827', letterSpacing: '-0.02em' }}>Add-Ons</h1>
                 <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input type="text" placeholder="Search add-ons..." value={searchAddOns} onChange={(e) => setSearchAddOns(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
                     <input type="checkbox" checked={showArchivedAddOns} onChange={(e) => setShowArchivedAddOns(e.target.checked)} />
                     Show archived
                   </label>
-                  <button onClick={() => handleAdd('addons')} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff' }}>+ Add Add-On</button>
+                  <button onClick={() => handleAdd('addons')} style={{ ...buttonStyle, background: '#6366F1', color: '#fff' }}>+ Add Add-On</button>
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderRadius: 16, border: '1px solid #E8EDFC', background: '#F8FAFF', marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderRadius: 16, border: '1px solid #E5E7EB', background: '#F9FAFB', marginBottom: 16 }}>
                 <div>
                   <span style={{ fontSize: 14, fontWeight: 600, color: brand.text }}>Add-Ons section on booking page</span>
                   <p style={{ fontSize: 13, color: brand.textLight, margin: '2px 0 0' }}>
@@ -1705,10 +1720,10 @@ export default function AdminPanel() {
                 </button>
               </div>
               <div className="table-wrapper">
-                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', overflow: 'hidden' }}>
+                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
-                      <tr style={{ background: brand.bg }}>
+                      <tr style={{ background: '#F9FAFB' }}>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Name</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Price</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Status</th>
@@ -1743,9 +1758,9 @@ export default function AdminPanel() {
                           </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
                             {editingId === `addon-${a.id}` ? (
-                              <button onClick={() => handleSave('addons', a.id)} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', marginRight: 8 }}>Save</button>
+                              <button onClick={() => handleSave('addons', a.id)} style={{ ...buttonStyle, background: '#6366F1', color: '#fff', marginRight: 8 }}>Save</button>
                             ) : (
-                              <button onClick={() => { setEditingId(`addon-${a.id}`); setEditValue({ name: a.name, price: a.price }); }} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748', marginRight: 8 }}>Edit</button>
+                              <button onClick={() => { setEditingId(`addon-${a.id}`); setEditValue({ name: a.name, price: a.price }); }} style={{ ...buttonStyle, background: '#EEF2FF', color: '#111827', marginRight: 8 }}>Edit</button>
                             )}
                             <button onClick={() => handleToggleArchive('addons', a.id, a.archived)} style={{ ...buttonStyle, background: a.archived ? '#dbeafe' : '#fef3c7', color: a.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
                               {a.archived ? 'Unarchive' : 'Archive'}
@@ -1765,21 +1780,21 @@ export default function AdminPanel() {
           {activeTab === 'workers' && (
             <div>
               <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em' }}>Workers</h1>
+                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111827', letterSpacing: '-0.02em' }}>Workers</h1>
                 <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input type="text" placeholder="Search workers..." value={searchWorkers} onChange={(e) => setSearchWorkers(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
                     <input type="checkbox" checked={showArchivedWorkers} onChange={(e) => setShowArchivedWorkers(e.target.checked)} />
                     Show archived
                   </label>
-                  <button onClick={() => handleAdd('workers')} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff' }}>+ Add Worker</button>
+                  <button onClick={() => handleAdd('workers')} style={{ ...buttonStyle, background: '#6366F1', color: '#fff' }}>+ Add Worker</button>
                 </div>
               </div>
               <div className="table-wrapper">
-                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', overflow: 'hidden' }}>
+                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
-                      <tr style={{ background: brand.bg }}>
+                      <tr style={{ background: '#F9FAFB' }}>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Name</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Email</th>
                         <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Phone</th>
@@ -1822,9 +1837,9 @@ export default function AdminPanel() {
                           </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
                             {editingId === `worker-${w.id}` ? (
-                              <button onClick={() => handleSave('workers', w.id)} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', marginRight: 8 }}>Save</button>
+                              <button onClick={() => handleSave('workers', w.id)} style={{ ...buttonStyle, background: '#6366F1', color: '#fff', marginRight: 8 }}>Save</button>
                             ) : (
-                              <button onClick={() => { setEditingId(`worker-${w.id}`); setEditValue({ name: w.name, email: w.email, phone: w.phone }); }} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748', marginRight: 8 }}>Edit</button>
+                              <button onClick={() => { setEditingId(`worker-${w.id}`); setEditValue({ name: w.name, email: w.email, phone: w.phone }); }} style={{ ...buttonStyle, background: '#EEF2FF', color: '#111827', marginRight: 8 }}>Edit</button>
                             )}
                             <button onClick={() => handleToggleArchive('workers', w.id, w.archived)} style={{ ...buttonStyle, background: w.archived ? '#dbeafe' : '#fef3c7', color: w.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
                               {w.archived ? 'Unarchive' : 'Archive'}
@@ -1846,10 +1861,10 @@ export default function AdminPanel() {
           {/* AVAILABILITY TAB */}
           {activeTab === 'availability' && (
             <div>
-              <h1 style={{ fontSize: 24, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em', marginBottom: 20 }}>Availability</h1>
+              <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111827', letterSpacing: '-0.02em', marginBottom: 20 }}>Availability</h1>
 
               {/* Sub-tab navigation */}
-              <div style={{ display: 'inline-flex', gap: 4, marginBottom: 28, background: '#EEF1FC', borderRadius: 12, padding: 4 }}>
+              <div style={{ display: 'inline-flex', gap: 4, marginBottom: 28, background: '#EEF2FF', borderRadius: 12, padding: 4 }}>
                 {[
                   { id: 'weekly', label: 'Weekly Schedules' },
                   { id: 'blocked', label: 'Blocked Dates' },
@@ -1860,8 +1875,8 @@ export default function AdminPanel() {
                     onClick={() => setAvailabilitySubTab(tab.id)}
                     style={{
                       padding: '10px 20px', fontSize: 14, fontWeight: 600,
-                      color: availabilitySubTab === tab.id ? '#fff' : '#718096',
-                      background: availabilitySubTab === tab.id ? '#9AA8E0' : 'transparent',
+                      color: availabilitySubTab === tab.id ? '#fff' : '#6B7280',
+                      background: availabilitySubTab === tab.id ? '#6366F1' : 'transparent',
                       border: 'none', borderRadius: 10, cursor: 'pointer',
                       transition: 'all 0.2s ease',
                     }}
@@ -1887,7 +1902,7 @@ export default function AdminPanel() {
                               key={w.id}
                               onClick={() => { setSelectedWorkerAvail(w.id); setEditingAvailability(getWorkerAvailability(w.id)); }}
                               style={{
-                                background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', padding: '16px 20px',
+                                background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '16px 20px',
                                 cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                                 transition: 'box-shadow 0.2s',
                               }}
@@ -1921,7 +1936,7 @@ export default function AdminPanel() {
                           );
                         })}
                         {workers.length === 0 && (
-                          <div style={{ padding: 32, textAlign: 'center', color: brand.textLight, background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC' }}>
+                          <div style={{ padding: 32, textAlign: 'center', color: brand.textLight, background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB' }}>
                             No workers found. Add workers first in the Workers tab.
                           </div>
                         )}
@@ -1944,10 +1959,10 @@ export default function AdminPanel() {
                       </div>
 
                       <div className="table-wrapper">
-                        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', overflow: 'hidden' }}>
+                        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', overflow: 'hidden' }}>
                           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
-                              <tr style={{ background: brand.bg }}>
+                              <tr style={{ background: '#F9FAFB' }}>
                                 <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Day</th>
                                 <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Day Off</th>
                                 <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Start Time</th>
@@ -2008,13 +2023,13 @@ export default function AdminPanel() {
                         <button
                           onClick={() => handleSaveWeeklySchedule(selectedWorkerAvail)}
                           disabled={availSaving}
-                          style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', opacity: availSaving ? 0.6 : 1 }}
+                          style={{ ...buttonStyle, background: '#6366F1', color: '#fff', opacity: availSaving ? 0.6 : 1 }}
                         >
                           {availSaving ? 'Saving...' : 'Save Schedule'}
                         </button>
                         <button
                           onClick={() => { setSelectedWorkerAvail(''); setEditingAvailability(null); }}
-                          style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748' }}
+                          style={{ ...buttonStyle, background: '#EEF2FF', color: '#111827' }}
                         >
                           Cancel
                         </button>
@@ -2042,11 +2057,11 @@ export default function AdminPanel() {
                       </div>
 
                       {/* Calendar */}
-                      <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', padding: 16, marginBottom: 16 }}>
+                      <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: 16, marginBottom: 16 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                          <button onClick={() => { if (calendarMonth === 0) { setCalendarMonth(11); setCalendarYear(calendarYear - 1); } else setCalendarMonth(calendarMonth - 1); }} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748', padding: '6px 14px' }}>&lt;</button>
+                          <button onClick={() => { if (calendarMonth === 0) { setCalendarMonth(11); setCalendarYear(calendarYear - 1); } else setCalendarMonth(calendarMonth - 1); }} style={{ ...buttonStyle, background: '#EEF2FF', color: '#111827', padding: '6px 14px' }}>&lt;</button>
                           <span style={{ fontSize: 16, fontWeight: 600, color: brand.text }}>{MONTH_NAMES[calendarMonth]} {calendarYear}</span>
-                          <button onClick={() => { if (calendarMonth === 11) { setCalendarMonth(0); setCalendarYear(calendarYear + 1); } else setCalendarMonth(calendarMonth + 1); }} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748', padding: '6px 14px' }}>&gt;</button>
+                          <button onClick={() => { if (calendarMonth === 11) { setCalendarMonth(0); setCalendarYear(calendarYear + 1); } else setCalendarMonth(calendarMonth + 1); }} style={{ ...buttonStyle, background: '#EEF2FF', color: '#111827', padding: '6px 14px' }}>&gt;</button>
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
                           {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map(d => (
@@ -2083,7 +2098,7 @@ export default function AdminPanel() {
 
                       {/* Add Blocked Date Form */}
                       {blockedDateForm.worker_id && blockedDateForm.blocked_date && (
-                        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', padding: 16 }}>
+                        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: 16 }}>
                           <p style={{ fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 12 }}>
                             Block {formatDate(blockedDateForm.blocked_date)} for {workers.find(w => w.id === blockedDateForm.worker_id)?.name}
                           </p>
@@ -2131,7 +2146,7 @@ export default function AdminPanel() {
                       <p style={{ fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 12 }}>
                         Upcoming Blocked Dates
                       </p>
-                      <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', overflow: 'hidden' }}>
+                      <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', overflow: 'hidden' }}>
                         {blockedDates
                           .filter(bd => !blockedDateForm.worker_id || bd.worker_id === blockedDateForm.worker_id)
                           .filter(bd => bd.blocked_date >= formatDateISO(new Date()))
@@ -2170,7 +2185,7 @@ export default function AdminPanel() {
               {availabilitySubTab === 'overrides' && (
                 <div>
                   {/* Add Override Form */}
-                  <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', padding: 24, marginBottom: 24 }}>
+                  <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: 24, marginBottom: 24 }}>
                     <p style={{ fontSize: 16, fontWeight: 600, color: brand.text, marginBottom: 16 }}>Add Schedule Override</p>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
                       <div>
@@ -2204,17 +2219,17 @@ export default function AdminPanel() {
                         <input type="text" value={overrideForm.reason} onChange={(e) => setOverrideForm({ ...overrideForm, reason: e.target.value })} placeholder="e.g. Working Saturday" style={inputStyle} />
                       </div>
                     </div>
-                    <button onClick={handleAddOverride} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', marginTop: 16 }}>
+                    <button onClick={handleAddOverride} style={{ ...buttonStyle, background: '#6366F1', color: '#fff', marginTop: 16 }}>
                       + Add Override
                     </button>
                   </div>
 
                   {/* Overrides List */}
                   <div className="table-wrapper">
-                    <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', overflow: 'hidden' }}>
+                    <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', overflow: 'hidden' }}>
                       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
-                          <tr style={{ background: brand.bg }}>
+                          <tr style={{ background: '#F9FAFB' }}>
                             <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Worker</th>
                             <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Date</th>
                             <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Hours</th>
@@ -2266,8 +2281,8 @@ export default function AdminPanel() {
           {/* SETTINGS TAB */}
           {activeTab === 'settings' && (
             <div>
-              <h1 style={{ fontSize: 24, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em', marginBottom: 24 }}>Settings</h1>
-              <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', padding: 24, maxWidth: 600 }}>
+              <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111827', letterSpacing: '-0.02em', marginBottom: 24 }}>Settings</h1>
+              <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: 24, maxWidth: 600 }}>
                 <p style={{ fontSize: 16, fontWeight: 600, color: brand.text, marginBottom: 20 }}>Scheduling Configuration</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
                   {[
@@ -2303,12 +2318,12 @@ export default function AdminPanel() {
                   <button
                     onClick={handleSaveServiceSettings}
                     disabled={availSaving || !editingSettings}
-                    style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', opacity: (availSaving || !editingSettings) ? 0.6 : 1 }}
+                    style={{ ...buttonStyle, background: '#6366F1', color: '#fff', opacity: (availSaving || !editingSettings) ? 0.6 : 1 }}
                   >
                     {availSaving ? 'Saving...' : 'Save Settings'}
                   </button>
                   {editingSettings && (
-                    <button onClick={() => setEditingSettings(null)} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748' }}>
+                    <button onClick={() => setEditingSettings(null)} style={{ ...buttonStyle, background: '#EEF2FF', color: '#111827' }}>
                       Cancel
                     </button>
                   )}

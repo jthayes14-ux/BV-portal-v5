@@ -12,9 +12,9 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
 function Logo() {
   return (
     <div style={{ display: 'flex', gap: 4 }}>
-      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
-      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
-      <div style={{ width: 8, height: 28, background: '#B8C5F2', borderRadius: 0 }} />
+      <div style={{ width: 8, height: 28, background: '#6366F1', borderRadius: 0 }} />
+      <div style={{ width: 8, height: 28, background: '#6366F1', borderRadius: 0 }} />
+      <div style={{ width: 8, height: 28, background: '#6366F1', borderRadius: 0 }} />
     </div>
   );
 }
@@ -367,11 +367,11 @@ function CheckoutForm({ booking, brand, user, signUp }) {
       {step === 'payment' && (
         <main className="checkout-grid" style={{ maxWidth: 900, margin: '0 auto', padding: '48px 24px', display: 'grid', gridTemplateColumns: '1fr 340px', gap: 48 }}>
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 600, color: brand.text, marginBottom: 8 }}>Payment Details</h1>
+            <h1 style={{ fontSize: 24, fontWeight: 700, color: '#111827', marginBottom: 8 }}>Payment Details</h1>
             <p style={{ color: brand.textLight, marginBottom: 32 }}>Your card will be charged after the cleaning is complete</p>
 
             {error && (
-              <div style={{ padding: '12px 16px', background: '#FEE2E2', borderRadius: 8, marginBottom: 20, fontSize: 14, color: '#DC2626' }}>
+              <div style={{ padding: '12px 16px', background: '#FEE2E2', border: '1px solid #FECACA', borderRadius: 10, marginBottom: 20, fontSize: 14, color: '#DC2626' }}>
                 {error}
               </div>
             )}
@@ -395,9 +395,9 @@ function CheckoutForm({ booking, brand, user, signUp }) {
 
             <button onClick={handleSubmit} disabled={!isFormValid || processing || !stripe} style={{
               width: '100%', marginTop: 24, padding: 18, fontSize: 16, fontWeight: 600,
-              background: isFormValid && !processing ? brand.text : brand.border,
-              border: 'none', borderRadius: 8,
-              color: isFormValid && !processing ? brand.white : '#999',
+              background: isFormValid && !processing ? '#6366F1' : '#E5E7EB',
+              border: 'none', borderRadius: 10,
+              color: isFormValid && !processing ? '#fff' : '#9CA3AF',
               cursor: isFormValid && !processing ? 'pointer' : 'not-allowed'
             }}>
               {processing ? 'Saving payment method...' : 'Confirm Booking'}
@@ -422,7 +422,7 @@ function CheckoutForm({ booking, brand, user, signUp }) {
                 <p style={{ fontWeight: 500, color: brand.text, marginBottom: 2 }}>{formatDate(booking.date)}</p>
                 <p style={{ fontSize: 14, color: brand.textLight }}>{booking.time_slot}</p>
                 {booking.frequency_name && booking.frequency_name !== 'One-Time' && (
-                  <p style={{ fontSize: 13, color: '#C9B037', fontWeight: 600, marginTop: 4 }}>
+                  <p style={{ fontSize: 13, color: '#6366F1', fontWeight: 600, marginTop: 4 }}>
                     Frequency: {booking.frequency_name}
                     {booking.frequency_discount_percent > 0 && ` (${booking.frequency_discount_percent}% off)`}
                   </p>
@@ -456,8 +456,8 @@ function CheckoutForm({ booking, brand, user, signUp }) {
                 {/* Frequency Discount */}
                 {hasFrequencyDiscount && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, fontSize: 14 }}>
-                    <span style={{ color: '#C9B037' }}>{booking.frequency_name} discount ({booking.frequency_discount_percent}%)</span>
-                    <span style={{ color: '#C9B037', fontWeight: 600 }}>-${frequencyDiscountAmount.toFixed(2)}</span>
+                    <span style={{ color: '#6366F1' }}>{booking.frequency_name} discount ({booking.frequency_discount_percent}%)</span>
+                    <span style={{ color: '#6366F1', fontWeight: 600 }}>-${frequencyDiscountAmount.toFixed(2)}</span>
                   </div>
                 )}
 
@@ -465,11 +465,11 @@ function CheckoutForm({ booking, brand, user, signUp }) {
                 <div style={{ marginTop: 16, marginBottom: 16, paddingTop: 16, borderTop: `1px solid ${brand.border}` }}>
                   <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: brand.text, marginBottom: 8 }}>Discount Code</label>
                   {appliedDiscount ? (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: '#D1FAE5', border: '1px solid #A7F3D0', borderRadius: 8 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2"><path d="M20 6L9 17l-5-5"/></svg>
-                        <span style={{ fontSize: 14, fontWeight: 600, color: '#16A34A' }}>{appliedDiscount.code}</span>
-                        <span style={{ fontSize: 12, color: '#15803D' }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2"><path d="M20 6L9 17l-5-5"/></svg>
+                        <span style={{ fontSize: 14, fontWeight: 600, color: '#059669' }}>{appliedDiscount.code}</span>
+                        <span style={{ fontSize: 12, color: '#059669' }}>
                           ({appliedDiscount.type === 'percent' ? `${appliedDiscount.value}% off` : `$${appliedDiscount.value} off`})
                         </span>
                       </div>
@@ -492,8 +492,8 @@ function CheckoutForm({ booking, brand, user, signUp }) {
                           disabled={!discountCode.trim() || applyingDiscount}
                           style={{
                             padding: '10px 16px', fontSize: 13, fontWeight: 600,
-                            background: discountCode.trim() && !applyingDiscount ? brand.text : brand.border,
-                            color: discountCode.trim() && !applyingDiscount ? brand.white : '#999',
+                            background: discountCode.trim() && !applyingDiscount ? '#111827' : brand.border,
+                            color: discountCode.trim() && !applyingDiscount ? '#fff' : '#999',
                             border: 'none', borderRadius: 8,
                             cursor: discountCode.trim() && !applyingDiscount ? 'pointer' : 'not-allowed',
                             whiteSpace: 'nowrap',
@@ -522,7 +522,7 @@ function CheckoutForm({ booking, brand, user, signUp }) {
                     {(hasFrequencyDiscount || appliedDiscount) && (
                       <span style={{ fontSize: 14, color: brand.textLight, textDecoration: 'line-through', marginRight: 8 }}>${baseSubtotal}</span>
                     )}
-                    <span style={{ fontSize: 20, fontWeight: 700, color: brand.text }}>${total.toFixed(2)}</span>
+                    <span style={{ fontSize: 20, fontWeight: 700, color: '#111827' }}>${total.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -536,24 +536,24 @@ function CheckoutForm({ booking, brand, user, signUp }) {
 
       {step === 'confirmation' && (
         <main style={{ maxWidth: 500, margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
-          <div style={{ width: 80, height: 80, background: brand.success, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+          <div style={{ width: 80, height: 80, background: '#059669', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
-          <h1 style={{ fontSize: 28, fontWeight: 600, color: brand.text, marginBottom: 8 }}>Booking Confirmed!</h1>
+          <h1 style={{ fontSize: 28, fontWeight: 700, color: '#111827', marginBottom: 8 }}>Booking Confirmed!</h1>
           <p style={{ color: brand.textLight, marginBottom: 32 }}>A confirmation has been sent to {booking.guest_email}</p>
 
-          <div style={{ background: brand.white, borderRadius: 12, border: `1px solid ${brand.border}`, padding: 24, textAlign: 'left', marginBottom: 32 }}>
+          <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', padding: 24, textAlign: 'left', marginBottom: 32 }}>
             <div style={{ marginBottom: 20 }}>
-              <p style={{ fontSize: 13, color: brand.textLight, marginBottom: 4 }}>PROPERTY</p>
-              <p style={{ fontWeight: 600, color: brand.text }}>{booking.building_name}</p>
+              <p style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>PROPERTY</p>
+              <p style={{ fontWeight: 600, color: '#111827' }}>{booking.building_name}</p>
               <p style={{ fontSize: 14, color: brand.textLight }}>Unit {booking.unit}</p>
             </div>
             <div style={{ marginBottom: 20 }}>
-              <p style={{ fontSize: 13, color: brand.textLight, marginBottom: 4 }}>DATE & TIME</p>
-              <p style={{ fontWeight: 600, color: brand.text }}>{formatDate(booking.date)}</p>
+              <p style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>DATE & TIME</p>
+              <p style={{ fontWeight: 600, color: '#111827' }}>{formatDate(booking.date)}</p>
               <p style={{ fontSize: 14, color: brand.textLight }}>{booking.time_slot}</p>
               {booking.frequency_name && booking.frequency_name !== 'One-Time' && (
-                <p style={{ fontSize: 13, color: '#C9B037', fontWeight: 600, marginTop: 4 }}>
+                <p style={{ fontSize: 13, color: '#6366F1', fontWeight: 600, marginTop: 4 }}>
                   {booking.frequency_name} frequency
                 </p>
               )}
@@ -567,9 +567,9 @@ function CheckoutForm({ booking, brand, user, signUp }) {
               </div>
             )}
             <div>
-              <p style={{ fontSize: 13, color: brand.textLight, marginBottom: 4 }}>TOTAL</p>
+              <p style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>TOTAL</p>
               {hasFrequencyDiscount && (
-                <p style={{ fontSize: 14, color: '#C9B037', marginBottom: 4 }}>
+                <p style={{ fontSize: 14, color: '#6366F1', marginBottom: 4 }}>
                   {booking.frequency_name} discount ({booking.frequency_discount_percent}%): -${frequencyDiscountAmount.toFixed(2)}
                 </p>
               )}
@@ -578,7 +578,7 @@ function CheckoutForm({ booking, brand, user, signUp }) {
                   Discount ({appliedDiscount.code}): -${codeDiscountAmount.toFixed(2)}
                 </p>
               )}
-              <p style={{ fontSize: 24, fontWeight: 700, color: brand.text }}>${total.toFixed(2)}</p>
+              <p style={{ fontSize: 24, fontWeight: 700, color: '#111827' }}>${total.toFixed(2)}</p>
               <p style={{ fontSize: 13, color: brand.textLight }}>Charged after service</p>
             </div>
           </div>
@@ -587,7 +587,7 @@ function CheckoutForm({ booking, brand, user, signUp }) {
           {!user && !accountCreated && (
             <div style={{ background: brand.white, borderRadius: 12, border: `1px solid ${brand.border}`, padding: 24, textAlign: 'left', marginBottom: 32 }}>
               <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={brand.gold} strokeWidth="2" style={{ marginBottom: 8 }}>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6366F1" strokeWidth="2" style={{ marginBottom: 8 }}>
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                   <circle cx="12" cy="7" r="4"/>
                 </svg>
@@ -596,7 +596,7 @@ function CheckoutForm({ booking, brand, user, signUp }) {
               </div>
 
               {accountError && (
-                <div style={{ padding: '10px 14px', background: '#FEE2E2', borderRadius: 8, marginBottom: 16, fontSize: 13, color: '#DC2626' }}>
+                <div style={{ padding: '10px 14px', background: '#FEE2E2', border: '1px solid #FECACA', borderRadius: 10, marginBottom: 16, fontSize: 13, color: '#DC2626' }}>
                   {accountError}
                 </div>
               )}
@@ -627,9 +627,9 @@ function CheckoutForm({ booking, brand, user, signUp }) {
                 disabled={creatingAccount || !password || !confirmPassword}
                 style={{
                   width: '100%', padding: '16px', fontSize: 15, fontWeight: 600,
-                  background: !creatingAccount && password && confirmPassword ? brand.text : brand.border,
-                  color: !creatingAccount && password && confirmPassword ? brand.white : '#999',
-                  border: 'none', borderRadius: 8,
+                  background: !creatingAccount && password && confirmPassword ? '#6366F1' : '#E5E7EB',
+                  color: !creatingAccount && password && confirmPassword ? '#fff' : '#9CA3AF',
+                  border: 'none', borderRadius: 10,
                   cursor: !creatingAccount && password && confirmPassword ? 'pointer' : 'not-allowed',
                   marginBottom: 12,
                 }}
@@ -661,11 +661,11 @@ function CheckoutForm({ booking, brand, user, signUp }) {
 
           <div className="confirmation-buttons" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             {(user || accountCreated) && (
-              <Link href="/dashboard" style={{ padding: '14px 28px', fontSize: 15, fontWeight: 600, background: brand.primary, border: 'none', borderRadius: 8, color: brand.text, textDecoration: 'none' }}>
+              <Link href="/dashboard" style={{ padding: '14px 28px', fontSize: 15, fontWeight: 600, background: '#6366F1', border: 'none', borderRadius: 10, color: '#fff', textDecoration: 'none' }}>
                 View My Bookings
               </Link>
             )}
-            <Link href="/book" style={{ padding: '14px 28px', fontSize: 15, fontWeight: 600, background: brand.white, border: `1px solid ${brand.border}`, borderRadius: 8, color: brand.text, textDecoration: 'none' }}>
+            <Link href="/book" style={{ padding: '14px 28px', fontSize: 15, fontWeight: 600, background: '#fff', border: '1px solid #E5E7EB', borderRadius: 10, color: '#111827', textDecoration: 'none' }}>
               Book Another
             </Link>
           </div>
@@ -675,24 +675,24 @@ function CheckoutForm({ booking, brand, user, signUp }) {
 
       {step === 'done' && (
         <main style={{ maxWidth: 500, margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
-          <div style={{ width: 80, height: 80, background: brand.success, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+          <div style={{ width: 80, height: 80, background: '#059669', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
-          <h1 style={{ fontSize: 28, fontWeight: 600, color: brand.text, marginBottom: 8 }}>You're All Set!</h1>
+          <h1 style={{ fontSize: 28, fontWeight: 700, color: '#111827', marginBottom: 8 }}>You're All Set!</h1>
           <p style={{ color: brand.textLight, marginBottom: 32 }}>Your booking confirmation has been sent to {booking.guest_email}</p>
 
-          <div style={{ background: brand.white, borderRadius: 12, border: `1px solid ${brand.border}`, padding: 24, textAlign: 'left', marginBottom: 32 }}>
+          <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', padding: 24, textAlign: 'left', marginBottom: 32 }}>
             <div style={{ marginBottom: 20 }}>
-              <p style={{ fontSize: 13, color: brand.textLight, marginBottom: 4 }}>PROPERTY</p>
-              <p style={{ fontWeight: 600, color: brand.text }}>{booking.building_name}</p>
+              <p style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>PROPERTY</p>
+              <p style={{ fontWeight: 600, color: '#111827' }}>{booking.building_name}</p>
               <p style={{ fontSize: 14, color: brand.textLight }}>Unit {booking.unit}</p>
             </div>
             <div style={{ marginBottom: 20 }}>
-              <p style={{ fontSize: 13, color: brand.textLight, marginBottom: 4 }}>DATE & TIME</p>
-              <p style={{ fontWeight: 600, color: brand.text }}>{formatDate(booking.date)}</p>
+              <p style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>DATE & TIME</p>
+              <p style={{ fontWeight: 600, color: '#111827' }}>{formatDate(booking.date)}</p>
               <p style={{ fontSize: 14, color: brand.textLight }}>{booking.time_slot}</p>
               {booking.frequency_name && booking.frequency_name !== 'One-Time' && (
-                <p style={{ fontSize: 13, color: '#C9B037', fontWeight: 600, marginTop: 4 }}>
+                <p style={{ fontSize: 13, color: '#6366F1', fontWeight: 600, marginTop: 4 }}>
                   {booking.frequency_name} frequency
                 </p>
               )}
@@ -706,22 +706,22 @@ function CheckoutForm({ booking, brand, user, signUp }) {
               </div>
             )}
             <div>
-              <p style={{ fontSize: 13, color: brand.textLight, marginBottom: 4 }}>TOTAL</p>
+              <p style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>TOTAL</p>
               {hasFrequencyDiscount && (
-                <p style={{ fontSize: 14, color: '#C9B037', marginBottom: 4 }}>
+                <p style={{ fontSize: 14, color: '#6366F1', marginBottom: 4 }}>
                   {booking.frequency_name} discount: -${frequencyDiscountAmount.toFixed(2)}
                 </p>
               )}
-              <p style={{ fontSize: 24, fontWeight: 700, color: brand.text }}>${total.toFixed(2)}</p>
+              <p style={{ fontSize: 24, fontWeight: 700, color: '#111827' }}>${total.toFixed(2)}</p>
               <p style={{ fontSize: 13, color: brand.textLight }}>Charged after service</p>
             </div>
           </div>
 
           <div className="confirmation-buttons" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/book" style={{ padding: '14px 28px', fontSize: 15, fontWeight: 600, background: brand.primary, border: 'none', borderRadius: 8, color: brand.text, textDecoration: 'none' }}>
+            <Link href="/book" style={{ padding: '14px 28px', fontSize: 15, fontWeight: 600, background: '#6366F1', border: 'none', borderRadius: 10, color: '#fff', textDecoration: 'none' }}>
               Book Another Service
             </Link>
-            <Link href="/" style={{ padding: '14px 28px', fontSize: 15, fontWeight: 600, background: brand.white, border: `1px solid ${brand.border}`, borderRadius: 8, color: brand.text, textDecoration: 'none' }}>
+            <Link href="/" style={{ padding: '14px 28px', fontSize: 15, fontWeight: 600, background: '#fff', border: '1px solid #E5E7EB', borderRadius: 10, color: '#111827', textDecoration: 'none' }}>
               Back to Home
             </Link>
           </div>
@@ -738,9 +738,9 @@ export default function PaymentFlow() {
   const [booking, setBooking] = useState(null);
 
   const brand = {
-    primary: '#B8C5F2', text: '#1a1a1a', textLight: '#666',
-    border: '#e0e0e0', bg: '#fafafa', white: '#ffffff', success: '#22c55e',
-    gold: '#C9B037', goldDark: '#A69028',
+    primary: '#6366F1', text: '#111827', textLight: '#6B7280',
+    border: '#E5E7EB', bg: '#F9FAFB', white: '#ffffff', success: '#059669',
+    gold: '#6366F1', goldDark: '#4F46E5',
   };
 
   useEffect(() => {
@@ -762,10 +762,10 @@ export default function PaymentFlow() {
 
   return (
     <div style={{ minHeight: '100vh', background: brand.bg }}>
-      <header className="checkout-header" style={{ padding: '16px 32px', background: brand.white, borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+      <header className="checkout-header" style={{ padding: '16px 32px', background: brand.white, borderBottom: `1px solid ${brand.border}`, boxShadow: '0 1px 3px rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
           <Logo />
-          <span style={{ fontSize: 24, fontWeight: 600, color: brand.text }}>BetterView</span>
+          <span style={{ fontSize: 24, fontWeight: 600, color: '#111827' }}>BetterView</span>
         </Link>
         <div style={{ fontSize: 14, color: brand.textLight }}>Secure checkout</div>
       </header>

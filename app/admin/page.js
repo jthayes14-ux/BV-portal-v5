@@ -186,6 +186,7 @@ export default function AdminPanel() {
   const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
   const [chargingBookingId, setChargingBookingId] = useState(null);
   const [crudError, setCrudError] = useState('');
+  const [loadError, setLoadError] = useState(null);
 
   // Slide panel state for editing
   const [slideOpen, setSlideOpen] = useState(false);
@@ -205,39 +206,44 @@ export default function AdminPanel() {
   }, [authLoading, user]);
 
   const loadAll = async () => {
-    const [nRes, bRes, fpRes, ulRes, aoRes, bkRes, wRes, fqRes, upRes, avRes, bdRes, soRes, svcRes] = await Promise.all([
-      supabase.from('neighborhoods').select('*').order('name'),
-      supabase.from('buildings').select('*').order('name'),
-      supabase.from('floor_plans').select('*').order('name'),
-      supabase.from('unit_lines').select('*').order('line_number'),
-      supabase.from('add_ons').select('*').order('name'),
-      supabase.from('bookings').select('*').order('booking_date', { ascending: false }).limit(10000),
-      supabase.from('workers').select('*').order('name'),
-      supabase.from('frequencies').select('*').order('sort_order'),
-      supabase.from('user_profiles').select('*').order('created_at', { ascending: false }),
-      supabase.from('availability').select('*').order('day_of_week'),
-      supabase.from('blocked_dates').select('*').order('blocked_date'),
-      supabase.from('schedule_overrides').select('*').order('override_date'),
-      supabase.from('site_settings').select('*'),
-    ]);
-    setNeighborhoods(nRes.data || []);
-    setBuildings(bRes.data || []);
-    setFloorPlans(fpRes.data || []);
-    setUnitLines(ulRes.data || []);
-    setAddOns(aoRes.data || []);
-    setBookings(bkRes.data || []);
-    setWorkers(wRes.data || []);
-    setFrequencies(fqRes.data || []);
-    setUserProfiles(upRes.data || []);
-    setAvailability(avRes.data || []);
-    setBlockedDates(bdRes.data || []);
-    setScheduleOverrides(soRes.data || []);
-    const allSettings = svcRes.data || [];
-    const addonVisible = allSettings.find(s => s.key === 'addons_section_visible');
-    if (addonVisible) setAddonsSectionVisible(addonVisible.value === 'true');
-    const settingsObj = {};
-    allSettings.forEach(s => { settingsObj[s.key] = s.value; });
-    setServiceSettings(settingsObj);
+    try {
+      const [nRes, bRes, fpRes, ulRes, aoRes, bkRes, wRes, fqRes, upRes, avRes, bdRes, soRes, svcRes] = await Promise.all([
+        supabase.from('neighborhoods').select('*').order('name'),
+        supabase.from('buildings').select('*').order('name'),
+        supabase.from('floor_plans').select('*').order('name'),
+        supabase.from('unit_lines').select('*').order('line_number'),
+        supabase.from('add_ons').select('*').order('name'),
+        supabase.from('bookings').select('*').order('booking_date', { ascending: false }).limit(10000),
+        supabase.from('workers').select('*').order('name'),
+        supabase.from('frequencies').select('*').order('sort_order'),
+        supabase.from('user_profiles').select('*').order('created_at', { ascending: false }),
+        supabase.from('availability').select('*').order('day_of_week'),
+        supabase.from('blocked_dates').select('*').order('blocked_date'),
+        supabase.from('schedule_overrides').select('*').order('override_date'),
+        supabase.from('site_settings').select('*'),
+      ]);
+      setNeighborhoods(nRes.data || []);
+      setBuildings(bRes.data || []);
+      setFloorPlans(fpRes.data || []);
+      setUnitLines(ulRes.data || []);
+      setAddOns(aoRes.data || []);
+      setBookings(bkRes.data || []);
+      setWorkers(wRes.data || []);
+      setFrequencies(fqRes.data || []);
+      setUserProfiles(upRes.data || []);
+      setAvailability(avRes.data || []);
+      setBlockedDates(bdRes.data || []);
+      setScheduleOverrides(soRes.data || []);
+      const allSettings = svcRes.data || [];
+      const addonVisible = allSettings.find(s => s.key === 'addons_section_visible');
+      if (addonVisible) setAddonsSectionVisible(addonVisible.value === 'true');
+      const settingsObj = {};
+      allSettings.forEach(s => { settingsObj[s.key] = s.value; });
+      setServiceSettings(settingsObj);
+    } catch (err) {
+      console.error('Failed to load admin data:', err);
+      setLoadError(err.message || 'Failed to load data');
+    }
     setDataLoading(false);
   };
 
@@ -648,6 +654,18 @@ export default function AdminPanel() {
         <div style={{ textAlign: 'center' }}>
           <div className="admin-spinner" />
           <p style={{ color: 'var(--av-text-muted)', fontSize: 14 }}>Loading admin panel...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="admin-loading">
+        <div style={{ textAlign: 'center', maxWidth: 400 }}>
+          <p style={{ color: 'var(--av-danger, #dc2626)', fontSize: 16, fontWeight: 600, marginBottom: 8 }}>Failed to load admin panel</p>
+          <p style={{ color: 'var(--av-text-muted, #9CA3AF)', fontSize: 14, marginBottom: 16 }}>{loadError}</p>
+          <button onClick={() => { setLoadError(null); setDataLoading(true); loadAll(); }} style={{ padding: '8px 20px', fontSize: 14, background: 'var(--av-navy, #1B2B5A)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>Retry</button>
         </div>
       </div>
     );

@@ -61,6 +61,8 @@ function BookingFlowInner() {
   const [allWorkers, setAllWorkers] = useState([]);
   const [assignedWorkerId, setAssignedWorkerId] = useState(null);
   const [maxDate, setMaxDate] = useState('');
+  const [calendarMonth, setCalendarMonth] = useState(new Date().getMonth());
+  const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
 
   // Contact info fields
   const [firstName, setFirstName] = useState('');
@@ -805,37 +807,184 @@ function BookingFlowInner() {
               </div>
             )}
 
-            {/* Date */}
+            {/* Date & Time */}
             {unitReady && (
               <div style={{ animation: 'fadeIn 0.4s ease' }}>
                 <label style={labelStyle}>Preferred Date</label>
-                <input type="date" value={date} onChange={(e) => { setDate(e.target.value); setTime(''); }} onFocus={() => setFocusedField('date')} onBlur={() => setFocusedField(null)} min={today} max={maxDate || undefined} style={getInputStyle('date')} />
-              </div>
-            )}
+                {(() => {
+                  const todayObj = new Date();
+                  todayObj.setHours(0, 0, 0, 0);
+                  const maxDateObj = maxDate ? new Date(maxDate + 'T00:00:00') : null;
 
-            {/* Time */}
-            {date && (
-              <div style={{ animation: 'fadeIn 0.4s ease' }}>
-                <label style={labelStyle}>Preferred Time</label>
-                {slotsLoading ? (
-                  <div style={{ padding: '18px 20px', fontSize: 14, color: brand.textLight, background: brand.bgCard, borderRadius: 12, border: `1px solid ${brand.border}` }}>
-                    Checking availability...
-                  </div>
-                ) : slotsMessage ? (
-                  <div style={{ padding: '18px 20px', fontSize: 14, color: '#92400E', background: '#FFFBEB', borderRadius: 12, border: '1px solid #FDE68A' }}>
-                    {slotsMessage}
-                  </div>
-                ) : (
-                  <select value={time} onChange={(e) => {
-                    setTime(e.target.value);
-                    // Auto-assign first available worker for this slot
-                    const slot = availableSlots.find(s => s.label === e.target.value);
-                    setAssignedWorkerId(slot && slot.workerIds && slot.workerIds.length > 0 ? slot.workerIds[0] : null);
-                  }} onFocus={() => setFocusedField('time')} onBlur={() => setFocusedField(null)} style={getSelectStyle('time')}>
-                    <option value="">Select available time</option>
-                    {availableSlots.map(slot => <option key={slot.label} value={slot.label}>{slot.label}</option>)}
-                  </select>
-                )}
+                  const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+                  const firstDayOfWeek = new Date(calendarYear, calendarMonth, 1).getDay();
+                  const dayNames = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+                  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+                  const canGoPrev = !(calendarYear === todayObj.getFullYear() && calendarMonth === todayObj.getMonth());
+                  const canGoNext = !maxDateObj || new Date(calendarYear, calendarMonth + 1, 1) <= maxDateObj;
+
+                  const cells = [];
+                  for (let i = 0; i < firstDayOfWeek; i++) cells.push(null);
+                  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+
+                  return (
+                    <div style={{ background: brand.bgCard, border: `1px solid ${brand.border}`, borderRadius: 16, padding: '20px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)' }}>
+                      {/* Month navigation */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                        <button
+                          onClick={() => {
+                            if (!canGoPrev) return;
+                            if (calendarMonth === 0) { setCalendarMonth(11); setCalendarYear(calendarYear - 1); }
+                            else setCalendarMonth(calendarMonth - 1);
+                          }}
+                          disabled={!canGoPrev}
+                          style={{
+                            width: 36, height: 36, borderRadius: 10, border: 'none',
+                            background: canGoPrev ? brand.primaryLight : 'transparent',
+                            cursor: canGoPrev ? 'pointer' : 'default',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            opacity: canGoPrev ? 1 : 0.25, transition: 'all 0.15s',
+                          }}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={brand.text} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                        </button>
+                        <span style={{ fontSize: 16, fontWeight: 600, color: brand.text, letterSpacing: '-0.01em', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
+                          {monthNames[calendarMonth]} {calendarYear}
+                        </span>
+                        <button
+                          onClick={() => {
+                            if (!canGoNext) return;
+                            if (calendarMonth === 11) { setCalendarMonth(0); setCalendarYear(calendarYear + 1); }
+                            else setCalendarMonth(calendarMonth + 1);
+                          }}
+                          disabled={!canGoNext}
+                          style={{
+                            width: 36, height: 36, borderRadius: 10, border: 'none',
+                            background: canGoNext ? brand.primaryLight : 'transparent',
+                            cursor: canGoNext ? 'pointer' : 'default',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            opacity: canGoNext ? 1 : 0.25, transition: 'all 0.15s',
+                          }}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={brand.text} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                      </div>
+
+                      {/* Day name headers */}
+                      <div className="cal-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 0, marginBottom: 4 }}>
+                        {dayNames.map(d => (
+                          <div key={d} style={{ textAlign: 'center', fontSize: 11, fontWeight: 600, color: brand.textMuted, padding: '6px 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            {d}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Day cells */}
+                      <div className="cal-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 3 }}>
+                        {cells.map((day, i) => {
+                          if (day === null) return <div key={`empty-${i}`} />;
+
+                          const dateStr = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                          const cellDate = new Date(calendarYear, calendarMonth, day);
+                          const isPast = cellDate < todayObj;
+                          const isBeyondMax = maxDateObj && cellDate > maxDateObj;
+                          const disabled = isPast || isBeyondMax;
+                          const isSelected = date === dateStr;
+                          const isToday = cellDate.getTime() === todayObj.getTime();
+
+                          return (
+                            <button
+                              key={day}
+                              disabled={disabled}
+                              onClick={() => { setDate(dateStr); setTime(''); }}
+                              className="cal-day"
+                              style={{
+                                width: '100%', aspectRatio: '1', border: 'none',
+                                borderRadius: 10,
+                                background: isSelected ? '#7B8EC8' : 'transparent',
+                                color: isSelected ? '#fff' : disabled ? '#D1D5DB' : brand.text,
+                                fontSize: 14, fontWeight: isSelected || isToday ? 700 : 500,
+                                cursor: disabled ? 'default' : 'pointer',
+                                transition: 'all 0.15s ease',
+                                position: 'relative',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+                                boxShadow: isSelected ? '0 2px 8px rgba(123, 142, 200, 0.4)' : 'none',
+                                transform: isSelected ? 'scale(1.08)' : 'scale(1)',
+                              }}
+                            >
+                              {day}
+                              {isToday && !isSelected && (
+                                <div style={{ position: 'absolute', bottom: 3, left: '50%', transform: 'translateX(-50%)', width: 4, height: 4, borderRadius: '50%', background: '#7B8EC8' }} />
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Time slot panel — expands below calendar when date is selected */}
+                      <div className="cal-time-panel" style={{
+                        overflow: 'hidden',
+                        maxHeight: date ? 200 : 0,
+                        opacity: date ? 1 : 0,
+                        marginTop: date ? 16 : 0,
+                        paddingTop: date ? 16 : 0,
+                        borderTop: date ? `1px solid ${brand.borderLight}` : 'none',
+                        transition: 'max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, margin-top 0.3s ease, padding-top 0.3s ease',
+                      }}>
+                        {date && (
+                          <>
+                            {slotsLoading ? (
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '12px 0', color: brand.textLight }}>
+                                <div style={{ width: 16, height: 16, border: `2px solid ${brand.borderLight}`, borderTopColor: '#7B8EC8', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
+                                <span style={{ fontSize: 14, fontWeight: 500 }}>Checking availability...</span>
+                              </div>
+                            ) : slotsMessage ? (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', background: '#FFFBEB', borderRadius: 10, border: '1px solid #FDE68A' }}>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                <span style={{ fontSize: 14, color: '#92400E', fontWeight: 500 }}>{slotsMessage}</span>
+                              </div>
+                            ) : (
+                              <div>
+                                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: brand.textMuted, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                                  Available times for {new Date(date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                                </label>
+                                <div style={{ position: 'relative' }}>
+                                  <select
+                                    value={time}
+                                    onChange={(e) => {
+                                      setTime(e.target.value);
+                                      const slot = availableSlots.find(s => s.label === e.target.value);
+                                      setAssignedWorkerId(slot && slot.workerIds && slot.workerIds.length > 0 ? slot.workerIds[0] : null);
+                                    }}
+                                    style={{
+                                      width: '100%', padding: '14px 44px 14px 16px', fontSize: 15, fontWeight: 600,
+                                      border: time ? '2px solid #7B8EC8' : `1px solid ${brand.border}`,
+                                      borderRadius: 12, background: time ? '#EEF1FC' : brand.bgCard,
+                                      color: time ? brand.text : brand.textLight,
+                                      cursor: 'pointer', appearance: 'none', outline: 'none',
+                                      transition: 'all 0.2s ease', boxSizing: 'border-box',
+                                      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+                                    }}
+                                  >
+                                    <option value="">Select a time</option>
+                                    {availableSlots.map(slot => (
+                                      <option key={slot.label} value={slot.label}>{slot.label}</option>
+                                    ))}
+                                  </select>
+                                  <div style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={time ? '#7B8EC8' : brand.textMuted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             )}
 
@@ -1005,8 +1154,19 @@ function BookingFlowInner() {
           from { opacity: 0; transform: translateY(8px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.7); cursor: pointer; }
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
         select option { padding: 12px; }
+        .cal-day:not(:disabled):hover {
+          background: #E8EDFC !important;
+        }
+        @media (max-width: 480px) {
+          .cal-grid { gap: 1px !important; }
+          .cal-day { font-size: 13px !important; border-radius: 8px !important; }
+          .cal-time-panel { max-height: 220px !important; }
+        }
       `}</style>
     </div>
   );

@@ -783,7 +783,7 @@ export default function CustomerDashboard() {
                     </div>
 
                     {/* Day name headers */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 0, marginBottom: 4 }}>
+                    <div className="reschedule-cal-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 0, marginBottom: 4 }}>
                       {dayNames.map(d => (
                         <div key={d} style={{ textAlign: 'center', fontSize: 11, fontWeight: 600, color: '#A0AEC0', padding: '4px 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                           {d}
@@ -792,7 +792,7 @@ export default function CustomerDashboard() {
                     </div>
 
                     {/* Day cells */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
+                    <div className="reschedule-cal-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
                       {cells.map((day, i) => {
                         if (day === null) return <div key={`empty-${i}`} />;
 
@@ -807,6 +807,7 @@ export default function CustomerDashboard() {
                         return (
                           <button
                             key={day}
+                            className="reschedule-cal-day"
                             disabled={disabled}
                             onClick={() => {
                               setRescheduleDate(dateStr);
@@ -940,6 +941,13 @@ export default function CustomerDashboard() {
         @keyframes spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
+        }
+        .reschedule-cal-day:not(:disabled):hover {
+          background: #EEF1FC !important;
+        }
+        @media (max-width: 480px) {
+          .reschedule-cal-grid { gap: 1px !important; }
+          .reschedule-cal-day { font-size: 13px !important; border-radius: 8px !important; }
         }
       `}</style>
     </div>

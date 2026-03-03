@@ -33,12 +33,17 @@ export default function CustomerDashboard() {
   const [rescheduling, setRescheduling] = useState(false);
   const [rescheduleError, setRescheduleError] = useState('');
 
-  const timeSlots = [
-    '8:00 AM – 11:00 AM',
-    '11:00 AM – 2:00 PM',
-    '2:00 PM – 5:00 PM',
-    '5:00 PM – 8:00 PM',
-  ];
+  // Availability state (same system as booking page)
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+  const [slotsMessage, setSlotsMessage] = useState('');
+  const [serviceSettings, setServiceSettings] = useState({});
+  const [allAvailability, setAllAvailability] = useState([]);
+  const [allBlockedDates, setAllBlockedDates] = useState([]);
+  const [allOverrides, setAllOverrides] = useState([]);
+  const [allWorkers, setAllWorkers] = useState([]);
+  const [assignedWorkerId, setAssignedWorkerId] = useState(null);
+  const [maxDate, setMaxDate] = useState('');
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -49,12 +54,32 @@ export default function CustomerDashboard() {
   }, [authLoading, user]);
 
   const loadData = async () => {
-    const [bkRes, fqRes] = await Promise.all([
+    const [bkRes, fqRes, svcRes, avRes, bdRes, soRes, wRes] = await Promise.all([
       supabase.from('bookings').select('*').eq('user_id', user.id).order('booking_date', { ascending: false }).limit(10000),
       supabase.from('frequencies').select('*').order('sort_order'),
+      supabase.from('site_settings').select('*'),
+      supabase.from('availability').select('*').order('day_of_week'),
+      supabase.from('blocked_dates').select('*').order('blocked_date'),
+      supabase.from('schedule_overrides').select('*').order('override_date'),
+      supabase.from('workers').select('*').eq('archived', false).order('name'),
     ]);
     setBookings(bkRes.data || []);
     setFrequencies(fqRes.data || []);
+
+    const allSettings = svcRes.data || [];
+    const settingsObj = {};
+    allSettings.forEach(s => { settingsObj[s.key] = s.value; });
+    setServiceSettings(settingsObj);
+    setAllAvailability(avRes.data || []);
+    setAllBlockedDates(bdRes.data || []);
+    setAllOverrides(soRes.data || []);
+    setAllWorkers(wRes.data || []);
+
+    const advanceDays = Number(settingsObj.advance_booking_days) || 30;
+    const maxD = new Date();
+    maxD.setDate(maxD.getDate() + advanceDays);
+    setMaxDate(maxD.toISOString().split('T')[0]);
+
     setDataLoading(false);
   };
 
@@ -69,12 +94,203 @@ export default function CustomerDashboard() {
 
   const today = new Date().toISOString().split('T')[0];
 
+  const formatHour = (hour) => {
+    const h = hour % 12 || 12;
+    const ampm = hour < 12 ? 'AM' : 'PM';
+    return `${h}:00 ${ampm}`;
+  };
+
+  const computeAvailableSlots = async (selectedDate) => {
+    setSlotsLoading(true);
+    setSlotsMessage('');
+    setAvailableSlots([]);
+    setRescheduleTime('');
+    setAssignedWorkerId(null);
+
+    const slotDuration = Number(serviceSettings.slot_duration_minutes) || 60;
+    const buffer = Number(serviceSettings.buffer_between_jobs_minutes) || 15;
+    const minNoticeHours = Number(serviceSettings.minimum_notice_hours) || 24;
+    const advanceDays = Number(serviceSettings.advance_booking_days) || 30;
+
+    const dateObj = new Date(selectedDate + 'T00:00:00');
+    const now = new Date();
+
+    const minNoticeTime = new Date(now.getTime() + minNoticeHours * 60 * 60 * 1000);
+    const endOfSelectedDay = new Date(selectedDate + 'T23:59:59');
+    if (endOfSelectedDay < minNoticeTime) {
+      setSlotsMessage('This date is too soon — minimum notice required.');
+      setSlotsLoading(false);
+      return;
+    }
+
+    const maxAdvanceDate = new Date();
+    maxAdvanceDate.setDate(maxAdvanceDate.getDate() + advanceDays);
+    if (dateObj > maxAdvanceDate) {
+      setSlotsMessage('This date is too far in advance.');
+      setSlotsLoading(false);
+      return;
+    }
+
+    const jsDay = dateObj.getDay();
+    const dbDayOfWeek = jsDay === 0 ? 6 : jsDay - 1;
+
+    const useWorkerSchedules = allWorkers.length > 0;
+
+    if (useWorkerSchedules) {
+      const { data: existingBookings } = await supabase
+        .from('bookings')
+        .select('booking_time, worker_id')
+        .eq('booking_date', selectedDate)
+        .in('status', ['upcoming', 'scheduled']);
+      const bookedSlots = existingBookings || [];
+
+      // Exclude the current booking being rescheduled from conflicts
+      const currentBookingId = rescheduleBooking?.id;
+      const filteredBookedSlots = bookedSlots.filter(b => {
+        // We can't filter by ID from the query since we only selected booking_time and worker_id,
+        // but we need to allow the booking's own slot. We'll handle this by not filtering here
+        // since we fetched minimal fields. The booking being rescheduled will move to a new date
+        // so it won't conflict on a different date. If same date, its old time should still be
+        // available since we're moving away from it.
+        return true;
+      });
+
+      const slotMap = {};
+
+      for (const worker of allWorkers) {
+        const override = allOverrides.find(o => o.worker_id === worker.id && o.override_date === selectedDate);
+        let startTime, endTime, isAvailable;
+
+        if (override) {
+          isAvailable = override.is_available;
+          startTime = override.start_time;
+          endTime = override.end_time;
+        } else {
+          const weeklyAvail = allAvailability.find(a => a.worker_id === worker.id && a.day_of_week === dbDayOfWeek);
+          if (weeklyAvail) {
+            if (!weeklyAvail.is_active) continue;
+            isAvailable = true;
+            startTime = weeklyAvail.start_time;
+            endTime = weeklyAvail.end_time;
+          } else {
+            isAvailable = true;
+            startTime = '09:00';
+            endTime = '16:00';
+          }
+        }
+
+        if (!isAvailable) continue;
+
+        const blocked = allBlockedDates.filter(bd => bd.worker_id === worker.id && bd.blocked_date === selectedDate);
+        if (blocked.some(bd => bd.all_day)) continue;
+
+        const startHour = parseInt(startTime?.slice(0, 2) || '9', 10);
+        const startMin = parseInt(startTime?.slice(3, 5) || '0', 10);
+        const endHour = parseInt(endTime?.slice(0, 2) || '16', 10);
+        const endMin = parseInt(endTime?.slice(3, 5) || '0', 10);
+        const startMinutes = startHour * 60 + startMin;
+        const endMinutes = endHour * 60 + endMin;
+
+        const workerBookings = filteredBookedSlots.filter(b => b.worker_id === worker.id);
+        const bookedRanges = workerBookings.map(b => {
+          const match = (b.booking_time || '').match(/^(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+          if (!match) return null;
+          let h = parseInt(match[1], 10);
+          const m = parseInt(match[2], 10);
+          const ampm = match[3].toUpperCase();
+          if (ampm === 'PM' && h !== 12) h += 12;
+          if (ampm === 'AM' && h === 12) h = 0;
+          const s = h * 60 + m;
+          return { start: s, end: s + slotDuration + buffer };
+        }).filter(Boolean);
+
+        const partialBlocks = blocked.filter(bd => !bd.all_day).map(bd => {
+          const bStart = parseInt(bd.start_time?.slice(0, 2) || '0', 10) * 60 + parseInt(bd.start_time?.slice(3, 5) || '0', 10);
+          const bEnd = parseInt(bd.end_time?.slice(0, 2) || '0', 10) * 60 + parseInt(bd.end_time?.slice(3, 5) || '0', 10);
+          return { start: bStart, end: bEnd };
+        });
+
+        for (let slotStart = startMinutes; slotStart + slotDuration <= endMinutes; slotStart += 60) {
+          const slotEnd = slotStart + slotDuration;
+
+          if (selectedDate === now.toISOString().split('T')[0]) {
+            const slotDateTime = new Date(selectedDate + 'T00:00:00');
+            slotDateTime.setMinutes(slotDateTime.getMinutes() + slotStart);
+            if (slotDateTime < minNoticeTime) continue;
+          }
+
+          if (bookedRanges.some(r => slotStart < r.end && slotEnd > r.start)) continue;
+          if (partialBlocks.some(r => slotStart < r.end && slotEnd > r.start)) continue;
+
+          const hour = Math.floor(slotStart / 60);
+          const label = formatHour(hour);
+          if (!slotMap[label]) slotMap[label] = [];
+          slotMap[label].push(worker.id);
+        }
+      }
+
+      const slots = Object.entries(slotMap)
+        .map(([label, workerIds]) => ({ label, workerIds }))
+        .sort((a, b) => {
+          const parseTime = (str) => {
+            const m = str.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+            if (!m) return 0;
+            let h = parseInt(m[1], 10);
+            if (m[3].toUpperCase() === 'PM' && h !== 12) h += 12;
+            if (m[3].toUpperCase() === 'AM' && h === 12) h = 0;
+            return h * 60 + parseInt(m[2], 10);
+          };
+          return parseTime(a.label) - parseTime(b.label);
+        });
+
+      if (slots.length === 0) {
+        setSlotsMessage('No times available for this date');
+      }
+      setAvailableSlots(slots);
+    } else {
+      const businessStart = 9 * 60;
+      const businessEnd = 16 * 60;
+      const slots = [];
+
+      for (let slotStart = businessStart; slotStart + slotDuration <= businessEnd; slotStart += 60) {
+        if (selectedDate === now.toISOString().split('T')[0]) {
+          const slotDateTime = new Date(selectedDate + 'T00:00:00');
+          slotDateTime.setMinutes(slotDateTime.getMinutes() + slotStart);
+          if (slotDateTime < minNoticeTime) continue;
+        }
+        const hour = Math.floor(slotStart / 60);
+        slots.push({ label: formatHour(hour), workerIds: [] });
+      }
+
+      if (slots.length === 0) {
+        setSlotsMessage('No times available for this date');
+      }
+      setAvailableSlots(slots);
+    }
+
+    setSlotsLoading(false);
+  };
+
   const openReschedule = (booking) => {
     setRescheduleBooking(booking);
     setRescheduleDate('');
     setRescheduleTime('');
     setRescheduleError('');
+    setAvailableSlots([]);
+    setSlotsMessage('');
+    setAssignedWorkerId(null);
   };
+
+  // Compute available slots when reschedule date changes
+  useEffect(() => {
+    if (!rescheduleDate) {
+      setAvailableSlots([]);
+      setSlotsMessage('');
+      setAssignedWorkerId(null);
+      return;
+    }
+    computeAvailableSlots(rescheduleDate);
+  }, [rescheduleDate, allAvailability, allBlockedDates, allOverrides, allWorkers, serviceSettings]);
 
   const handleReschedule = async () => {
     if (!rescheduleDate || !rescheduleTime) {
@@ -84,9 +300,12 @@ export default function CustomerDashboard() {
     setRescheduling(true);
     setRescheduleError('');
 
+    const updateData = { booking_date: rescheduleDate, booking_time: rescheduleTime };
+    if (assignedWorkerId) updateData.worker_id = assignedWorkerId;
+
     const { error } = await supabase
       .from('bookings')
-      .update({ booking_date: rescheduleDate, booking_time: rescheduleTime })
+      .update(updateData)
       .eq('id', rescheduleBooking.id);
 
     if (error) {
@@ -97,7 +316,7 @@ export default function CustomerDashboard() {
 
     setBookings(bookings.map(b =>
       b.id === rescheduleBooking.id
-        ? { ...b, booking_date: rescheduleDate, booking_time: rescheduleTime }
+        ? { ...b, booking_date: rescheduleDate, booking_time: rescheduleTime, ...(assignedWorkerId ? { worker_id: assignedWorkerId } : {}) }
         : b
     ));
     setRescheduleBooking(null);
@@ -507,8 +726,9 @@ export default function CustomerDashboard() {
                 <input
                   type="date"
                   value={rescheduleDate}
-                  onChange={(e) => setRescheduleDate(e.target.value)}
+                  onChange={(e) => { setRescheduleDate(e.target.value); setRescheduleTime(''); }}
                   min={today}
+                  max={maxDate || undefined}
                   style={{
                     width: '100%', padding: '16px 18px', fontSize: 15,
                     border: '1.5px solid #e5e5e5', borderRadius: 14,
@@ -522,27 +742,42 @@ export default function CustomerDashboard() {
               </div>
 
               {/* New Time */}
-              <div style={{ marginBottom: 28 }}>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#2D3748', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>New Time</label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                  {timeSlots.map(slot => (
-                    <button
-                      key={slot}
-                      onClick={() => setRescheduleTime(slot)}
-                      style={{
-                        padding: '14px 10px', fontSize: 13, fontWeight: 600,
-                        border: rescheduleTime === slot ? '2px solid #9AA8E0' : '1.5px solid #e5e5e5',
-                        borderRadius: 14, cursor: 'pointer',
-                        background: rescheduleTime === slot ? '#9AA8E0' : '#fff',
-                        color: rescheduleTime === slot ? '#fff' : '#2D3748',
-                        transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-                      }}
-                    >
-                      {slot}
-                    </button>
-                  ))}
+              {rescheduleDate && (
+                <div style={{ marginBottom: 28 }}>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#2D3748', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>New Time</label>
+                  {slotsLoading ? (
+                    <div style={{ padding: '16px 18px', fontSize: 14, color: '#718096', background: '#F8FAFF', borderRadius: 14, border: '1px solid #E8EDFC', textAlign: 'center' }}>
+                      Checking availability...
+                    </div>
+                  ) : slotsMessage ? (
+                    <div style={{ padding: '16px 18px', fontSize: 14, color: '#92400E', background: '#FFFBEB', borderRadius: 14, border: '1px solid #FDE68A' }}>
+                      {slotsMessage}
+                    </div>
+                  ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                      {availableSlots.map(slot => (
+                        <button
+                          key={slot.label}
+                          onClick={() => {
+                            setRescheduleTime(slot.label);
+                            setAssignedWorkerId(slot.workerIds && slot.workerIds.length > 0 ? slot.workerIds[0] : null);
+                          }}
+                          style={{
+                            padding: '14px 10px', fontSize: 13, fontWeight: 600,
+                            border: rescheduleTime === slot.label ? '2px solid #9AA8E0' : '1.5px solid #e5e5e5',
+                            borderRadius: 14, cursor: 'pointer',
+                            background: rescheduleTime === slot.label ? '#9AA8E0' : '#fff',
+                            color: rescheduleTime === slot.label ? '#fff' : '#2D3748',
+                            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                          }}
+                        >
+                          {slot.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
+              )}
 
               {rescheduleError && (
                 <div style={{

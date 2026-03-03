@@ -5,15 +5,49 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../lib/useAuth';
 
-function Logo() {
+function Logo({ light }) {
+  const c = light ? '#fff' : '#B8C5F2';
   return (
     <div style={{ display: 'flex', gap: 3 }}>
-      <div style={{ width: 4, height: 22, background: '#B8C5F2', borderRadius: 1 }} />
-      <div style={{ width: 4, height: 22, background: '#B8C5F2', borderRadius: 1 }} />
-      <div style={{ width: 4, height: 22, background: '#B8C5F2', borderRadius: 1 }} />
+      <div style={{ width: 4, height: 22, background: c, borderRadius: 2 }} />
+      <div style={{ width: 4, height: 22, background: c, borderRadius: 2 }} />
+      <div style={{ width: 4, height: 22, background: c, borderRadius: 2 }} />
     </div>
   );
 }
+
+// Sidebar icons (18x18 SVGs)
+const SidebarIcon = ({ name }) => {
+  const icons = {
+    bookings: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="m9 16 2 2 4-4"/></svg>,
+    customers: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+    frequencies: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>,
+    neighborhoods: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>,
+    buildings: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><line x1="8" y1="6" x2="8" y2="6.01"/><line x1="12" y1="6" x2="12" y2="6.01"/><line x1="16" y1="6" x2="16" y2="6.01"/><line x1="8" y1="10" x2="8" y2="10.01"/><line x1="12" y1="10" x2="12" y2="10.01"/><line x1="16" y1="10" x2="16" y2="10.01"/><line x1="8" y1="14" x2="8" y2="14.01"/><line x1="12" y1="14" x2="12" y2="14.01"/><line x1="16" y1="14" x2="16" y2="14.01"/></svg>,
+    floorplans: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>,
+    unitlines: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>,
+    addons: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>,
+    workers: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>,
+    availability: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+    settings: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+    calendar: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+    edit: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+    trash: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>,
+    archive: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>,
+    check: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
+    x: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+  };
+  return icons[name] || null;
+};
+
+// Sidebar group config
+const sidebarGroups = [
+  { label: 'Operations', items: ['bookings', 'customers', 'calendar'] },
+  { label: 'Properties', items: ['buildings', 'neighborhoods', 'floorplans', 'unitlines'] },
+  { label: 'Services', items: ['frequencies', 'addons'] },
+  { label: 'Team', items: ['workers', 'availability'] },
+  { label: 'System', items: ['settings'] },
+];
 
 const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || '')
   .split(',')
@@ -94,23 +128,25 @@ export default function AdminPanel() {
   const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
 
   const brand = {
-    primary: '#9AA8E0', text: '#2D3748', textLight: '#718096',
-    border: '#E8EDFC', bg: '#F8FAFF', white: '#ffffff',
-    danger: '#dc2626', success: '#9AA8E0', gold: '#9AA8E0',
+    navy: '#1B2B5A', navyLight: '#243670', periwinkle: '#B8C5F2',
+    primary: '#1B2B5A', text: '#1E293B', textLight: '#64748B',
+    border: '#E2E8F0', bg: '#F8FAFC', white: '#ffffff',
+    danger: '#EF4444', success: '#22C55E', warning: '#F59E0B',
+    gold: '#1B2B5A', accent: '#B8C5F2',
   };
 
   const tabs = [
-    { id: 'bookings', label: 'Bookings' },
-    { id: 'customers', label: 'Customers' },
-    { id: 'frequencies', label: 'Frequencies' },
-    { id: 'neighborhoods', label: 'Neighborhoods' },
-    { id: 'buildings', label: 'Buildings' },
-    { id: 'floorplans', label: 'Floor Plans' },
-    { id: 'unitlines', label: 'Unit Lines' },
-    { id: 'addons', label: 'Add-Ons' },
-    { id: 'workers', label: 'Workers' },
-    { id: 'availability', label: 'Availability' },
-    { id: 'settings', label: 'Settings' },
+    { id: 'bookings', label: 'Bookings', icon: 'bookings' },
+    { id: 'customers', label: 'Customers', icon: 'customers' },
+    { id: 'frequencies', label: 'Frequencies', icon: 'frequencies' },
+    { id: 'neighborhoods', label: 'Neighborhoods', icon: 'neighborhoods' },
+    { id: 'buildings', label: 'Buildings', icon: 'buildings' },
+    { id: 'floorplans', label: 'Floor Plans', icon: 'floorplans' },
+    { id: 'unitlines', label: 'Unit Lines', icon: 'unitlines' },
+    { id: 'addons', label: 'Add-Ons', icon: 'addons' },
+    { id: 'workers', label: 'Workers', icon: 'workers' },
+    { id: 'availability', label: 'Availability', icon: 'availability' },
+    { id: 'settings', label: 'Settings', icon: 'settings' },
   ];
 
   const HOUR_OPTIONS = [
@@ -146,8 +182,11 @@ export default function AdminPanel() {
     { value: '90', label: '90 days' },
   ];
 
-  const buttonStyle = { padding: '8px 18px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 100, cursor: 'pointer', transition: 'all 0.15s ease' };
-  const inputStyle = { padding: '10px 14px', fontSize: 14, border: '1.5px solid #e5e5e5', borderRadius: 10, width: '100%', boxSizing: 'border-box', outline: 'none', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" };
+  const buttonStyle = { padding: '7px 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 6, cursor: 'pointer', transition: 'all 0.15s ease', display: 'inline-flex', alignItems: 'center', gap: 6 };
+  const inputStyle = { padding: '8px 12px', fontSize: 13, border: '1px solid #E2E8F0', borderRadius: 6, width: '100%', boxSizing: 'border-box', outline: 'none', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif", background: '#fff', transition: 'border-color 0.15s' };
+  const iconBtnStyle = { ...buttonStyle, padding: '6px', borderRadius: 6, width: 32, height: 32, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' };
+  const thStyle = { padding: '10px 16px', textAlign: 'left', fontSize: 11, fontWeight: 600, color: brand.textLight, textTransform: 'uppercase', letterSpacing: '0.05em' };
+  const tdStyle = { padding: '12px 16px' };
 
   useEffect(() => {
     if (!authLoading && !user) { router.push('/login'); return; }
@@ -716,120 +755,209 @@ export default function AdminPanel() {
 
   const getStatusStyle = (status) => {
     switch (status) {
-      case 'upcoming': return { background: '#9AA8E0', color: '#fff' };
-      case 'scheduled': return { background: '#E8EDFC', color: '#2D3748' };
-      case 'completed': return { background: '#E8EDFC', color: '#718096' };
-      case 'skipped': return { background: '#FEF3C7', color: '#92400E' };
-      case 'cancelled': return { background: '#FEE2E2', color: '#DC2626' };
-      default: return { background: '#E8EDFC', color: '#718096' };
+      case 'upcoming': return { background: brand.navy, color: '#fff' };
+      case 'scheduled': return { background: '#DBEAFE', color: '#1E40AF' };
+      case 'completed': return { background: '#F0FDF4', color: '#16A34A' };
+      case 'skipped': return { background: '#FFFBEB', color: '#D97706' };
+      case 'cancelled': return { background: '#FEF2F2', color: '#DC2626' };
+      default: return { background: '#F1F5F9', color: brand.textLight };
     }
   };
 
   if (authLoading || dataLoading) {
-    return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}><div style={{ textAlign: 'center' }}><div style={{ width: 40, height: 40, border: '3px solid #E8EDFC', borderTopColor: '#9AA8E0', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} /><p style={{ color: '#718096', fontSize: 15 }}>Loading...</p></div><style jsx global>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style></div>;
+    return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: brand.bg }}><div style={{ textAlign: 'center' }}><div style={{ width: 36, height: 36, border: '3px solid #E2E8F0', borderTopColor: brand.navy, borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} /><p style={{ color: brand.textLight, fontSize: 13, fontWeight: 500 }}>Loading admin...</p></div><style jsx global>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style></div>;
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#fff', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
-      <header className="admin-header" style={{ padding: '14px 24px', background: '#fff', borderBottom: '1px solid #E8EDFC', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Logo />
-          <span style={{ fontSize: 18, fontWeight: 700, color: '#2D3748', letterSpacing: '-0.02em' }}>BetterView</span>
-          <span style={{ marginLeft: 8, padding: '4px 10px', background: '#9AA8E0', color: '#fff', borderRadius: 6, fontSize: 11, fontWeight: 700, letterSpacing: '0.04em' }}>ADMIN</span>
-        </div>
-        <div className="admin-header-right" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Link href="/admin/calendar" style={{ fontSize: 14, color: '#2D3748', textDecoration: 'none', fontWeight: 600, padding: '8px 20px', background: '#EEF1FC', borderRadius: 100, transition: 'background 0.15s' }}>
-            Calendar View
-          </Link>
-          <span style={{ fontSize: 13, color: '#718096' }}>{user?.email}</span>
-          <button onClick={handleLogout} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748' }}>Log Out</button>
-        </div>
-
-        <button className="mobile-nav-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
-          {mobileMenuOpen ? (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          ) : (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
-            </svg>
-          )}
-        </button>
-
-        <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
-          <Link href="/admin/calendar" onClick={() => setMobileMenuOpen(false)} style={{ padding: '16px', fontSize: 16, fontWeight: 600, color: '#fff', textDecoration: 'none', textAlign: 'center', borderRadius: 12, background: '#9AA8E0' }}>
-            Calendar View
-          </Link>
-          <span style={{ padding: '14px 16px', fontSize: 13, color: '#718096', textAlign: 'center' }}>{user?.email}</span>
-          <button onClick={() => { handleLogout(); setMobileMenuOpen(false); }} style={{ padding: '16px', fontSize: 16, fontWeight: 600, background: '#EEF1FC', border: 'none', borderRadius: 12, color: '#2D3748', cursor: 'pointer' }}>
-            Log Out
-          </button>
-        </div>
-      </header>
+    <div style={{ minHeight: '100vh', background: brand.bg, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
 
       <div className="admin-layout" style={{ display: 'flex' }}>
-        <aside className="admin-sidebar" style={{ width: 200, background: '#fff', borderRight: '1px solid #E8EDFC', minHeight: 'calc(100vh - 57px)', padding: '16px 0', position: 'sticky', top: 57, alignSelf: 'flex-start' }}>
-          {tabs.map(tab => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
-              display: 'block', width: '100%', padding: '10px 20px', textAlign: 'left',
-              background: activeTab === tab.id ? '#EEF1FC' : 'transparent', border: 'none',
-              borderLeft: activeTab === tab.id ? '3px solid #9AA8E0' : '3px solid transparent',
-              fontSize: 14, fontWeight: activeTab === tab.id ? 700 : 500,
-              color: activeTab === tab.id ? '#2D3748' : '#718096',
-              cursor: 'pointer', transition: 'all 0.15s ease',
-              letterSpacing: activeTab === tab.id ? '-0.01em' : '0',
-            }}>
-              {tab.label}
+        {/* Navy Sidebar */}
+        <aside className="admin-sidebar" style={{ width: 240, background: brand.navy, minHeight: '100vh', padding: '0', position: 'sticky', top: 0, alignSelf: 'flex-start', display: 'flex', flexDirection: 'column' }}>
+          {/* Sidebar Header */}
+          <div style={{ padding: '20px 20px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+              <Logo light />
+              <span style={{ fontSize: 16, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>BetterView</span>
+              <span style={{ padding: '2px 6px', background: 'rgba(184,197,242,0.2)', color: brand.periwinkle, borderRadius: 4, fontSize: 10, fontWeight: 700, letterSpacing: '0.06em' }}>ADMIN</span>
+            </div>
+          </div>
+
+          {/* Sidebar Navigation */}
+          <nav style={{ flex: 1, padding: '12px 0', overflowY: 'auto' }}>
+            {sidebarGroups.map((group, gi) => (
+              <div key={group.label} style={{ marginBottom: 4 }}>
+                <div style={{ padding: '8px 20px 4px', fontSize: 10, fontWeight: 600, color: 'rgba(184,197,242,0.5)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                  {group.label}
+                </div>
+                {group.items.map(itemId => {
+                  if (itemId === 'calendar') {
+                    return (
+                      <Link key="calendar" href="/admin/calendar" style={{
+                        display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '8px 20px',
+                        textDecoration: 'none', fontSize: 13, fontWeight: 400,
+                        color: 'rgba(255,255,255,0.6)', transition: 'all 0.15s ease',
+                      }}>
+                        <SidebarIcon name="calendar" />
+                        <span>Calendar</span>
+                      </Link>
+                    );
+                  }
+                  const tab = tabs.find(t => t.id === itemId);
+                  if (!tab) return null;
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
+                      display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '8px 20px',
+                      textAlign: 'left', border: 'none',
+                      background: isActive ? 'rgba(255,255,255,0.12)' : 'transparent',
+                      borderLeft: isActive ? '3px solid ' + brand.periwinkle : '3px solid transparent',
+                      fontSize: 13, fontWeight: isActive ? 600 : 400,
+                      color: isActive ? '#fff' : 'rgba(255,255,255,0.6)',
+                      cursor: 'pointer', transition: 'all 0.15s ease',
+                    }}>
+                      <SidebarIcon name={tab.icon} />
+                      <span>{tab.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+          </nav>
+
+          {/* Sidebar Footer */}
+          <div style={{ padding: '16px 20px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email}</div>
+            <button onClick={handleLogout} style={{ ...buttonStyle, background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', width: '100%', justifyContent: 'center', fontSize: 12 }}>
+              Log Out
             </button>
-          ))}
+          </div>
         </aside>
 
-        <main className="admin-main" style={{ flex: 1, padding: 32 }}>
+        {/* Mobile Header */}
+        <header className="admin-header" style={{ display: 'none', padding: '12px 16px', background: brand.navy, justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <Logo light />
+            <span style={{ fontSize: 16, fontWeight: 700, color: '#fff' }}>BetterView</span>
+          </div>
+
+          <button className="mobile-nav-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu" style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: 6, padding: 8, color: '#fff', cursor: 'pointer' }}>
+            {mobileMenuOpen ? (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            ) : (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+              </svg>
+            )}
+          </button>
+
+          <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`} style={{ background: brand.navy }}>
+            {tabs.map(tab => (
+              <button key={tab.id} onClick={() => { setActiveTab(tab.id); setMobileMenuOpen(false); }} style={{
+                padding: '12px 16px', fontSize: 14, fontWeight: activeTab === tab.id ? 600 : 400,
+                background: activeTab === tab.id ? 'rgba(255,255,255,0.12)' : 'transparent',
+                border: 'none', borderRadius: 8, color: activeTab === tab.id ? '#fff' : 'rgba(255,255,255,0.6)',
+                cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 10,
+              }}>
+                <SidebarIcon name={tab.icon} />
+                {tab.label}
+              </button>
+            ))}
+            <Link href="/admin/calendar" onClick={() => setMobileMenuOpen(false)} style={{
+              padding: '12px 16px', fontSize: 14, fontWeight: 400, color: 'rgba(255,255,255,0.6)',
+              textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10,
+            }}>
+              <SidebarIcon name="calendar" />
+              Calendar
+            </Link>
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', margin: '8px 0', padding: '12px 16px' }}>
+              <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>{user?.email}</span>
+            </div>
+            <button onClick={() => { handleLogout(); setMobileMenuOpen(false); }} style={{
+              padding: '12px 16px', fontSize: 14, fontWeight: 500, background: 'rgba(255,255,255,0.08)',
+              border: 'none', borderRadius: 8, color: 'rgba(255,255,255,0.7)', cursor: 'pointer', width: '100%', textAlign: 'center',
+            }}>
+              Log Out
+            </button>
+          </div>
+        </header>
+
+        <main className="admin-main" style={{ flex: 1, padding: '28px 32px', minHeight: '100vh' }}>
 
           {crudError && (
-            <div style={{ padding: '14px 20px', background: '#FEE2E2', borderRadius: 14, marginBottom: 20, fontSize: 14, color: '#DC2626', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 500 }}>
+            <div style={{ padding: '10px 16px', background: '#FEF2F2', borderRadius: 8, marginBottom: 20, fontSize: 13, color: '#DC2626', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 500, border: '1px solid #FECACA' }}>
               <span>{crudError}</span>
-              <button onClick={() => setCrudError('')} style={{ background: 'none', border: 'none', color: '#DC2626', fontWeight: 700, cursor: 'pointer', fontSize: 18, width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>&times;</button>
+              <button onClick={() => setCrudError('')} style={{ background: 'none', border: 'none', color: '#DC2626', fontWeight: 600, cursor: 'pointer', fontSize: 16, width: 24, height: 24, borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>&times;</button>
             </div>
           )}
 
           {/* BOOKINGS TAB */}
-          {activeTab === 'bookings' && (
+          {activeTab === 'bookings' && (() => {
+            const today = new Date().toISOString().split('T')[0];
+            const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
+            const todayBookings = bookings.filter(b => b.booking_date === today && !['cancelled', 'skipped'].includes(b.status));
+            const weekBookings = bookings.filter(b => b.booking_date >= weekAgo && b.booking_date <= today);
+            const weekRevenue = weekBookings.filter(b => b.payment_status === 'paid').reduce((sum, b) => sum + (Number(b.total_price) || 0), 0);
+            const upcomingCount = bookings.filter(b => ['upcoming', 'scheduled'].includes(b.status)).length;
+            const pendingPayments = bookings.filter(b => b.payment_status === 'pending' && ['upcoming', 'scheduled'].includes(b.status)).length;
+
+            return (
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em' }}>Bookings</h1>
-                <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-                  <input type="text" placeholder="Search bookings..." value={searchBookings} onChange={(e) => setSearchBookings(e.target.value)} style={{ ...inputStyle, width: 220 }} />
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
-                    <input type="checkbox" checked={showCancelled} onChange={(e) => setShowCancelled(e.target.checked)} style={{ cursor: 'pointer' }} />
-                    Show Cancelled
-                  </label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
-                    <input type="checkbox" checked={showSkipped} onChange={(e) => setShowSkipped(e.target.checked)} style={{ cursor: 'pointer' }} />
-                    Show Skipped
-                  </label>
-                </div>
+              <div style={{ marginBottom: 24 }}>
+                <h1 style={{ fontSize: 22, fontWeight: 700, color: brand.text, letterSpacing: '-0.02em', marginBottom: 4 }}>Bookings</h1>
+                <p style={{ fontSize: 13, color: brand.textLight }}>{sortedBookings.length} booking{sortedBookings.length !== 1 ? 's' : ''} total</p>
               </div>
+
+              {/* Stats Cards */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 24 }}>
+                {[
+                  { label: "Today's Bookings", value: todayBookings.length, sub: today },
+                  { label: 'Upcoming', value: upcomingCount, sub: 'Scheduled jobs' },
+                  { label: 'Week Revenue', value: `$${weekRevenue.toFixed(0)}`, sub: 'Last 7 days' },
+                  { label: 'Pending Payments', value: pendingPayments, sub: 'Needs attention' },
+                ].map((stat, i) => (
+                  <div key={i} style={{ background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border, padding: '16px 20px' }}>
+                    <p style={{ fontSize: 11, fontWeight: 600, color: brand.textLight, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{stat.label}</p>
+                    <p style={{ fontSize: 24, fontWeight: 700, color: brand.navy, letterSpacing: '-0.02em', marginBottom: 2 }}>{stat.value}</p>
+                    <p style={{ fontSize: 12, color: brand.textLight }}>{stat.sub}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Filters */}
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginBottom: 16 }}>
+                <input type="text" placeholder="Search bookings..." value={searchBookings} onChange={(e) => setSearchBookings(e.target.value)} style={{ ...inputStyle, width: 240 }} />
+                <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: brand.textLight, cursor: 'pointer', background: showCancelled ? '#FEF2F2' : '#fff', padding: '6px 12px', borderRadius: 6, border: '1px solid ' + brand.border }}>
+                  <input type="checkbox" checked={showCancelled} onChange={(e) => setShowCancelled(e.target.checked)} style={{ cursor: 'pointer' }} />
+                  Cancelled
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: brand.textLight, cursor: 'pointer', background: showSkipped ? '#FFFBEB' : '#fff', padding: '6px 12px', borderRadius: 6, border: '1px solid ' + brand.border }}>
+                  <input type="checkbox" checked={showSkipped} onChange={(e) => setShowSkipped(e.target.checked)} style={{ cursor: 'pointer' }} />
+                  Skipped
+                </label>
+              </div>
+
               <div className="table-wrapper">
-                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', overflow: 'hidden', minWidth: 800 }}>
+                <div style={{ background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border, overflow: 'hidden', minWidth: 800 }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
-                      <tr style={{ background: brand.bg }}>
+                      <tr style={{ borderBottom: '1px solid ' + brand.border }}>
                         {[
                           { field: 'customer_name', label: 'Customer' },
                           { field: 'building', label: 'Property' },
                           { field: 'booking_date', label: 'Date & Time' },
-                          { field: 'total_price', label: 'Total' },
+                          { field: 'total_price', label: 'Amount' },
                           { field: 'status', label: 'Status' },
                           { field: 'payment_status', label: 'Payment' },
                           { field: 'worker_id', label: 'Worker' },
                         ].map(col => (
-                          <th key={col.field} onClick={() => handleSort(col.field)} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight, cursor: 'pointer', userSelect: 'none' }}>
+                          <th key={col.field} onClick={() => handleSort(col.field)} style={{ ...thStyle, cursor: 'pointer', userSelect: 'none', position: 'sticky', top: 0, background: '#fff', zIndex: 1 }}>
                             {col.label}{sortIndicator(col.field)}
                           </th>
                         ))}
-                        <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Actions</th>
+                        <th style={{ ...thStyle, textAlign: 'right', position: 'sticky', top: 0, background: '#fff', zIndex: 1 }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -840,74 +968,74 @@ export default function AdminPanel() {
                         const isActionable = ['upcoming', 'scheduled'].includes(booking.status);
 
                         return (
-                          <tr key={booking.id} style={{ borderTop: `1px solid ${brand.border}` }}>
-                            <td style={{ padding: '16px' }}>
-                              <p style={{ fontWeight: 500, color: brand.text }}>{booking.customer_name}</p>
-                              <p style={{ fontSize: 13, color: brand.textLight }}>{booking.customer_email}</p>
+                          <tr key={booking.id} className="table-row-hover" style={{ borderBottom: '1px solid ' + brand.border }}>
+                            <td style={tdStyle}>
+                              <p style={{ fontWeight: 500, color: brand.text, fontSize: 13 }}>{booking.customer_name}</p>
+                              <p style={{ fontSize: 12, color: brand.textLight }}>{booking.customer_email}</p>
                             </td>
-                            <td style={{ padding: '16px' }}>
-                              <p style={{ fontWeight: 500, color: brand.text }}>{booking.building}</p>
-                              <p style={{ fontSize: 13, color: brand.textLight }}>Unit {booking.unit_number} · {booking.floor_plan}</p>
+                            <td style={tdStyle}>
+                              <p style={{ fontWeight: 500, color: brand.text, fontSize: 13 }}>{booking.building}</p>
+                              <p style={{ fontSize: 12, color: brand.textLight }}>Unit {booking.unit_number} · {booking.floor_plan}</p>
                             </td>
-                            <td style={{ padding: '16px' }}>
-                              <p style={{ fontWeight: 500, color: brand.text }}>{formatDate(booking.booking_date)}</p>
-                              <p style={{ fontSize: 13, color: brand.textLight }}>{booking.booking_time}</p>
+                            <td style={tdStyle}>
+                              <p style={{ fontWeight: 500, color: brand.text, fontSize: 13 }}>{formatDate(booking.booking_date)}</p>
+                              <p style={{ fontSize: 12, color: brand.textLight }}>{booking.booking_time}</p>
                               {freqName && freqName !== 'One-Time' && (
-                                <p style={{ fontSize: 12, color: brand.gold, fontWeight: 600 }}>{freqName}</p>
+                                <p style={{ fontSize: 11, color: brand.navy, fontWeight: 600 }}>{freqName}</p>
                               )}
                               {isRecurring && (
-                                <p style={{ fontSize: 11, color: brand.textLight }}>Recurring group</p>
+                                <p style={{ fontSize: 11, color: brand.textLight }}>Recurring</p>
                               )}
                             </td>
-                            <td style={{ padding: '16px' }}>
-                              <span style={{ fontWeight: 600, color: brand.text }}>${booking.total_price}</span>
+                            <td style={tdStyle}>
+                              <span style={{ fontWeight: 600, color: brand.text, fontSize: 13 }}>${booking.total_price}</span>
                               {booking.frequency_discount > 0 && (
-                                <p style={{ fontSize: 11, color: brand.gold }}>-${booking.frequency_discount} freq.</p>
+                                <p style={{ fontSize: 11, color: brand.textLight }}>-${booking.frequency_discount}</p>
                               )}
                             </td>
-                            <td style={{ padding: '16px' }}>
-                              <span style={{ padding: '4px 10px', borderRadius: 100, fontSize: 13, fontWeight: 500, ...statusStyle }}>
+                            <td style={tdStyle}>
+                              <span style={{ padding: '3px 8px', borderRadius: 4, fontSize: 12, fontWeight: 500, ...statusStyle }}>
                                 {booking.status}
                               </span>
                             </td>
-                            <td style={{ padding: '16px' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                                <span style={{ padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 500, ...getPaymentStatusStyle(booking.payment_status) }}>
+                            <td style={tdStyle}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                                <span style={{ padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 500, ...getPaymentStatusStyle(booking.payment_status) }}>
                                   {booking.payment_status || 'n/a'}
                                 </span>
                                 {booking.payment_status === 'pending' && booking.stripe_customer_id && (
                                   <button
                                     onClick={() => handleChargeBooking(booking.id)}
                                     disabled={chargingBookingId === booking.id}
-                                    style={{ ...buttonStyle, background: '#065F46', color: '#fff', fontSize: 11, padding: '5px 10px', opacity: chargingBookingId === booking.id ? 0.6 : 1 }}
+                                    style={{ ...buttonStyle, background: '#065F46', color: '#fff', fontSize: 11, padding: '4px 8px', opacity: chargingBookingId === booking.id ? 0.6 : 1 }}
                                   >
-                                    {chargingBookingId === booking.id ? 'Charging...' : 'Charge Now'}
+                                    {chargingBookingId === booking.id ? '...' : 'Charge'}
                                   </button>
                                 )}
                               </div>
                             </td>
-                            <td style={{ padding: '16px' }}>
+                            <td style={tdStyle}>
                               <select
                                 value={booking.worker_id || ''}
                                 onChange={(e) => handleWorkerAssign(booking.id, e.target.value)}
-                                style={{ ...inputStyle, width: 140, fontSize: 13 }}
+                                style={{ ...inputStyle, width: 120, fontSize: 12, padding: '6px 8px' }}
                               >
                                 <option value="">Unassigned</option>
                                 {workers.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                               </select>
                             </td>
-                            <td style={{ padding: '16px', textAlign: 'right' }}>
-                              <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                            <td style={{ ...tdStyle, textAlign: 'right' }}>
+                              <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
                                 {isActionable && (
                                   <>
-                                    <button onClick={() => handleMarkComplete(booking.id)} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', fontSize: 12, padding: '6px 12px' }}>
-                                      Complete
+                                    <button onClick={() => handleMarkComplete(booking.id)} title="Complete" style={{ ...iconBtnStyle, background: '#F0FDF4', color: '#16A34A' }}>
+                                      <SidebarIcon name="check" />
                                     </button>
-                                    <button onClick={() => handleSkipBooking(booking.id)} style={{ ...buttonStyle, background: '#FEF3C7', color: '#92400E', fontSize: 12, padding: '6px 12px' }}>
-                                      Skip
+                                    <button onClick={() => handleSkipBooking(booking.id)} title="Skip" style={{ ...iconBtnStyle, background: '#FFFBEB', color: '#D97706' }}>
+                                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
                                     </button>
-                                    <button onClick={() => handleCancelBooking(booking.id)} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger, fontSize: 12, padding: '6px 12px' }}>
-                                      Cancel
+                                    <button onClick={() => handleCancelBooking(booking.id)} title="Cancel" style={{ ...iconBtnStyle, background: '#FEF2F2', color: brand.danger }}>
+                                      <SidebarIcon name="x" />
                                     </button>
                                   </>
                                 )}
@@ -916,12 +1044,21 @@ export default function AdminPanel() {
                           </tr>
                         );
                       })}
+                      {sortedBookings.length === 0 && (
+                        <tr>
+                          <td colSpan={8} style={{ padding: 48, textAlign: 'center' }}>
+                            <p style={{ fontSize: 14, color: brand.textLight, marginBottom: 4 }}>No bookings found</p>
+                            <p style={{ fontSize: 12, color: brand.textLight }}>Try adjusting your filters</p>
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
               </div>
             </div>
-          )}
+            );
+          })()}
 
           {/* CUSTOMERS TAB */}
           {activeTab === 'customers' && (() => {
@@ -991,28 +1128,28 @@ export default function AdminPanel() {
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
                   <div>
-                    <h1 style={{ fontSize: 24, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em' }}>Customers</h1>
-                    <p style={{ fontSize: 14, color: brand.textLight, marginTop: 4 }}>{customers.length} customer{customers.length !== 1 ? 's' : ''} found</p>
+                    <h1 style={{ fontSize: 22, fontWeight: 700, color: brand.text, letterSpacing: '-0.02em', marginBottom: 4 }}>Customers</h1>
+                    <p style={{ fontSize: 13, color: brand.textLight }}>{customers.length} customer{customers.length !== 1 ? 's' : ''} found</p>
                   </div>
                   <input
                     type="text"
                     placeholder="Search by name, email, or phone..."
                     value={customerSearch}
                     onChange={(e) => setCustomerSearch(e.target.value)}
-                    style={{ ...inputStyle, width: 280 }}
+                    style={{ ...inputStyle, width: 260 }}
                   />
                 </div>
                 <div className="table-wrapper">
-                  <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', overflow: 'hidden', minWidth: 700 }}>
+                  <div style={{ background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border, overflow: 'hidden', minWidth: 700 }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                       <thead>
-                        <tr style={{ background: brand.bg }}>
-                          <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight, width: 30 }}></th>
-                          <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Customer</th>
-                          <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Account</th>
-                          <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Bookings</th>
-                          <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Total Spent</th>
-                          <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Last Booking</th>
+                        <tr style={{ borderBottom: '1px solid ' + brand.border }}>
+                          <th style={{ ...thStyle, width: 30 }}></th>
+                          <th style={thStyle}>Customer</th>
+                          <th style={thStyle}>Account</th>
+                          <th style={thStyle}>Bookings</th>
+                          <th style={thStyle}>Total Spent</th>
+                          <th style={thStyle}>Last Booking</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1026,36 +1163,37 @@ export default function AdminPanel() {
                             <React.Fragment key={c.email}>
                               <tr
                                 onClick={() => setExpandedCustomer(isExpanded ? null : c.email)}
-                                style={{ borderTop: `1px solid ${brand.border}`, cursor: 'pointer', background: isExpanded ? brand.bg : 'transparent' }}
+                                className="table-row-hover"
+                                style={{ borderBottom: '1px solid ' + brand.border, cursor: 'pointer', background: isExpanded ? brand.bg : 'transparent' }}
                               >
-                                <td style={{ padding: '16px 8px 16px 16px', fontSize: 14, color: brand.textLight }}>
+                                <td style={{ padding: '12px 8px 12px 16px', fontSize: 12, color: brand.textLight }}>
                                   {isExpanded ? '▼' : '▶'}
                                 </td>
-                                <td style={{ padding: '16px' }}>
-                                  <p style={{ fontWeight: 500, color: brand.text }}>{c.name || 'Unknown'}</p>
-                                  <p style={{ fontSize: 13, color: brand.textLight }}>{c.email}</p>
-                                  {c.phone && <p style={{ fontSize: 12, color: brand.textLight }}>{c.phone}</p>}
+                                <td style={tdStyle}>
+                                  <p style={{ fontWeight: 500, color: brand.text, fontSize: 13 }}>{c.name || 'Unknown'}</p>
+                                  <p style={{ fontSize: 12, color: brand.textLight }}>{c.email}</p>
+                                  {c.phone && <p style={{ fontSize: 11, color: brand.textLight }}>{c.phone}</p>}
                                 </td>
-                                <td style={{ padding: '16px' }}>
+                                <td style={tdStyle}>
                                   <span style={{
-                                    padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 500,
+                                    padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 500,
                                     background: c.hasAccount ? '#DBEAFE' : '#f3f4f6',
                                     color: c.hasAccount ? '#1E40AF' : brand.textLight
                                   }}>
                                     {c.hasAccount ? 'Registered' : 'Guest'}
                                   </span>
                                 </td>
-                                <td style={{ padding: '16px' }}>
-                                  <span style={{ fontWeight: 600, color: brand.text }}>{c.bookings.length}</span>
-                                  <span style={{ fontSize: 12, color: brand.textLight, marginLeft: 6 }}>
+                                <td style={tdStyle}>
+                                  <span style={{ fontWeight: 600, color: brand.text, fontSize: 13 }}>{c.bookings.length}</span>
+                                  <span style={{ fontSize: 11, color: brand.textLight, marginLeft: 6 }}>
                                     ({upcomingCount} upcoming, {completedCount} done{cancelledCount > 0 ? `, ${cancelledCount} cancelled` : ''})
                                   </span>
                                 </td>
-                                <td style={{ padding: '16px' }}>
-                                  <span style={{ fontWeight: 600, color: brand.text }}>${c.totalSpent.toFixed(2)}</span>
+                                <td style={tdStyle}>
+                                  <span style={{ fontWeight: 600, color: brand.text, fontSize: 13 }}>${c.totalSpent.toFixed(2)}</span>
                                 </td>
-                                <td style={{ padding: '16px' }}>
-                                  <span style={{ color: brand.text }}>{formatDate(c.lastBooking)}</span>
+                                <td style={tdStyle}>
+                                  <span style={{ color: brand.text, fontSize: 13 }}>{formatDate(c.lastBooking)}</span>
                                 </td>
                               </tr>
                               {isExpanded && (
@@ -1064,16 +1202,16 @@ export default function AdminPanel() {
                                     <div style={{ padding: '0 16px 16px 48px', background: brand.bg }}>
 
                                       {/* Customer Info Section */}
-                                      <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', padding: 16, marginBottom: 16, marginTop: 8 }}>
+                                      <div style={{ background: '#fff', borderRadius: 8, border: '1px solid ' + brand.border, padding: 16, marginBottom: 16, marginTop: 8 }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                                          <p style={{ fontSize: 14, fontWeight: 600, color: brand.text }}>Customer Info</p>
+                                          <p style={{ fontSize: 13, fontWeight: 600, color: brand.text }}>Customer Info</p>
                                           {editingCustomerEmail === c.email ? (
                                             <div style={{ display: 'flex', gap: 6 }}>
-                                              <button onClick={() => handleSaveCustomerInfo(c.email, c.bookings, c.user_id)} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', fontSize: 12, padding: '6px 12px' }}>Save</button>
-                                              <button onClick={() => { setEditingCustomerEmail(null); setEditingCustomerValue({}); }} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748', fontSize: 12, padding: '6px 14px' }}>Cancel</button>
+                                              <button onClick={() => handleSaveCustomerInfo(c.email, c.bookings, c.user_id)} style={{ ...buttonStyle, background: brand.navy, color: '#fff', fontSize: 12, padding: '5px 12px' }}>Save</button>
+                                              <button onClick={() => { setEditingCustomerEmail(null); setEditingCustomerValue({}); }} style={{ ...buttonStyle, background: '#fff', color: brand.text, fontSize: 12, padding: '5px 12px', border: '1px solid ' + brand.border }}>Cancel</button>
                                             </div>
                                           ) : (
-                                            <button onClick={() => { setEditingCustomerEmail(c.email); setEditingCustomerValue({ customer_name: c.name || '', customer_email: c.email, phone: c.phone || '' }); }} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748', fontSize: 12, padding: '6px 14px' }}>Edit</button>
+                                            <button onClick={() => { setEditingCustomerEmail(c.email); setEditingCustomerValue({ customer_name: c.name || '', customer_email: c.email, phone: c.phone || '' }); }} style={{ ...buttonStyle, background: '#fff', color: brand.text, fontSize: 12, padding: '5px 12px', border: '1px solid ' + brand.border }}><SidebarIcon name="edit" /> Edit</button>
                                           )}
                                         </div>
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
@@ -1105,20 +1243,20 @@ export default function AdminPanel() {
                                       </div>
 
                                       {/* Bookings Table */}
-                                      <p style={{ fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 12 }}>
+                                      <p style={{ fontSize: 13, fontWeight: 600, color: brand.text, marginBottom: 10 }}>
                                         Booking History ({c.bookings.length})
                                       </p>
-                                      <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', overflow: 'hidden' }}>
+                                      <div style={{ background: '#fff', borderRadius: 8, border: '1px solid ' + brand.border, overflow: 'hidden' }}>
                                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                           <thead>
-                                            <tr style={{ background: '#f9fafb' }}>
-                                              <th style={{ padding: '10px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: brand.textLight }}>Date & Time</th>
-                                              <th style={{ padding: '10px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: brand.textLight }}>Property</th>
-                                              <th style={{ padding: '10px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: brand.textLight }}>Frequency</th>
-                                              <th style={{ padding: '10px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: brand.textLight }}>Total</th>
-                                              <th style={{ padding: '10px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: brand.textLight }}>Status</th>
-                                              <th style={{ padding: '10px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: brand.textLight }}>Worker</th>
-                                              <th style={{ padding: '10px 12px', textAlign: 'right', fontSize: 12, fontWeight: 600, color: brand.textLight }}>Actions</th>
+                                            <tr style={{ borderBottom: '1px solid ' + brand.border }}>
+                                              <th style={thStyle}>Date & Time</th>
+                                              <th style={thStyle}>Property</th>
+                                              <th style={thStyle}>Frequency</th>
+                                              <th style={thStyle}>Total</th>
+                                              <th style={thStyle}>Status</th>
+                                              <th style={thStyle}>Worker</th>
+                                              <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
                                             </tr>
                                           </thead>
                                           <tbody>
@@ -1132,73 +1270,72 @@ export default function AdminPanel() {
                                                 const isActionable = ['upcoming', 'scheduled'].includes(b.status);
 
                                                 return (
-                                                  <tr key={b.id} style={{ borderTop: `1px solid ${brand.border}` }}>
-                                                    <td style={{ padding: '10px 12px' }}>
+                                                  <tr key={b.id} style={{ borderBottom: '1px solid ' + brand.border }}>
+                                                    <td style={{ padding: '8px 12px' }}>
                                                       {isEditing ? (
                                                         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                                                          <input type="date" style={{ ...inputStyle, fontSize: 12, padding: '6px 8px' }} value={editingBookingValue.booking_date || ''} onChange={(e) => setEditingBookingValue({ ...editingBookingValue, booking_date: e.target.value })} />
-                                                          <input type="text" style={{ ...inputStyle, fontSize: 12, padding: '6px 8px' }} value={editingBookingValue.booking_time || ''} onChange={(e) => setEditingBookingValue({ ...editingBookingValue, booking_time: e.target.value })} placeholder="e.g. 9:00 AM" />
+                                                          <input type="date" style={{ ...inputStyle, fontSize: 12, padding: '5px 8px' }} value={editingBookingValue.booking_date || ''} onChange={(e) => setEditingBookingValue({ ...editingBookingValue, booking_date: e.target.value })} />
+                                                          <input type="text" style={{ ...inputStyle, fontSize: 12, padding: '5px 8px' }} value={editingBookingValue.booking_time || ''} onChange={(e) => setEditingBookingValue({ ...editingBookingValue, booking_time: e.target.value })} placeholder="e.g. 9:00 AM" />
                                                         </div>
                                                       ) : (
                                                         <>
-                                                          <p style={{ fontWeight: 500, color: brand.text, fontSize: 13 }}>{formatDate(b.booking_date)}</p>
-                                                          <p style={{ fontSize: 12, color: brand.textLight }}>{b.booking_time}</p>
+                                                          <p style={{ fontWeight: 500, color: brand.text, fontSize: 12 }}>{formatDate(b.booking_date)}</p>
+                                                          <p style={{ fontSize: 11, color: brand.textLight }}>{b.booking_time}</p>
                                                         </>
                                                       )}
                                                     </td>
-                                                    <td style={{ padding: '10px 12px' }}>
+                                                    <td style={{ padding: '8px 12px' }}>
                                                       {isEditing ? (
                                                         <div>
-                                                          <p style={{ fontWeight: 500, color: brand.text, fontSize: 13 }}>{b.building}</p>
-                                                          <input style={{ ...inputStyle, fontSize: 12, padding: '6px 8px', marginTop: 4 }} value={editingBookingValue.unit_number || ''} onChange={(e) => setEditingBookingValue({ ...editingBookingValue, unit_number: e.target.value })} placeholder="Unit #" />
+                                                          <p style={{ fontWeight: 500, color: brand.text, fontSize: 12 }}>{b.building}</p>
+                                                          <input style={{ ...inputStyle, fontSize: 12, padding: '5px 8px', marginTop: 4 }} value={editingBookingValue.unit_number || ''} onChange={(e) => setEditingBookingValue({ ...editingBookingValue, unit_number: e.target.value })} placeholder="Unit #" />
                                                         </div>
                                                       ) : (
                                                         <>
-                                                          <p style={{ fontWeight: 500, color: brand.text, fontSize: 13 }}>{b.building}</p>
-                                                          <p style={{ fontSize: 12, color: brand.textLight }}>Unit {b.unit_number} · {b.floor_plan}</p>
+                                                          <p style={{ fontWeight: 500, color: brand.text, fontSize: 12 }}>{b.building}</p>
+                                                          <p style={{ fontSize: 11, color: brand.textLight }}>Unit {b.unit_number} · {b.floor_plan}</p>
                                                         </>
                                                       )}
                                                     </td>
-                                                    <td style={{ padding: '10px 12px' }}>
+                                                    <td style={{ padding: '8px 12px' }}>
                                                       {freqName && freqName !== 'One-Time' ? (
-                                                        <span style={{ fontSize: 12, color: brand.gold, fontWeight: 600 }}>{freqName}</span>
+                                                        <span style={{ fontSize: 11, color: brand.navy, fontWeight: 600 }}>{freqName}</span>
                                                       ) : (
-                                                        <span style={{ fontSize: 12, color: brand.textLight }}>One-Time</span>
+                                                        <span style={{ fontSize: 11, color: brand.textLight }}>One-Time</span>
                                                       )}
                                                     </td>
-                                                    <td style={{ padding: '10px 12px' }}>
-                                                      <span style={{ fontWeight: 600, color: brand.text, fontSize: 13 }}>${b.total_price}</span>
+                                                    <td style={{ padding: '8px 12px' }}>
+                                                      <span style={{ fontWeight: 600, color: brand.text, fontSize: 12 }}>${b.total_price}</span>
                                                     </td>
-                                                    <td style={{ padding: '10px 12px' }}>
-                                                      <span style={{ padding: '3px 8px', borderRadius: 100, fontSize: 12, fontWeight: 500, ...statusStyle }}>
+                                                    <td style={{ padding: '8px 12px' }}>
+                                                      <span style={{ padding: '2px 6px', borderRadius: 4, fontSize: 11, fontWeight: 500, ...statusStyle }}>
                                                         {b.status}
                                                       </span>
                                                     </td>
-                                                    <td style={{ padding: '10px 12px' }}>
+                                                    <td style={{ padding: '8px 12px' }}>
                                                       {isEditing ? (
-                                                        <select style={{ ...inputStyle, fontSize: 12, padding: '6px 8px', width: 120 }} value={editingBookingValue.worker_id || ''} onChange={(e) => setEditingBookingValue({ ...editingBookingValue, worker_id: e.target.value })}>
+                                                        <select style={{ ...inputStyle, fontSize: 12, padding: '5px 8px', width: 110 }} value={editingBookingValue.worker_id || ''} onChange={(e) => setEditingBookingValue({ ...editingBookingValue, worker_id: e.target.value })}>
                                                           <option value="">Unassigned</option>
                                                           {workers.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                                                         </select>
                                                       ) : (
-                                                        <span style={{ fontSize: 13, color: workerName ? brand.text : brand.textLight }}>{workerName || 'Unassigned'}</span>
+                                                        <span style={{ fontSize: 12, color: workerName ? brand.text : brand.textLight }}>{workerName || 'Unassigned'}</span>
                                                       )}
                                                     </td>
-                                                    <td style={{ padding: '10px 12px', textAlign: 'right' }}>
-                                                      <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                                                    <td style={{ padding: '8px 12px', textAlign: 'right' }}>
+                                                      <div style={{ display: 'flex', gap: 3, justifyContent: 'flex-end' }}>
                                                         {isEditing ? (
                                                           <>
-                                                            <button onClick={() => handleSaveBookingEdit(b.id)} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', fontSize: 11, padding: '5px 10px' }}>Save</button>
-                                                            <button onClick={() => { setEditingBookingId(null); setEditingBookingValue({}); }} style={{ ...buttonStyle, background: brand.bg, color: brand.text, fontSize: 11, padding: '5px 10px', border: `1px solid ${brand.border}` }}>Cancel</button>
+                                                            <button onClick={() => handleSaveBookingEdit(b.id)} style={{ ...buttonStyle, background: brand.navy, color: '#fff', fontSize: 11, padding: '4px 10px' }}>Save</button>
+                                                            <button onClick={() => { setEditingBookingId(null); setEditingBookingValue({}); }} style={{ ...buttonStyle, background: '#fff', color: brand.text, fontSize: 11, padding: '4px 10px', border: '1px solid ' + brand.border }}>Cancel</button>
                                                           </>
                                                         ) : (
                                                           <>
-                                                            <button onClick={(e) => { e.stopPropagation(); setEditingBookingId(b.id); setEditingBookingValue({ booking_date: b.booking_date, booking_time: b.booking_time || '', worker_id: b.worker_id || '', unit_number: b.unit_number || '', special_instructions: b.special_instructions || '' }); }} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748', fontSize: 11, padding: '5px 10px' }}>Edit</button>
+                                                            <button onClick={(e) => { e.stopPropagation(); setEditingBookingId(b.id); setEditingBookingValue({ booking_date: b.booking_date, booking_time: b.booking_time || '', worker_id: b.worker_id || '', unit_number: b.unit_number || '', special_instructions: b.special_instructions || '' }); }} title="Edit" style={{ ...iconBtnStyle, background: '#fff', color: brand.textLight, border: '1px solid ' + brand.border }}><SidebarIcon name="edit" /></button>
                                                             {isActionable && (
                                                               <>
-                                                                <button onClick={(e) => { e.stopPropagation(); handleMarkComplete(b.id); }} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', fontSize: 11, padding: '5px 10px' }}>Complete</button>
-                                                                <button onClick={(e) => { e.stopPropagation(); handleSkipBooking(b.id); }} style={{ ...buttonStyle, background: '#FEF3C7', color: '#92400E', fontSize: 11, padding: '5px 10px' }}>Skip</button>
-                                                                <button onClick={(e) => { e.stopPropagation(); handleCancelBooking(b.id); }} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger, fontSize: 11, padding: '5px 10px' }}>Cancel</button>
+                                                                <button onClick={(e) => { e.stopPropagation(); handleMarkComplete(b.id); }} title="Complete" style={{ ...iconBtnStyle, background: '#F0FDF4', color: '#16A34A' }}><SidebarIcon name="check" /></button>
+                                                                <button onClick={(e) => { e.stopPropagation(); handleCancelBooking(b.id); }} title="Cancel" style={{ ...iconBtnStyle, background: '#FEF2F2', color: brand.danger }}><SidebarIcon name="x" /></button>
                                                               </>
                                                             )}
                                                           </>
@@ -1237,32 +1374,32 @@ export default function AdminPanel() {
           {activeTab === 'frequencies' && (
             <div>
               <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em' }}>Frequencies</h1>
+                <h1 style={{ fontSize: 22, fontWeight: 700, color: brand.text, letterSpacing: '-0.02em' }}>Frequencies</h1>
                 <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input type="text" placeholder="Search frequencies..." value={searchFrequencies} onChange={(e) => setSearchFrequencies(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
                     <input type="checkbox" checked={showArchivedFrequencies} onChange={(e) => setShowArchivedFrequencies(e.target.checked)} />
                     Show archived
                   </label>
-                  <button onClick={() => handleAdd('frequencies')} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff' }}>+ Add Frequency</button>
+                  <button onClick={() => handleAdd('frequencies')} style={{ ...buttonStyle, background: brand.navy, color: '#fff' }}>+ Add Frequency</button>
                 </div>
               </div>
               <div className="table-wrapper">
-                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', overflow: 'hidden' }}>
+                <div style={{ background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border, overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
-                      <tr style={{ background: brand.bg }}>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Name</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Discount %</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Interval (days)</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Sort Order</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Status</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Actions</th>
+                      <tr style={{ borderBottom: '1px solid ' + brand.border }}>
+                        <th style={thStyle}>Name</th>
+                        <th style={thStyle}>Discount %</th>
+                        <th style={thStyle}>Interval (days)</th>
+                        <th style={thStyle}>Sort Order</th>
+                        <th style={thStyle}>Status</th>
+                        <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredFrequenciesList.map(f => (
-                        <tr key={f.id} style={{ borderTop: `1px solid ${brand.border}`, opacity: f.archived ? 0.6 : 1 }}>
+                        <tr key={f.id} style={{ borderBottom: '1px solid ' + brand.border, opacity: f.archived ? 0.6 : 1 }}>
                           <td style={{ padding: '16px' }}>
                             {editingId === `frequency-${f.id}` ? (
                               <input style={inputStyle} value={editValue.name || ''} onChange={(e) => setEditValue({ ...editValue, name: e.target.value })} />
@@ -1292,20 +1429,20 @@ export default function AdminPanel() {
                             )}
                           </td>
                           <td style={{ padding: '16px' }}>
-                            <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 12, background: f.archived ? '#fee2e2' : '#dcfce7', color: f.archived ? brand.danger : '#16a34a' }}>
+                            <span style={{ fontSize: 11, fontWeight: 500, padding: '3px 8px', borderRadius: 4, background: f.archived ? '#fee2e2' : '#dcfce7', color: f.archived ? brand.danger : '#16a34a' }}>
                               {f.archived ? 'Archived' : 'Active'}
                             </span>
                           </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
                             {editingId === `frequency-${f.id}` ? (
-                              <button onClick={() => handleSave('frequencies', f.id)} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', marginRight: 8 }}>Save</button>
+                              <button onClick={() => handleSave('frequencies', f.id)} style={{ ...buttonStyle, background: brand.navy, color: '#fff', marginRight: 6 }}>Save</button>
                             ) : (
-                              <button onClick={() => { setEditingId(`frequency-${f.id}`); setEditValue({ name: f.name, discount_percent: f.discount_percent, interval_days: f.interval_days, sort_order: f.sort_order }); }} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748', marginRight: 8 }}>Edit</button>
+                              <button onClick={() => { setEditingId(`frequency-${f.id}`); setEditValue({ name: f.name, discount_percent: f.discount_percent, interval_days: f.interval_days, sort_order: f.sort_order }); }} style={{ ...buttonStyle, background: '#fff', color: brand.text, marginRight: 6, border: '1px solid ' + brand.border }}>Edit</button>
                             )}
-                            <button onClick={() => handleToggleArchive('frequencies', f.id, f.archived)} style={{ ...buttonStyle, background: f.archived ? '#dbeafe' : '#fef3c7', color: f.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
+                            <button onClick={() => handleToggleArchive('frequencies', f.id, f.archived)} style={{ ...buttonStyle, background: f.archived ? '#DBEAFE' : '#FFFBEB', color: f.archived ? '#2563EB' : '#D97706', marginRight: 6 }}>
                               {f.archived ? 'Unarchive' : 'Archive'}
                             </button>
-                            <button onClick={() => handleDelete('frequencies', f.id)} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger }}>Delete</button>
+                            <button onClick={() => handleDelete('frequencies', f.id)} style={{ ...buttonStyle, background: '#FEF2F2', color: brand.danger }}>Delete</button>
                           </td>
                         </tr>
                       ))}
@@ -1323,30 +1460,30 @@ export default function AdminPanel() {
           {activeTab === 'neighborhoods' && (
             <div>
               <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em' }}>Neighborhoods</h1>
+                <h1 style={{ fontSize: 22, fontWeight: 700, color: brand.text, letterSpacing: '-0.02em' }}>Neighborhoods</h1>
                 <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input type="text" placeholder="Search neighborhoods..." value={searchNeighborhoods} onChange={(e) => setSearchNeighborhoods(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
                     <input type="checkbox" checked={showArchivedNeighborhoods} onChange={(e) => setShowArchivedNeighborhoods(e.target.checked)} />
                     Show archived
                   </label>
-                  <button onClick={() => handleAdd('neighborhoods')} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff' }}>+ Add Neighborhood</button>
+                  <button onClick={() => handleAdd('neighborhoods')} style={{ ...buttonStyle, background: brand.navy, color: '#fff' }}>+ Add Neighborhood</button>
                 </div>
               </div>
               <div className="table-wrapper">
-                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', overflow: 'hidden' }}>
+                <div style={{ background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border, overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
-                      <tr style={{ background: brand.bg }}>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Name</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Buildings</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Status</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Actions</th>
+                      <tr style={{ borderBottom: '1px solid ' + brand.border }}>
+                        <th style={thStyle}>Name</th>
+                        <th style={thStyle}>Buildings</th>
+                        <th style={thStyle}>Status</th>
+                        <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredNeighborhoods.map(n => (
-                        <tr key={n.id} style={{ borderTop: `1px solid ${brand.border}`, opacity: n.archived ? 0.6 : 1 }}>
+                        <tr key={n.id} style={{ borderBottom: '1px solid ' + brand.border, opacity: n.archived ? 0.6 : 1 }}>
                           <td style={{ padding: '16px' }}>
                             {editingId === `neighborhood-${n.id}` ? (
                               <input style={inputStyle} value={editValue.name || ''} onChange={(e) => setEditValue({ ...editValue, name: e.target.value })} />
@@ -1356,20 +1493,20 @@ export default function AdminPanel() {
                           </td>
                           <td style={{ padding: '16px', color: brand.textLight }}>{buildings.filter(b => b.neighborhood_id === n.id).length} buildings</td>
                           <td style={{ padding: '16px' }}>
-                            <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 12, background: n.archived ? '#fee2e2' : '#dcfce7', color: n.archived ? brand.danger : '#16a34a' }}>
+                            <span style={{ fontSize: 11, fontWeight: 500, padding: '3px 8px', borderRadius: 4, background: n.archived ? '#fee2e2' : '#dcfce7', color: n.archived ? brand.danger : '#16a34a' }}>
                               {n.archived ? 'Archived' : 'Active'}
                             </span>
                           </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
                             {editingId === `neighborhood-${n.id}` ? (
-                              <button onClick={() => handleSave('neighborhoods', n.id)} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', marginRight: 8 }}>Save</button>
+                              <button onClick={() => handleSave('neighborhoods', n.id)} style={{ ...buttonStyle, background: brand.navy, color: '#fff', marginRight: 6 }}>Save</button>
                             ) : (
-                              <button onClick={() => { setEditingId(`neighborhood-${n.id}`); setEditValue({ name: n.name }); }} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748', marginRight: 8 }}>Edit</button>
+                              <button onClick={() => { setEditingId(`neighborhood-${n.id}`); setEditValue({ name: n.name }); }} style={{ ...buttonStyle, background: '#fff', color: brand.text, marginRight: 6, border: '1px solid ' + brand.border }}>Edit</button>
                             )}
-                            <button onClick={() => handleToggleArchive('neighborhoods', n.id, n.archived)} style={{ ...buttonStyle, background: n.archived ? '#dbeafe' : '#fef3c7', color: n.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
+                            <button onClick={() => handleToggleArchive('neighborhoods', n.id, n.archived)} style={{ ...buttonStyle, background: n.archived ? '#DBEAFE' : '#FFFBEB', color: n.archived ? '#2563EB' : '#D97706', marginRight: 6 }}>
                               {n.archived ? 'Unarchive' : 'Archive'}
                             </button>
-                            <button onClick={() => handleDelete('neighborhoods', n.id)} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger }}>Delete</button>
+                            <button onClick={() => handleDelete('neighborhoods', n.id)} style={{ ...buttonStyle, background: '#FEF2F2', color: brand.danger }}>Delete</button>
                           </td>
                         </tr>
                       ))}
@@ -1387,7 +1524,7 @@ export default function AdminPanel() {
           {activeTab === 'buildings' && (
             <div>
               <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em' }}>Buildings</h1>
+                <h1 style={{ fontSize: 22, fontWeight: 700, color: brand.text, letterSpacing: '-0.02em' }}>Buildings</h1>
                 <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input type="text" placeholder="Search buildings..." value={searchBuildings} onChange={(e) => setSearchBuildings(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <select value={selectedNeighborhood} onChange={(e) => setSelectedNeighborhood(e.target.value)} style={{ ...inputStyle, width: 180 }}>
@@ -1398,24 +1535,24 @@ export default function AdminPanel() {
                     <input type="checkbox" checked={showArchivedBuildings} onChange={(e) => setShowArchivedBuildings(e.target.checked)} />
                     Show archived
                   </label>
-                  <button onClick={() => handleAdd('buildings')} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff' }}>+ Add Building</button>
+                  <button onClick={() => handleAdd('buildings')} style={{ ...buttonStyle, background: brand.navy, color: '#fff' }}>+ Add Building</button>
                 </div>
               </div>
               <div className="table-wrapper">
-                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', overflow: 'hidden' }}>
+                <div style={{ background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border, overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
-                      <tr style={{ background: brand.bg }}>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Name</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Address</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Neighborhood</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Status</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Actions</th>
+                      <tr style={{ borderBottom: '1px solid ' + brand.border }}>
+                        <th style={thStyle}>Name</th>
+                        <th style={thStyle}>Address</th>
+                        <th style={thStyle}>Neighborhood</th>
+                        <th style={thStyle}>Status</th>
+                        <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredBuildings.map(b => (
-                        <tr key={b.id} style={{ borderTop: `1px solid ${brand.border}`, opacity: b.archived ? 0.6 : 1 }}>
+                        <tr key={b.id} style={{ borderBottom: '1px solid ' + brand.border, opacity: b.archived ? 0.6 : 1 }}>
                           <td style={{ padding: '16px' }}>
                             {editingId === `building-${b.id}` ? (
                               <input style={inputStyle} value={editValue.name || ''} onChange={(e) => setEditValue({ ...editValue, name: e.target.value })} />
@@ -1440,20 +1577,20 @@ export default function AdminPanel() {
                             )}
                           </td>
                           <td style={{ padding: '16px' }}>
-                            <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 12, background: b.archived ? '#fee2e2' : '#dcfce7', color: b.archived ? brand.danger : '#16a34a' }}>
+                            <span style={{ fontSize: 11, fontWeight: 500, padding: '3px 8px', borderRadius: 4, background: b.archived ? '#fee2e2' : '#dcfce7', color: b.archived ? brand.danger : '#16a34a' }}>
                               {b.archived ? 'Archived' : 'Active'}
                             </span>
                           </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
                             {editingId === `building-${b.id}` ? (
-                              <button onClick={() => handleSave('buildings', b.id)} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', marginRight: 8 }}>Save</button>
+                              <button onClick={() => handleSave('buildings', b.id)} style={{ ...buttonStyle, background: brand.navy, color: '#fff', marginRight: 6 }}>Save</button>
                             ) : (
-                              <button onClick={() => { setEditingId(`building-${b.id}`); setEditValue({ name: b.name, address: b.address, neighborhood_id: b.neighborhood_id }); }} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748', marginRight: 8 }}>Edit</button>
+                              <button onClick={() => { setEditingId(`building-${b.id}`); setEditValue({ name: b.name, address: b.address, neighborhood_id: b.neighborhood_id }); }} style={{ ...buttonStyle, background: '#fff', color: brand.text, marginRight: 6, border: '1px solid ' + brand.border }}>Edit</button>
                             )}
-                            <button onClick={() => handleToggleArchive('buildings', b.id, b.archived)} style={{ ...buttonStyle, background: b.archived ? '#dbeafe' : '#fef3c7', color: b.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
+                            <button onClick={() => handleToggleArchive('buildings', b.id, b.archived)} style={{ ...buttonStyle, background: b.archived ? '#DBEAFE' : '#FFFBEB', color: b.archived ? '#2563EB' : '#D97706', marginRight: 6 }}>
                               {b.archived ? 'Unarchive' : 'Archive'}
                             </button>
-                            <button onClick={() => handleDelete('buildings', b.id)} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger }}>Delete</button>
+                            <button onClick={() => handleDelete('buildings', b.id)} style={{ ...buttonStyle, background: '#FEF2F2', color: brand.danger }}>Delete</button>
                           </td>
                         </tr>
                       ))}
@@ -1471,7 +1608,7 @@ export default function AdminPanel() {
           {activeTab === 'floorplans' && (
             <div>
               <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em' }}>Floor Plans</h1>
+                <h1 style={{ fontSize: 22, fontWeight: 700, color: brand.text, letterSpacing: '-0.02em' }}>Floor Plans</h1>
                 <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input type="text" placeholder="Search floor plans..." value={searchFloorPlans} onChange={(e) => setSearchFloorPlans(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <select value={selectedBuilding} onChange={(e) => setSelectedBuilding(e.target.value)} style={{ ...inputStyle, width: 200 }}>
@@ -1482,25 +1619,25 @@ export default function AdminPanel() {
                     <input type="checkbox" checked={showArchivedFloorPlans} onChange={(e) => setShowArchivedFloorPlans(e.target.checked)} />
                     Show archived
                   </label>
-                  <button onClick={() => handleAdd('floorplans')} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff' }}>+ Add Floor Plan</button>
+                  <button onClick={() => handleAdd('floorplans')} style={{ ...buttonStyle, background: brand.navy, color: '#fff' }}>+ Add Floor Plan</button>
                 </div>
               </div>
               <div className="table-wrapper">
-                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', overflow: 'hidden' }}>
+                <div style={{ background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border, overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
-                      <tr style={{ background: brand.bg }}>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Name</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Building</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Price</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Duration</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Status</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Actions</th>
+                      <tr style={{ borderBottom: '1px solid ' + brand.border }}>
+                        <th style={thStyle}>Name</th>
+                        <th style={thStyle}>Building</th>
+                        <th style={thStyle}>Price</th>
+                        <th style={thStyle}>Duration</th>
+                        <th style={thStyle}>Status</th>
+                        <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredFloorPlans.map(f => (
-                        <tr key={f.id} style={{ borderTop: `1px solid ${brand.border}`, opacity: f.archived ? 0.6 : 1 }}>
+                        <tr key={f.id} style={{ borderBottom: '1px solid ' + brand.border, opacity: f.archived ? 0.6 : 1 }}>
                           <td style={{ padding: '16px' }}>
                             {editingId === `floorplan-${f.id}` ? (
                               <input style={inputStyle} value={editValue.name || ''} onChange={(e) => setEditValue({ ...editValue, name: e.target.value })} />
@@ -1532,20 +1669,20 @@ export default function AdminPanel() {
                             )}
                           </td>
                           <td style={{ padding: '16px' }}>
-                            <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 12, background: f.archived ? '#fee2e2' : '#dcfce7', color: f.archived ? brand.danger : '#16a34a' }}>
+                            <span style={{ fontSize: 11, fontWeight: 500, padding: '3px 8px', borderRadius: 4, background: f.archived ? '#fee2e2' : '#dcfce7', color: f.archived ? brand.danger : '#16a34a' }}>
                               {f.archived ? 'Archived' : 'Active'}
                             </span>
                           </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
                             {editingId === `floorplan-${f.id}` ? (
-                              <button onClick={() => handleSave('floorplans', f.id)} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', marginRight: 8 }}>Save</button>
+                              <button onClick={() => handleSave('floorplans', f.id)} style={{ ...buttonStyle, background: brand.navy, color: '#fff', marginRight: 6 }}>Save</button>
                             ) : (
-                              <button onClick={() => { setEditingId(`floorplan-${f.id}`); setEditValue({ name: f.name, price: f.price, duration_minutes: f.duration_minutes || 60, building_id: f.building_id }); }} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748', marginRight: 8 }}>Edit</button>
+                              <button onClick={() => { setEditingId(`floorplan-${f.id}`); setEditValue({ name: f.name, price: f.price, duration_minutes: f.duration_minutes || 60, building_id: f.building_id }); }} style={{ ...buttonStyle, background: '#fff', color: brand.text, marginRight: 6, border: '1px solid ' + brand.border }}>Edit</button>
                             )}
-                            <button onClick={() => handleToggleArchive('floorplans', f.id, f.archived)} style={{ ...buttonStyle, background: f.archived ? '#dbeafe' : '#fef3c7', color: f.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
+                            <button onClick={() => handleToggleArchive('floorplans', f.id, f.archived)} style={{ ...buttonStyle, background: f.archived ? '#DBEAFE' : '#FFFBEB', color: f.archived ? '#2563EB' : '#D97706', marginRight: 6 }}>
                               {f.archived ? 'Unarchive' : 'Archive'}
                             </button>
-                            <button onClick={() => handleDelete('floorplans', f.id)} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger }}>Delete</button>
+                            <button onClick={() => handleDelete('floorplans', f.id)} style={{ ...buttonStyle, background: '#FEF2F2', color: brand.danger }}>Delete</button>
                           </td>
                         </tr>
                       ))}
@@ -1563,7 +1700,7 @@ export default function AdminPanel() {
           {activeTab === 'unitlines' && (
             <div>
               <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em' }}>Unit Lines</h1>
+                <h1 style={{ fontSize: 22, fontWeight: 700, color: brand.text, letterSpacing: '-0.02em' }}>Unit Lines</h1>
                 <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input type="text" placeholder="Search unit lines..." value={searchUnitLines} onChange={(e) => setSearchUnitLines(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <select value={selectedBuildingUL} onChange={(e) => setSelectedBuildingUL(e.target.value)} style={{ ...inputStyle, width: 200 }}>
@@ -1574,21 +1711,21 @@ export default function AdminPanel() {
                     <input type="checkbox" checked={showArchivedUnitLines} onChange={(e) => setShowArchivedUnitLines(e.target.checked)} />
                     Show archived
                   </label>
-                  <button onClick={() => handleAdd('unitlines')} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff' }}>+ Add Unit Line</button>
+                  <button onClick={() => handleAdd('unitlines')} style={{ ...buttonStyle, background: brand.navy, color: '#fff' }}>+ Add Unit Line</button>
                 </div>
               </div>
               <div className="table-wrapper">
-                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', overflow: 'hidden' }}>
+                <div style={{ background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border, overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
-                      <tr style={{ background: brand.bg }}>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Building</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Line Number</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Floor Range</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Floor Plan</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Price</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Status</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Actions</th>
+                      <tr style={{ borderBottom: '1px solid ' + brand.border }}>
+                        <th style={thStyle}>Building</th>
+                        <th style={thStyle}>Line Number</th>
+                        <th style={thStyle}>Floor Range</th>
+                        <th style={thStyle}>Floor Plan</th>
+                        <th style={thStyle}>Price</th>
+                        <th style={thStyle}>Status</th>
+                        <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1597,7 +1734,7 @@ export default function AdminPanel() {
                         const displayPrice = ul.custom_price != null ? `$${ul.custom_price}` : (fp ? `$${fp.price}` : '—');
                         const isEditing = editingId === `unitline-${ul.id}`;
                         return (
-                          <tr key={ul.id} style={{ borderTop: `1px solid ${brand.border}`, opacity: ul.archived ? 0.6 : 1 }}>
+                          <tr key={ul.id} style={{ borderBottom: '1px solid ' + brand.border, opacity: ul.archived ? 0.6 : 1 }}>
                             <td style={{ padding: '16px' }}>
                               {isEditing ? (
                                 <select style={inputStyle} value={editValue.building_id || ''} onChange={(e) => setEditValue({ ...editValue, building_id: e.target.value })}>
@@ -1646,20 +1783,20 @@ export default function AdminPanel() {
                               )}
                             </td>
                             <td style={{ padding: '16px' }}>
-                              <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 12, background: ul.archived ? '#fee2e2' : '#dcfce7', color: ul.archived ? brand.danger : '#16a34a' }}>
+                              <span style={{ fontSize: 11, fontWeight: 500, padding: '3px 8px', borderRadius: 4, background: ul.archived ? '#fee2e2' : '#dcfce7', color: ul.archived ? brand.danger : '#16a34a' }}>
                                 {ul.archived ? 'Archived' : 'Active'}
                               </span>
                             </td>
                             <td style={{ padding: '16px', textAlign: 'right' }}>
                               {isEditing ? (
-                                <button onClick={() => handleSave('unitlines', ul.id)} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', marginRight: 8 }}>Save</button>
+                                <button onClick={() => handleSave('unitlines', ul.id)} style={{ ...buttonStyle, background: brand.navy, color: '#fff', marginRight: 6 }}>Save</button>
                               ) : (
-                                <button onClick={() => { setEditingId(`unitline-${ul.id}`); setEditValue({ building_id: ul.building_id, line_number: ul.line_number, floor_min: ul.floor_min, floor_max: ul.floor_max, floor_plan_id: ul.floor_plan_id || '', custom_price: ul.custom_price ?? '' }); }} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748', marginRight: 8 }}>Edit</button>
+                                <button onClick={() => { setEditingId(`unitline-${ul.id}`); setEditValue({ building_id: ul.building_id, line_number: ul.line_number, floor_min: ul.floor_min, floor_max: ul.floor_max, floor_plan_id: ul.floor_plan_id || '', custom_price: ul.custom_price ?? '' }); }} style={{ ...buttonStyle, background: '#fff', color: brand.text, marginRight: 6, border: '1px solid ' + brand.border }}>Edit</button>
                               )}
-                              <button onClick={() => handleToggleArchive('unitlines', ul.id, ul.archived)} style={{ ...buttonStyle, background: ul.archived ? '#dbeafe' : '#fef3c7', color: ul.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
+                              <button onClick={() => handleToggleArchive('unitlines', ul.id, ul.archived)} style={{ ...buttonStyle, background: ul.archived ? '#DBEAFE' : '#FFFBEB', color: ul.archived ? '#2563EB' : '#D97706', marginRight: 6 }}>
                                 {ul.archived ? 'Unarchive' : 'Archive'}
                               </button>
-                              <button onClick={() => handleDelete('unitlines', ul.id)} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger }}>Delete</button>
+                              <button onClick={() => handleDelete('unitlines', ul.id)} style={{ ...buttonStyle, background: '#FEF2F2', color: brand.danger }}>Delete</button>
                             </td>
                           </tr>
                         );
@@ -1678,17 +1815,17 @@ export default function AdminPanel() {
           {activeTab === 'addons' && (
             <div>
               <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em' }}>Add-Ons</h1>
+                <h1 style={{ fontSize: 22, fontWeight: 700, color: brand.text, letterSpacing: '-0.02em' }}>Add-Ons</h1>
                 <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input type="text" placeholder="Search add-ons..." value={searchAddOns} onChange={(e) => setSearchAddOns(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
                     <input type="checkbox" checked={showArchivedAddOns} onChange={(e) => setShowArchivedAddOns(e.target.checked)} />
                     Show archived
                   </label>
-                  <button onClick={() => handleAdd('addons')} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff' }}>+ Add Add-On</button>
+                  <button onClick={() => handleAdd('addons')} style={{ ...buttonStyle, background: brand.navy, color: '#fff' }}>+ Add Add-On</button>
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderRadius: 16, border: '1px solid #E8EDFC', background: '#F8FAFF', marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', borderRadius: 8, border: '1px solid ' + brand.border, background: '#fff', marginBottom: 16 }}>
                 <div>
                   <span style={{ fontSize: 14, fontWeight: 600, color: brand.text }}>Add-Ons section on booking page</span>
                   <p style={{ fontSize: 13, color: brand.textLight, margin: '2px 0 0' }}>
@@ -1705,19 +1842,19 @@ export default function AdminPanel() {
                 </button>
               </div>
               <div className="table-wrapper">
-                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', overflow: 'hidden' }}>
+                <div style={{ background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border, overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
-                      <tr style={{ background: brand.bg }}>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Name</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Price</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Status</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Actions</th>
+                      <tr style={{ borderBottom: '1px solid ' + brand.border }}>
+                        <th style={thStyle}>Name</th>
+                        <th style={thStyle}>Price</th>
+                        <th style={thStyle}>Status</th>
+                        <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredAddOnsList.map(a => (
-                        <tr key={a.id} style={{ borderTop: `1px solid ${brand.border}`, opacity: a.archived ? 0.6 : 1 }}>
+                        <tr key={a.id} style={{ borderBottom: '1px solid ' + brand.border, opacity: a.archived ? 0.6 : 1 }}>
                           <td style={{ padding: '16px' }}>
                             {editingId === `addon-${a.id}` ? (
                               <input style={inputStyle} value={editValue.name || ''} onChange={(e) => setEditValue({ ...editValue, name: e.target.value })} />
@@ -1734,7 +1871,7 @@ export default function AdminPanel() {
                           </td>
                           <td style={{ padding: '16px' }}>
                             <span style={{
-                              fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 12,
+                              fontSize: 11, fontWeight: 500, padding: '3px 8px', borderRadius: 4,
                               background: a.archived ? '#fee2e2' : '#dcfce7',
                               color: a.archived ? brand.danger : '#16a34a',
                             }}>
@@ -1743,14 +1880,14 @@ export default function AdminPanel() {
                           </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
                             {editingId === `addon-${a.id}` ? (
-                              <button onClick={() => handleSave('addons', a.id)} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', marginRight: 8 }}>Save</button>
+                              <button onClick={() => handleSave('addons', a.id)} style={{ ...buttonStyle, background: brand.navy, color: '#fff', marginRight: 6 }}>Save</button>
                             ) : (
-                              <button onClick={() => { setEditingId(`addon-${a.id}`); setEditValue({ name: a.name, price: a.price }); }} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748', marginRight: 8 }}>Edit</button>
+                              <button onClick={() => { setEditingId(`addon-${a.id}`); setEditValue({ name: a.name, price: a.price }); }} style={{ ...buttonStyle, background: '#fff', color: brand.text, marginRight: 6, border: '1px solid ' + brand.border }}>Edit</button>
                             )}
-                            <button onClick={() => handleToggleArchive('addons', a.id, a.archived)} style={{ ...buttonStyle, background: a.archived ? '#dbeafe' : '#fef3c7', color: a.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
+                            <button onClick={() => handleToggleArchive('addons', a.id, a.archived)} style={{ ...buttonStyle, background: a.archived ? '#DBEAFE' : '#FFFBEB', color: a.archived ? '#2563EB' : '#D97706', marginRight: 6 }}>
                               {a.archived ? 'Unarchive' : 'Archive'}
                             </button>
-                            <button onClick={() => handleDelete('addons', a.id)} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger }}>Delete</button>
+                            <button onClick={() => handleDelete('addons', a.id)} style={{ ...buttonStyle, background: '#FEF2F2', color: brand.danger }}>Delete</button>
                           </td>
                         </tr>
                       ))}
@@ -1765,32 +1902,32 @@ export default function AdminPanel() {
           {activeTab === 'workers' && (
             <div>
               <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em' }}>Workers</h1>
+                <h1 style={{ fontSize: 22, fontWeight: 700, color: brand.text, letterSpacing: '-0.02em' }}>Workers</h1>
                 <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input type="text" placeholder="Search workers..." value={searchWorkers} onChange={(e) => setSearchWorkers(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
                     <input type="checkbox" checked={showArchivedWorkers} onChange={(e) => setShowArchivedWorkers(e.target.checked)} />
                     Show archived
                   </label>
-                  <button onClick={() => handleAdd('workers')} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff' }}>+ Add Worker</button>
+                  <button onClick={() => handleAdd('workers')} style={{ ...buttonStyle, background: brand.navy, color: '#fff' }}>+ Add Worker</button>
                 </div>
               </div>
               <div className="table-wrapper">
-                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', overflow: 'hidden' }}>
+                <div style={{ background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border, overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
-                      <tr style={{ background: brand.bg }}>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Name</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Email</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Phone</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Assigned Jobs</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Status</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Actions</th>
+                      <tr style={{ borderBottom: '1px solid ' + brand.border }}>
+                        <th style={thStyle}>Name</th>
+                        <th style={thStyle}>Email</th>
+                        <th style={thStyle}>Phone</th>
+                        <th style={thStyle}>Assigned Jobs</th>
+                        <th style={thStyle}>Status</th>
+                        <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredWorkers.map(w => (
-                        <tr key={w.id} style={{ borderTop: `1px solid ${brand.border}`, opacity: w.archived ? 0.6 : 1 }}>
+                        <tr key={w.id} style={{ borderBottom: '1px solid ' + brand.border, opacity: w.archived ? 0.6 : 1 }}>
                           <td style={{ padding: '16px' }}>
                             {editingId === `worker-${w.id}` ? (
                               <input style={inputStyle} value={editValue.name || ''} onChange={(e) => setEditValue({ ...editValue, name: e.target.value })} />
@@ -1816,20 +1953,20 @@ export default function AdminPanel() {
                             {bookings.filter(b => b.worker_id === w.id && b.status === 'upcoming').length} upcoming
                           </td>
                           <td style={{ padding: '16px' }}>
-                            <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 12, background: w.archived ? '#fee2e2' : '#dcfce7', color: w.archived ? brand.danger : '#16a34a' }}>
+                            <span style={{ fontSize: 11, fontWeight: 500, padding: '3px 8px', borderRadius: 4, background: w.archived ? '#fee2e2' : '#dcfce7', color: w.archived ? brand.danger : '#16a34a' }}>
                               {w.archived ? 'Archived' : 'Active'}
                             </span>
                           </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
                             {editingId === `worker-${w.id}` ? (
-                              <button onClick={() => handleSave('workers', w.id)} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', marginRight: 8 }}>Save</button>
+                              <button onClick={() => handleSave('workers', w.id)} style={{ ...buttonStyle, background: brand.navy, color: '#fff', marginRight: 6 }}>Save</button>
                             ) : (
-                              <button onClick={() => { setEditingId(`worker-${w.id}`); setEditValue({ name: w.name, email: w.email, phone: w.phone }); }} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748', marginRight: 8 }}>Edit</button>
+                              <button onClick={() => { setEditingId(`worker-${w.id}`); setEditValue({ name: w.name, email: w.email, phone: w.phone }); }} style={{ ...buttonStyle, background: '#fff', color: brand.text, marginRight: 6, border: '1px solid ' + brand.border }}>Edit</button>
                             )}
-                            <button onClick={() => handleToggleArchive('workers', w.id, w.archived)} style={{ ...buttonStyle, background: w.archived ? '#dbeafe' : '#fef3c7', color: w.archived ? '#2563eb' : '#d97706', marginRight: 8 }}>
+                            <button onClick={() => handleToggleArchive('workers', w.id, w.archived)} style={{ ...buttonStyle, background: w.archived ? '#DBEAFE' : '#FFFBEB', color: w.archived ? '#2563EB' : '#D97706', marginRight: 6 }}>
                               {w.archived ? 'Unarchive' : 'Archive'}
                             </button>
-                            <button onClick={() => handleDelete('workers', w.id)} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger }}>Delete</button>
+                            <button onClick={() => handleDelete('workers', w.id)} style={{ ...buttonStyle, background: '#FEF2F2', color: brand.danger }}>Delete</button>
                           </td>
                         </tr>
                       ))}
@@ -1846,10 +1983,10 @@ export default function AdminPanel() {
           {/* AVAILABILITY TAB */}
           {activeTab === 'availability' && (
             <div>
-              <h1 style={{ fontSize: 24, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em', marginBottom: 20 }}>Availability</h1>
+              <h1 style={{ fontSize: 22, fontWeight: 700, color: brand.text, letterSpacing: '-0.02em', marginBottom: 20 }}>Availability</h1>
 
               {/* Sub-tab navigation */}
-              <div style={{ display: 'inline-flex', gap: 4, marginBottom: 28, background: '#EEF1FC', borderRadius: 12, padding: 4 }}>
+              <div style={{ display: 'inline-flex', gap: 1, marginBottom: 24, background: '#F1F5F9', borderRadius: 8, padding: 3 }}>
                 {[
                   { id: 'weekly', label: 'Weekly Schedules' },
                   { id: 'blocked', label: 'Blocked Dates' },
@@ -1859,11 +1996,12 @@ export default function AdminPanel() {
                     key={tab.id}
                     onClick={() => setAvailabilitySubTab(tab.id)}
                     style={{
-                      padding: '10px 20px', fontSize: 14, fontWeight: 600,
-                      color: availabilitySubTab === tab.id ? '#fff' : '#718096',
-                      background: availabilitySubTab === tab.id ? '#9AA8E0' : 'transparent',
-                      border: 'none', borderRadius: 10, cursor: 'pointer',
-                      transition: 'all 0.2s ease',
+                      padding: '7px 16px', fontSize: 13, fontWeight: 500,
+                      color: availabilitySubTab === tab.id ? brand.text : brand.textLight,
+                      background: availabilitySubTab === tab.id ? '#fff' : 'transparent',
+                      border: 'none', borderRadius: 6, cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                      boxShadow: availabilitySubTab === tab.id ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
                     }}
                   >
                     {tab.label}
@@ -1886,13 +2024,12 @@ export default function AdminPanel() {
                             <div
                               key={w.id}
                               onClick={() => { setSelectedWorkerAvail(w.id); setEditingAvailability(getWorkerAvailability(w.id)); }}
+                              className="table-row-hover"
                               style={{
-                                background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', padding: '16px 20px',
+                                background: '#fff', borderRadius: 8, border: '1px solid ' + brand.border, padding: '14px 18px',
                                 cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                transition: 'box-shadow 0.2s',
+                                transition: 'all 0.15s',
                               }}
-                              onMouseOver={(e) => e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)'}
-                              onMouseOut={(e) => e.currentTarget.style.boxShadow = 'none'}
                             >
                               <div>
                                 <p style={{ fontWeight: 600, color: brand.text, fontSize: 15, marginBottom: 4 }}>{w.name}</p>
@@ -1933,7 +2070,7 @@ export default function AdminPanel() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                           <button
                             onClick={() => { setSelectedWorkerAvail(''); setEditingAvailability(null); }}
-                            style={{ ...buttonStyle, background: brand.bg, color: brand.text, border: `1px solid ${brand.border}`, padding: '6px 12px' }}
+                            style={{ ...buttonStyle, background: '#fff', color: brand.text, border: '1px solid ' + brand.border, padding: '6px 12px' }}
                           >
                             &larr; Back
                           </button>
@@ -1944,19 +2081,19 @@ export default function AdminPanel() {
                       </div>
 
                       <div className="table-wrapper">
-                        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', overflow: 'hidden' }}>
+                        <div style={{ background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border, overflow: 'hidden' }}>
                           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
                               <tr style={{ background: brand.bg }}>
-                                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Day</th>
+                                <th style={thStyle}>Day</th>
                                 <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Day Off</th>
-                                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Start Time</th>
-                                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>End Time</th>
+                                <th style={thStyle}>Start Time</th>
+                                <th style={thStyle}>End Time</th>
                               </tr>
                             </thead>
                             <tbody>
                               {(editingAvailability || getWorkerAvailability(selectedWorkerAvail)).map((day, idx) => (
-                                <tr key={idx} style={{ borderTop: `1px solid ${brand.border}`, opacity: day.is_active ? 1 : 0.5 }}>
+                                <tr key={idx} style={{ borderBottom: '1px solid ' + brand.border, opacity: day.is_active ? 1 : 0.5 }}>
                                   <td style={{ padding: '16px', fontWeight: 500, color: brand.text }}>{DAY_NAMES[idx]}</td>
                                   <td style={{ padding: '16px', textAlign: 'center' }}>
                                     <input
@@ -2008,13 +2145,13 @@ export default function AdminPanel() {
                         <button
                           onClick={() => handleSaveWeeklySchedule(selectedWorkerAvail)}
                           disabled={availSaving}
-                          style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', opacity: availSaving ? 0.6 : 1 }}
+                          style={{ ...buttonStyle, background: brand.navy, color: '#fff', opacity: availSaving ? 0.6 : 1 }}
                         >
                           {availSaving ? 'Saving...' : 'Save Schedule'}
                         </button>
                         <button
                           onClick={() => { setSelectedWorkerAvail(''); setEditingAvailability(null); }}
-                          style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748' }}
+                          style={{ ...buttonStyle, background: '#fff', color: brand.text, border: '1px solid ' + brand.border }}
                         >
                           Cancel
                         </button>
@@ -2042,11 +2179,11 @@ export default function AdminPanel() {
                       </div>
 
                       {/* Calendar */}
-                      <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', padding: 16, marginBottom: 16 }}>
+                      <div style={{ background: '#fff', borderRadius: 8, border: '1px solid ' + brand.border, padding: 16, marginBottom: 16 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                          <button onClick={() => { if (calendarMonth === 0) { setCalendarMonth(11); setCalendarYear(calendarYear - 1); } else setCalendarMonth(calendarMonth - 1); }} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748', padding: '6px 14px' }}>&lt;</button>
+                          <button onClick={() => { if (calendarMonth === 0) { setCalendarMonth(11); setCalendarYear(calendarYear - 1); } else setCalendarMonth(calendarMonth - 1); }} style={{ ...buttonStyle, background: '#fff', color: brand.text, padding: '5px 12px', border: '1px solid ' + brand.border }}>&lt;</button>
                           <span style={{ fontSize: 16, fontWeight: 600, color: brand.text }}>{MONTH_NAMES[calendarMonth]} {calendarYear}</span>
-                          <button onClick={() => { if (calendarMonth === 11) { setCalendarMonth(0); setCalendarYear(calendarYear + 1); } else setCalendarMonth(calendarMonth + 1); }} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748', padding: '6px 14px' }}>&gt;</button>
+                          <button onClick={() => { if (calendarMonth === 11) { setCalendarMonth(0); setCalendarYear(calendarYear + 1); } else setCalendarMonth(calendarMonth + 1); }} style={{ ...buttonStyle, background: '#fff', color: brand.text, padding: '5px 12px', border: '1px solid ' + brand.border }}>&gt;</button>
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
                           {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map(d => (
@@ -2083,8 +2220,8 @@ export default function AdminPanel() {
 
                       {/* Add Blocked Date Form */}
                       {blockedDateForm.worker_id && blockedDateForm.blocked_date && (
-                        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', padding: 16 }}>
-                          <p style={{ fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 12 }}>
+                        <div style={{ background: '#fff', borderRadius: 8, border: '1px solid ' + brand.border, padding: 16 }}>
+                          <p style={{ fontSize: 13, fontWeight: 600, color: brand.text, marginBottom: 12 }}>
                             Block {formatDate(blockedDateForm.blocked_date)} for {workers.find(w => w.id === blockedDateForm.worker_id)?.name}
                           </p>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
@@ -2119,7 +2256,7 @@ export default function AdminPanel() {
                               style={inputStyle}
                             />
                           </div>
-                          <button onClick={handleAddBlockedDate} style={{ ...buttonStyle, background: '#dc2626', color: '#fff' }}>
+                          <button onClick={handleAddBlockedDate} style={{ ...buttonStyle, background: brand.danger, color: '#fff' }}>
                             Block This Date
                           </button>
                         </div>
@@ -2131,7 +2268,7 @@ export default function AdminPanel() {
                       <p style={{ fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 12 }}>
                         Upcoming Blocked Dates
                       </p>
-                      <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', overflow: 'hidden' }}>
+                      <div style={{ background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border, overflow: 'hidden' }}>
                         {blockedDates
                           .filter(bd => !blockedDateForm.worker_id || bd.worker_id === blockedDateForm.worker_id)
                           .filter(bd => bd.blocked_date >= formatDateISO(new Date()))
@@ -2150,7 +2287,7 @@ export default function AdminPanel() {
                                   {bd.reason && ` · ${bd.reason}`}
                                 </p>
                               </div>
-                              <button onClick={() => handleDeleteBlockedDate(bd.id)} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger, fontSize: 12, padding: '6px 10px' }}>
+                              <button onClick={() => handleDeleteBlockedDate(bd.id)} style={{ ...buttonStyle, background: '#FEF2F2', color: brand.danger, fontSize: 12, padding: '5px 10px' }}>
                                 Delete
                               </button>
                             </div>
@@ -2170,8 +2307,8 @@ export default function AdminPanel() {
               {availabilitySubTab === 'overrides' && (
                 <div>
                   {/* Add Override Form */}
-                  <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', padding: 24, marginBottom: 24 }}>
-                    <p style={{ fontSize: 16, fontWeight: 600, color: brand.text, marginBottom: 16 }}>Add Schedule Override</p>
+                  <div style={{ background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border, padding: 20, marginBottom: 24 }}>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 14 }}>Add Schedule Override</p>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
                       <div>
                         <label style={{ fontSize: 12, color: brand.textLight, display: 'block', marginBottom: 4 }}>Worker</label>
@@ -2204,30 +2341,30 @@ export default function AdminPanel() {
                         <input type="text" value={overrideForm.reason} onChange={(e) => setOverrideForm({ ...overrideForm, reason: e.target.value })} placeholder="e.g. Working Saturday" style={inputStyle} />
                       </div>
                     </div>
-                    <button onClick={handleAddOverride} style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', marginTop: 16 }}>
+                    <button onClick={handleAddOverride} style={{ ...buttonStyle, background: brand.navy, color: '#fff', marginTop: 14 }}>
                       + Add Override
                     </button>
                   </div>
 
                   {/* Overrides List */}
                   <div className="table-wrapper">
-                    <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', overflow: 'hidden' }}>
+                    <div style={{ background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border, overflow: 'hidden' }}>
                       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                           <tr style={{ background: brand.bg }}>
-                            <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Worker</th>
-                            <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Date</th>
-                            <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Hours</th>
-                            <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Status</th>
-                            <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Reason</th>
-                            <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Actions</th>
+                            <th style={thStyle}>Worker</th>
+                            <th style={thStyle}>Date</th>
+                            <th style={thStyle}>Hours</th>
+                            <th style={thStyle}>Status</th>
+                            <th style={thStyle}>Reason</th>
+                            <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
                           </tr>
                         </thead>
                         <tbody>
                           {scheduleOverrides
                             .sort((a, b) => a.override_date.localeCompare(b.override_date))
                             .map(so => (
-                              <tr key={so.id} style={{ borderTop: `1px solid ${brand.border}` }}>
+                              <tr key={so.id} style={{ borderBottom: '1px solid ' + brand.border }}>
                                 <td style={{ padding: '16px', fontWeight: 500, color: brand.text }}>
                                   {workers.find(w => w.id === so.worker_id)?.name || 'Unknown'}
                                 </td>
@@ -2244,7 +2381,7 @@ export default function AdminPanel() {
                                 </td>
                                 <td style={{ padding: '16px', color: brand.textLight, fontSize: 13 }}>{so.reason || '--'}</td>
                                 <td style={{ padding: '16px', textAlign: 'right' }}>
-                                  <button onClick={() => handleDeleteOverride(so.id)} style={{ ...buttonStyle, background: '#fee2e2', color: brand.danger, fontSize: 12, padding: '6px 12px' }}>
+                                  <button onClick={() => handleDeleteOverride(so.id)} style={{ ...buttonStyle, background: '#FEF2F2', color: brand.danger, fontSize: 12, padding: '5px 10px' }}>
                                     Delete
                                   </button>
                                 </td>
@@ -2266,9 +2403,9 @@ export default function AdminPanel() {
           {/* SETTINGS TAB */}
           {activeTab === 'settings' && (
             <div>
-              <h1 style={{ fontSize: 24, fontWeight: 800, color: '#2D3748', letterSpacing: '-0.02em', marginBottom: 24 }}>Settings</h1>
-              <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC', padding: 24, maxWidth: 600 }}>
-                <p style={{ fontSize: 16, fontWeight: 600, color: brand.text, marginBottom: 20 }}>Scheduling Configuration</p>
+              <h1 style={{ fontSize: 22, fontWeight: 700, color: brand.text, letterSpacing: '-0.02em', marginBottom: 24 }}>Settings</h1>
+              <div style={{ background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border, padding: 24, maxWidth: 600 }}>
+                <p style={{ fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 20 }}>Scheduling Configuration</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
                   {[
                     { key: 'slot_duration_minutes', label: 'Slot Duration', description: 'Length of each booking time slot', options: SLOT_DURATION_OPTIONS },
@@ -2303,12 +2440,12 @@ export default function AdminPanel() {
                   <button
                     onClick={handleSaveServiceSettings}
                     disabled={availSaving || !editingSettings}
-                    style={{ ...buttonStyle, background: '#9AA8E0', color: '#fff', opacity: (availSaving || !editingSettings) ? 0.6 : 1 }}
+                    style={{ ...buttonStyle, background: brand.navy, color: '#fff', opacity: (availSaving || !editingSettings) ? 0.6 : 1 }}
                   >
                     {availSaving ? 'Saving...' : 'Save Settings'}
                   </button>
                   {editingSettings && (
-                    <button onClick={() => setEditingSettings(null)} style={{ ...buttonStyle, background: '#EEF1FC', color: '#2D3748' }}>
+                    <button onClick={() => setEditingSettings(null)} style={{ ...buttonStyle, background: '#fff', color: brand.text, border: '1px solid ' + brand.border }}>
                       Cancel
                     </button>
                   )}

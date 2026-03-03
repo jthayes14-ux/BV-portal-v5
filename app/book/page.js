@@ -902,7 +902,7 @@ function BookingFlowInner() {
                               style={{
                                 width: '100%', aspectRatio: '1', border: 'none',
                                 borderRadius: 10,
-                                background: isSelected ? brand.gold : 'transparent',
+                                background: isSelected ? '#7B8EC8' : 'transparent',
                                 color: isSelected ? '#fff' : disabled ? '#D1D5DB' : brand.text,
                                 fontSize: 14, fontWeight: isSelected || isToday ? 700 : 500,
                                 cursor: disabled ? 'default' : 'pointer',
@@ -910,66 +910,78 @@ function BookingFlowInner() {
                                 position: 'relative',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+                                boxShadow: isSelected ? '0 2px 8px rgba(123, 142, 200, 0.4)' : 'none',
+                                transform: isSelected ? 'scale(1.08)' : 'scale(1)',
                               }}
                             >
                               {day}
                               {isToday && !isSelected && (
-                                <div style={{ position: 'absolute', bottom: 3, left: '50%', transform: 'translateX(-50%)', width: 4, height: 4, borderRadius: '50%', background: brand.gold }} />
+                                <div style={{ position: 'absolute', bottom: 3, left: '50%', transform: 'translateX(-50%)', width: 4, height: 4, borderRadius: '50%', background: '#7B8EC8' }} />
                               )}
                             </button>
                           );
                         })}
                       </div>
 
-                      {/* Time slot dropdown — inline below calendar */}
-                      {date && (
-                        <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${brand.borderLight}`, animation: 'fadeIn 0.25s ease' }}>
-                          {slotsLoading ? (
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '12px 0', color: brand.textLight }}>
-                              <div style={{ width: 16, height: 16, border: `2px solid ${brand.borderLight}`, borderTopColor: brand.gold, borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
-                              <span style={{ fontSize: 14, fontWeight: 500 }}>Checking availability...</span>
-                            </div>
-                          ) : slotsMessage ? (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', background: '#FFFBEB', borderRadius: 10, border: '1px solid #FDE68A' }}>
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                              <span style={{ fontSize: 14, color: '#92400E', fontWeight: 500 }}>{slotsMessage}</span>
-                            </div>
-                          ) : (
-                            <div>
-                              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: brand.textMuted, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                                Available times for {new Date(date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                              </label>
-                              <div style={{ position: 'relative' }}>
-                                <select
-                                  value={time}
-                                  onChange={(e) => {
-                                    setTime(e.target.value);
-                                    const slot = availableSlots.find(s => s.label === e.target.value);
-                                    setAssignedWorkerId(slot && slot.workerIds && slot.workerIds.length > 0 ? slot.workerIds[0] : null);
-                                  }}
-                                  style={{
-                                    width: '100%', padding: '14px 44px 14px 16px', fontSize: 15, fontWeight: 600,
-                                    border: time ? `2px solid ${brand.gold}` : `1px solid ${brand.border}`,
-                                    borderRadius: 12, background: time ? brand.goldLight : brand.bgCard,
-                                    color: time ? brand.text : brand.textLight,
-                                    cursor: 'pointer', appearance: 'none', outline: 'none',
-                                    transition: 'all 0.2s ease', boxSizing: 'border-box',
-                                    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-                                  }}
-                                >
-                                  <option value="">Select a time</option>
-                                  {availableSlots.map(slot => (
-                                    <option key={slot.label} value={slot.label}>{slot.label}</option>
-                                  ))}
-                                </select>
-                                <div style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={time ? brand.gold : brand.textMuted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                      {/* Time slot panel — expands below calendar when date is selected */}
+                      <div className="cal-time-panel" style={{
+                        overflow: 'hidden',
+                        maxHeight: date ? 200 : 0,
+                        opacity: date ? 1 : 0,
+                        marginTop: date ? 16 : 0,
+                        paddingTop: date ? 16 : 0,
+                        borderTop: date ? `1px solid ${brand.borderLight}` : 'none',
+                        transition: 'max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, margin-top 0.3s ease, padding-top 0.3s ease',
+                      }}>
+                        {date && (
+                          <>
+                            {slotsLoading ? (
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '12px 0', color: brand.textLight }}>
+                                <div style={{ width: 16, height: 16, border: `2px solid ${brand.borderLight}`, borderTopColor: '#7B8EC8', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
+                                <span style={{ fontSize: 14, fontWeight: 500 }}>Checking availability...</span>
+                              </div>
+                            ) : slotsMessage ? (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', background: '#FFFBEB', borderRadius: 10, border: '1px solid #FDE68A' }}>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                <span style={{ fontSize: 14, color: '#92400E', fontWeight: 500 }}>{slotsMessage}</span>
+                              </div>
+                            ) : (
+                              <div>
+                                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: brand.textMuted, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                                  Available times for {new Date(date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                                </label>
+                                <div style={{ position: 'relative' }}>
+                                  <select
+                                    value={time}
+                                    onChange={(e) => {
+                                      setTime(e.target.value);
+                                      const slot = availableSlots.find(s => s.label === e.target.value);
+                                      setAssignedWorkerId(slot && slot.workerIds && slot.workerIds.length > 0 ? slot.workerIds[0] : null);
+                                    }}
+                                    style={{
+                                      width: '100%', padding: '14px 44px 14px 16px', fontSize: 15, fontWeight: 600,
+                                      border: time ? '2px solid #7B8EC8' : `1px solid ${brand.border}`,
+                                      borderRadius: 12, background: time ? '#EEF1FC' : brand.bgCard,
+                                      color: time ? brand.text : brand.textLight,
+                                      cursor: 'pointer', appearance: 'none', outline: 'none',
+                                      transition: 'all 0.2s ease', boxSizing: 'border-box',
+                                      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+                                    }}
+                                  >
+                                    <option value="">Select a time</option>
+                                    {availableSlots.map(slot => (
+                                      <option key={slot.label} value={slot.label}>{slot.label}</option>
+                                    ))}
+                                  </select>
+                                  <div style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={time ? '#7B8EC8' : brand.textMuted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
+                            )}
+                          </>
+                        )}
+                      </div>
                     </div>
                   );
                 })()}
@@ -1148,11 +1160,12 @@ function BookingFlowInner() {
         }
         select option { padding: 12px; }
         .cal-day:not(:disabled):hover {
-          background: #F5F0DC !important;
+          background: #E8EDFC !important;
         }
         @media (max-width: 480px) {
           .cal-grid { gap: 1px !important; }
           .cal-day { font-size: 13px !important; border-radius: 8px !important; }
+          .cal-time-panel { max-height: 220px !important; }
         }
       `}</style>
     </div>

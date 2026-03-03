@@ -7,10 +7,15 @@
 }
 
 html, body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: #fafafa;
-  color: #1a1a1a;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #F8FAFC;
+  color: #1E293B;
   -webkit-text-size-adjust: 100%;
+}
+
+/* Table row hover */
+.table-row-hover:hover {
+  background-color: #F8FAFC !important;
 }
 
 /* ===== Hamburger Menu System ===== */
@@ -40,24 +45,26 @@ html, body {
   top: 100%;
   left: 0;
   right: 0;
-  background: white;
-  border-bottom: 1px solid #e0e0e0;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-  padding: 16px;
-  gap: 8px;
+  background: #1B2B5A;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  padding: 12px;
+  gap: 4px;
   z-index: 200;
   animation: slideDown 0.2s ease;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 .mobile-menu.open a,
 .mobile-menu.open button {
   width: 100%;
-  padding: 14px 16px !important;
-  font-size: 16px !important;
-  text-align: center;
-  border-radius: 8px !important;
+  padding: 12px 16px !important;
+  font-size: 14px !important;
+  text-align: left;
+  border-radius: 6px !important;
   text-decoration: none;
-  display: block;
+  display: flex;
 }
 
 @keyframes slideDown {
@@ -211,32 +218,17 @@ html, body {
     flex-direction: column !important;
   }
   .admin-sidebar {
-    width: 100% !important;
-    min-height: auto !important;
-    border-right: none !important;
-    border-bottom: 1px solid #e0e0e0;
-    padding: 12px 0 !important;
-    display: flex !important;
-    flex-direction: row !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch;
+    display: none !important;
   }
-  .admin-sidebar button {
-    border-left: none !important;
-    border-bottom: 3px solid transparent !important;
-    white-space: nowrap;
-    padding: 10px 16px !important;
-    flex-shrink: 0;
+  .admin-header {
+    display: flex !important;
+    position: sticky;
+    top: 0;
+    z-index: 100;
   }
   .admin-main {
     padding: 16px !important;
-  }
-  .admin-header {
-    padding: 12px 16px !important;
-    position: relative;
-  }
-  .admin-header-right {
-    display: none !important;
+    min-height: auto !important;
   }
   .table-wrapper {
     overflow-x: auto;
@@ -248,7 +240,7 @@ html, body {
     gap: 12px !important;
   }
   .admin-tab-header h1 {
-    font-size: 20px !important;
+    font-size: 18px !important;
   }
   .admin-filter-controls {
     flex-direction: column !important;
@@ -322,7 +314,7 @@ html, body {
 /* ===== Small mobile breakpoint (480px) ===== */
 @media (max-width: 480px) {
   .admin-sidebar {
-    gap: 0 !important;
+    display: none !important;
   }
   .social-login-row {
     flex-direction: column !important;

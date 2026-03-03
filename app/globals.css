@@ -206,10 +206,57 @@ html, body {
     justify-content: space-between !important;
   }
 
-  /* --- Admin Panel (legacy - see admin.css for new styles) --- */
+  /* --- Admin Panel --- */
+  .admin-layout {
+    flex-direction: column !important;
+  }
+  .admin-sidebar {
+    width: 100% !important;
+    min-height: auto !important;
+    border-right: none !important;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 12px 0 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  .admin-sidebar button {
+    border-left: none !important;
+    border-bottom: 3px solid transparent !important;
+    white-space: nowrap;
+    padding: 10px 16px !important;
+    flex-shrink: 0;
+  }
+  .admin-main {
+    padding: 16px !important;
+  }
+  .admin-header {
+    padding: 12px 16px !important;
+    position: relative;
+  }
+  .admin-header-right {
+    display: none !important;
+  }
   .table-wrapper {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+  }
+  .admin-tab-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+  .admin-tab-header h1 {
+    font-size: 20px !important;
+  }
+  .admin-filter-controls {
+    flex-direction: column !important;
+    width: 100%;
+  }
+  .admin-filter-controls select,
+  .admin-filter-controls button {
+    width: 100% !important;
   }
 
   /* --- Admin Calendar --- */
@@ -274,6 +321,9 @@ html, body {
 
 /* ===== Small mobile breakpoint (480px) ===== */
 @media (max-width: 480px) {
+  .admin-sidebar {
+    gap: 0 !important;
+  }
   .social-login-row {
     flex-direction: column !important;
   }

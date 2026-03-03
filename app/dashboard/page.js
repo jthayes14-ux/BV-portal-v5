@@ -44,6 +44,8 @@ export default function CustomerDashboard() {
   const [allWorkers, setAllWorkers] = useState([]);
   const [assignedWorkerId, setAssignedWorkerId] = useState(null);
   const [maxDate, setMaxDate] = useState('');
+  const [calendarMonth, setCalendarMonth] = useState(new Date().getMonth());
+  const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -279,6 +281,9 @@ export default function CustomerDashboard() {
     setAvailableSlots([]);
     setSlotsMessage('');
     setAssignedWorkerId(null);
+    const now = new Date();
+    setCalendarMonth(now.getMonth());
+    setCalendarYear(now.getFullYear());
   };
 
   // Compute available slots when reschedule date changes
@@ -707,73 +712,176 @@ export default function CustomerDashboard() {
               </div>
             </div>
 
-            <div style={{ padding: '24px 28px' }}>
-              {/* Current schedule */}
-              <div style={{ background: '#F8FAFF', borderRadius: 14, padding: '16px 20px', marginBottom: 28, display: 'flex', alignItems: 'center', gap: 14 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 12, background: '#E8EDFC', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#718096" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                </div>
-                <div>
-                  <p style={{ fontSize: 12, fontWeight: 600, color: '#718096', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Current</p>
-                  <p style={{ fontSize: 15, fontWeight: 600, color: '#2D3748' }}>{formatDate(rescheduleBooking.booking_date)}</p>
-                  <p style={{ fontSize: 14, color: '#718096' }}>{rescheduleBooking.booking_time}</p>
-                </div>
+            <div style={{ padding: '20px 28px 24px' }}>
+              {/* Current schedule pill */}
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#F8FAFF', borderRadius: 100, padding: '8px 16px', marginBottom: 20 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9AA8E0" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span style={{ fontSize: 13, fontWeight: 600, color: '#718096' }}>
+                  Currently: {formatDate(rescheduleBooking.booking_date)} at {rescheduleBooking.booking_time}
+                </span>
               </div>
 
-              {/* New Date */}
-              <div style={{ marginBottom: 24 }}>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#2D3748', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>New Date</label>
-                <input
-                  type="date"
-                  value={rescheduleDate}
-                  onChange={(e) => { setRescheduleDate(e.target.value); setRescheduleTime(''); }}
-                  min={today}
-                  max={maxDate || undefined}
-                  style={{
-                    width: '100%', padding: '16px 18px', fontSize: 15,
-                    border: '1.5px solid #e5e5e5', borderRadius: 14,
-                    boxSizing: 'border-box', background: '#fff',
-                    outline: 'none', transition: 'border-color 0.2s',
-                    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = '#9AA8E0'}
-                  onBlur={(e) => e.target.style.borderColor = '#e5e5e5'}
-                />
-              </div>
+              {/* Custom inline calendar */}
+              {(() => {
+                const todayObj = new Date();
+                todayObj.setHours(0, 0, 0, 0);
+                const maxDateObj = maxDate ? new Date(maxDate + 'T00:00:00') : null;
 
-              {/* New Time */}
+                const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+                const firstDayOfWeek = new Date(calendarYear, calendarMonth, 1).getDay();
+                const dayNames = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+                const canGoPrev = !(calendarYear === todayObj.getFullYear() && calendarMonth === todayObj.getMonth());
+                const canGoNext = !maxDateObj || new Date(calendarYear, calendarMonth + 1, 1) <= maxDateObj;
+
+                const cells = [];
+                for (let i = 0; i < firstDayOfWeek; i++) cells.push(null);
+                for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+
+                return (
+                  <div>
+                    {/* Month navigation */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                      <button
+                        onClick={() => {
+                          if (!canGoPrev) return;
+                          if (calendarMonth === 0) { setCalendarMonth(11); setCalendarYear(calendarYear - 1); }
+                          else setCalendarMonth(calendarMonth - 1);
+                        }}
+                        disabled={!canGoPrev}
+                        style={{
+                          width: 32, height: 32, borderRadius: 8, border: 'none',
+                          background: canGoPrev ? '#F8FAFF' : 'transparent',
+                          cursor: canGoPrev ? 'pointer' : 'default',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          opacity: canGoPrev ? 1 : 0.25, transition: 'all 0.15s',
+                        }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2D3748" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                      </button>
+                      <span style={{ fontSize: 15, fontWeight: 700, color: '#2D3748', letterSpacing: '-0.01em' }}>
+                        {monthNames[calendarMonth]} {calendarYear}
+                      </span>
+                      <button
+                        onClick={() => {
+                          if (!canGoNext) return;
+                          if (calendarMonth === 11) { setCalendarMonth(0); setCalendarYear(calendarYear + 1); }
+                          else setCalendarMonth(calendarMonth + 1);
+                        }}
+                        disabled={!canGoNext}
+                        style={{
+                          width: 32, height: 32, borderRadius: 8, border: 'none',
+                          background: canGoNext ? '#F8FAFF' : 'transparent',
+                          cursor: canGoNext ? 'pointer' : 'default',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          opacity: canGoNext ? 1 : 0.25, transition: 'all 0.15s',
+                        }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2D3748" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                      </button>
+                    </div>
+
+                    {/* Day name headers */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 0, marginBottom: 4 }}>
+                      {dayNames.map(d => (
+                        <div key={d} style={{ textAlign: 'center', fontSize: 11, fontWeight: 600, color: '#A0AEC0', padding: '4px 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          {d}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Day cells */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
+                      {cells.map((day, i) => {
+                        if (day === null) return <div key={`empty-${i}`} />;
+
+                        const dateStr = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                        const cellDate = new Date(calendarYear, calendarMonth, day);
+                        const isPast = cellDate < todayObj;
+                        const isBeyondMax = maxDateObj && cellDate > maxDateObj;
+                        const disabled = isPast || isBeyondMax;
+                        const isSelected = rescheduleDate === dateStr;
+                        const isToday = cellDate.getTime() === todayObj.getTime();
+
+                        return (
+                          <button
+                            key={day}
+                            disabled={disabled}
+                            onClick={() => {
+                              setRescheduleDate(dateStr);
+                              setRescheduleTime('');
+                            }}
+                            style={{
+                              width: '100%', aspectRatio: '1', border: 'none',
+                              borderRadius: 10,
+                              background: isSelected ? '#9AA8E0' : 'transparent',
+                              color: isSelected ? '#fff' : disabled ? '#D1D5DB' : '#2D3748',
+                              fontSize: 14, fontWeight: isSelected || isToday ? 700 : 500,
+                              cursor: disabled ? 'default' : 'pointer',
+                              transition: 'all 0.15s ease',
+                              position: 'relative',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            }}
+                          >
+                            {day}
+                            {isToday && !isSelected && (
+                              <div style={{ position: 'absolute', bottom: 4, left: '50%', transform: 'translateX(-50%)', width: 4, height: 4, borderRadius: '50%', background: '#9AA8E0' }} />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Time slot dropdown — appears seamlessly after date selection */}
               {rescheduleDate && (
-                <div style={{ marginBottom: 28 }}>
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#2D3748', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>New Time</label>
+                <div style={{ marginTop: 20, animation: 'fadeIn 0.25s ease' }}>
+                  <div style={{ height: 1, background: 'linear-gradient(90deg, transparent, #E8EDFC, transparent)', marginBottom: 16 }} />
                   {slotsLoading ? (
-                    <div style={{ padding: '16px 18px', fontSize: 14, color: '#718096', background: '#F8FAFF', borderRadius: 14, border: '1px solid #E8EDFC', textAlign: 'center' }}>
-                      Checking availability...
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px 0', color: '#718096' }}>
+                      <div style={{ width: 16, height: 16, border: '2px solid #E8EDFC', borderTopColor: '#9AA8E0', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
+                      <span style={{ fontSize: 14, fontWeight: 500 }}>Checking availability...</span>
                     </div>
                   ) : slotsMessage ? (
-                    <div style={{ padding: '16px 18px', fontSize: 14, color: '#92400E', background: '#FFFBEB', borderRadius: 14, border: '1px solid #FDE68A' }}>
-                      {slotsMessage}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', background: '#FFFBEB', borderRadius: 12, border: '1px solid #FDE68A' }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                      <span style={{ fontSize: 14, color: '#92400E', fontWeight: 500 }}>{slotsMessage}</span>
                     </div>
                   ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                      {availableSlots.map(slot => (
-                        <button
-                          key={slot.label}
-                          onClick={() => {
-                            setRescheduleTime(slot.label);
-                            setAssignedWorkerId(slot.workerIds && slot.workerIds.length > 0 ? slot.workerIds[0] : null);
+                    <div style={{ position: 'relative' }}>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#A0AEC0', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                        Available times for {new Date(rescheduleDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </label>
+                      <div style={{ position: 'relative' }}>
+                        <select
+                          value={rescheduleTime}
+                          onChange={(e) => {
+                            setRescheduleTime(e.target.value);
+                            const slot = availableSlots.find(s => s.label === e.target.value);
+                            setAssignedWorkerId(slot && slot.workerIds && slot.workerIds.length > 0 ? slot.workerIds[0] : null);
                           }}
                           style={{
-                            padding: '14px 10px', fontSize: 13, fontWeight: 600,
-                            border: rescheduleTime === slot.label ? '2px solid #9AA8E0' : '1.5px solid #e5e5e5',
-                            borderRadius: 14, cursor: 'pointer',
-                            background: rescheduleTime === slot.label ? '#9AA8E0' : '#fff',
-                            color: rescheduleTime === slot.label ? '#fff' : '#2D3748',
-                            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                            width: '100%', padding: '14px 44px 14px 16px', fontSize: 15, fontWeight: 600,
+                            border: rescheduleTime ? '2px solid #9AA8E0' : '1.5px solid #e5e5e5',
+                            borderRadius: 12, background: rescheduleTime ? '#F8FAFF' : '#fff',
+                            color: rescheduleTime ? '#2D3748' : '#718096',
+                            cursor: 'pointer', appearance: 'none', outline: 'none',
+                            transition: 'all 0.2s ease',
+                            fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
                           }}
                         >
-                          {slot.label}
-                        </button>
-                      ))}
+                          <option value="">Select a time</option>
+                          {availableSlots.map(slot => (
+                            <option key={slot.label} value={slot.label}>{slot.label}</option>
+                          ))}
+                        </select>
+                        <div style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={rescheduleTime ? '#9AA8E0' : '#A0AEC0'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -782,7 +890,7 @@ export default function CustomerDashboard() {
               {rescheduleError && (
                 <div style={{
                   padding: '12px 16px', background: '#FEE2E2', borderRadius: 12,
-                  marginBottom: 20, fontSize: 14, color: '#DC2626', fontWeight: 500,
+                  marginTop: 16, fontSize: 14, color: '#DC2626', fontWeight: 500,
                 }}>
                   {rescheduleError}
                 </div>
@@ -828,6 +936,10 @@ export default function CustomerDashboard() {
         @keyframes scaleIn {
           from { opacity: 0; transform: scale(0.95); }
           to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
       `}</style>
     </div>

@@ -264,7 +264,7 @@ export default function AdminPanel() {
         break;
       case 'unitlines': {
         const defaultBuilding = selectedBuildingUL || buildings[0]?.id;
-        const buildingPlans = floorPlans.filter(fp => fp.building_id === defaultBuilding);
+        const buildingPlans = floorPlans.filter(fp => fp.building_id === defaultBuilding && !fp.archived);
         result = await supabase.from('unit_lines').insert({ building_id: defaultBuilding, line_number: '01', floor_min: 1, floor_max: 99, floor_plan_id: buildingPlans[0]?.id || null, custom_price: null }).select().single();
         if (result.error) { setCrudError('Failed to add: ' + result.error.message); return; }
         if (result.data) { setUnitLines([...unitLines, result.data]); setEditingId(`unitline-${result.data.id}`); setEditValue({ building_id: result.data.building_id, line_number: result.data.line_number, floor_min: result.data.floor_min, floor_max: result.data.floor_max, floor_plan_id: result.data.floor_plan_id || '', custom_price: result.data.custom_price || '' }); }
@@ -299,7 +299,7 @@ export default function AdminPanel() {
 
   const handleAddUnitLineToBuilding = async (buildingId) => {
     setCrudError('');
-    const buildingPlans = floorPlans.filter(fp => fp.building_id === buildingId);
+    const buildingPlans = floorPlans.filter(fp => fp.building_id === buildingId && !fp.archived);
     const result = await supabase.from('unit_lines').insert({ building_id: buildingId, line_number: '01', floor_min: 1, floor_max: 99, floor_plan_id: buildingPlans[0]?.id || null, custom_price: null }).select().single();
     if (result.error) { setCrudError('Failed to add: ' + result.error.message); return; }
     if (result.data) { setUnitLines([...unitLines, result.data]); setEditingId(`unitline-${result.data.id}`); setEditValue({ building_id: result.data.building_id, line_number: result.data.line_number, floor_min: result.data.floor_min, floor_max: result.data.floor_max, floor_plan_id: result.data.floor_plan_id || '', custom_price: result.data.custom_price ?? '' }); }
@@ -319,7 +319,7 @@ export default function AdminPanel() {
         result = await supabase.from('floor_plans').update(editValue).eq('id', id);
         break;
       case 'unitlines': {
-        const payload = { ...editValue, custom_price: editValue.custom_price === '' || editValue.custom_price === null ? null : Number(editValue.custom_price), floor_plan_id: editValue.floor_plan_id || null };
+        const payload = { ...editValue, custom_price: editValue.custom_price === '' || editValue.custom_price === null ? null : Number(editValue.custom_price), floor_plan_id: editValue.floor_plan_id ? Number(editValue.floor_plan_id) : null };
         result = await supabase.from('unit_lines').update(payload).eq('id', id);
         break;
       }
@@ -1862,9 +1862,9 @@ export default function AdminPanel() {
                                       <input style={{ ...inputStyle, width: 55 }} type="number" min="1" value={editValue.floor_min || 1} onChange={(e) => setEditValue({ ...editValue, floor_min: Number(e.target.value) })} />
                                       <span style={{ color: brand.textLight }}>-</span>
                                       <input style={{ ...inputStyle, width: 55 }} type="number" min="1" value={editValue.floor_max || 99} onChange={(e) => setEditValue({ ...editValue, floor_max: Number(e.target.value) })} />
-                                      <select style={{ ...inputStyle, width: 120 }} value={editValue.floor_plan_id || ''} onChange={(e) => setEditValue({ ...editValue, floor_plan_id: e.target.value })}>
+                                      <select style={{ ...inputStyle, width: 120 }} value={editValue.floor_plan_id || ''} onChange={(e) => setEditValue({ ...editValue, floor_plan_id: e.target.value ? Number(e.target.value) : '' })}>
                                         <option value="">— None —</option>
-                                        {floorPlans.filter(f => f.building_id === (editValue.building_id || ul.building_id)).map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+                                        {floorPlans.filter(f => f.building_id === (editValue.building_id || ul.building_id) && !f.archived).map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
                                       </select>
                                       <span style={{ color: brand.textLight, fontSize: 12 }}>$</span>
                                       <input style={{ ...inputStyle, width: 70 }} type="number" placeholder={fp ? `${fp.price}` : ''} value={editValue.custom_price ?? ''} onChange={(e) => setEditValue({ ...editValue, custom_price: e.target.value })} />

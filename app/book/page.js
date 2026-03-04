@@ -1133,7 +1133,7 @@ function BookingFlowInner() {
         {serviceSelected && (
           <div ref={contactRef} style={{ marginTop: 32, background: brand.bgCard, borderRadius: 24, padding: '40px 36px', boxShadow: '0 8px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04)', border: `1px solid ${brand.borderLight}`, animation: 'fadeIn 0.4s ease' }}>
             <div style={{ marginBottom: 28 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 600, color: brand.text, marginBottom: 4, fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 28, fontWeight: 400 }}>Your Information</h2>
+              <h2 style={{ fontSize: 22, fontWeight: 600, color: brand.text, marginBottom: 4 }}>Your Information</h2>
               <p style={{ fontSize: 14, color: brand.textLight }}>How can we reach you about your booking?</p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -1178,7 +1178,7 @@ function BookingFlowInner() {
                 </div>
               )}
               {selectedFrequency && Number(selectedFrequency.interval_days) > 0 && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, fontSize: 15, color: brand.gold, fontWeight: 500 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, fontSize: 15, color: '#10B981', fontWeight: 500 }}>
                   <span>Frequency: {selectedFrequency.name}</span>
                   <span>-{selectedFrequency.discount_percent}% (−${frequencyDiscount.toFixed(2)})</span>
                 </div>
@@ -1190,21 +1190,21 @@ function BookingFlowInner() {
                   {frequencyDiscount > 0 && (
                     <span style={{ fontSize: 16, color: brand.textMuted, textDecoration: 'line-through', marginRight: 12 }}>${subtotal}</span>
                   )}
-                  <span style={{ fontSize: 36, fontWeight: 300, color: brand.text, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>${total.toFixed(2)}</span>
+                  <span style={{ fontSize: 32, fontWeight: 700, color: brand.text }}>${total.toFixed(2)}</span>
                 </div>
               </div>
             </div>
 
             <button disabled={!canBook} onClick={handleContinue} style={{
               width: '100%', padding: '20px 32px', fontSize: 16, fontWeight: 600,
-              background: canBook ? `linear-gradient(135deg, ${brand.gold} 0%, ${brand.goldDark} 100%)` : brand.border,
+              background: canBook ? '#1B2B5A' : brand.border,
               border: 'none', borderRadius: 12, color: canBook ? '#FFFFFF' : '#999',
               cursor: canBook ? 'pointer' : 'not-allowed', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              boxShadow: canBook ? '0 4px 20px rgba(201, 176, 55, 0.35)' : 'none',
+              boxShadow: canBook ? '0 4px 20px rgba(27, 43, 90, 0.35)' : 'none',
               letterSpacing: '0.04em', textTransform: 'uppercase'
             }}
-            onMouseOver={(e) => { if (canBook) { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = '0 8px 30px rgba(201, 176, 55, 0.45)'; }}}
-            onMouseOut={(e) => { if (canBook) { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = '0 4px 20px rgba(201, 176, 55, 0.35)'; }}}>
+            onMouseOver={(e) => { if (canBook) { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = '0 8px 30px rgba(27, 43, 90, 0.45)'; }}}
+            onMouseOut={(e) => { if (canBook) { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = '0 4px 20px rgba(27, 43, 90, 0.35)'; }}}>
               Continue to Payment
             </button>
 
@@ -1248,14 +1248,14 @@ function BookingFlowInner() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, maxWidth: 580, margin: '0 auto' }}>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 12, fontWeight: 500, color: brand.textMuted, marginBottom: 2 }}>Total</div>
-              <div style={{ fontSize: 22, fontWeight: 600, color: brand.text, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>${total.toFixed(2)}</div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: brand.text }}>${total.toFixed(2)}</div>
             </div>
             <button onClick={handleContinue} style={{
               padding: '14px 28px', fontSize: 15, fontWeight: 600,
-              background: `linear-gradient(135deg, ${brand.gold} 0%, ${brand.goldDark} 100%)`,
+              background: '#1B2B5A',
               border: 'none', borderRadius: 12, color: '#FFFFFF',
               cursor: 'pointer', letterSpacing: '0.04em', textTransform: 'uppercase',
-              boxShadow: '0 4px 16px rgba(201, 176, 55, 0.35)',
+              boxShadow: '0 4px 16px rgba(27, 43, 90, 0.35)',
               whiteSpace: 'nowrap',
             }}>
               Continue to Payment

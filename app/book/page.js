@@ -897,7 +897,7 @@ function BookingFlowInner() {
             {/* Date & Time */}
             {unitReady && (
               <div ref={dateRef} style={{ animation: 'fadeIn 0.4s ease' }}>
-                <label style={labelStyle}>Preferred Date</label>
+                <label style={labelStyle}>Date</label>
                 {(() => {
                   const todayObj = new Date();
                   todayObj.setHours(0, 0, 0, 0);

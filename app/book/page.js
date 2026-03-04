@@ -664,21 +664,21 @@ function BookingFlowInner() {
   const getSelectStyle = (fieldName) => ({
     width: '100%', padding: '18px 20px', fontSize: 16,
     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-    border: focusedField === fieldName ? `2px solid ${brand.gold}` : `1px solid ${brand.border}`,
+    border: focusedField === fieldName ? `2px solid #1B2B5A` : `1px solid ${brand.border}`,
     borderRadius: 12, background: brand.bgCard, color: brand.text, cursor: 'pointer',
     appearance: 'none',
-    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23C9B037' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231B2B5A' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
     backgroundRepeat: 'no-repeat', backgroundPosition: 'right 18px center', backgroundSize: '18px',
-    boxShadow: focusedField === fieldName ? '0 0 0 4px rgba(201, 176, 55, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05)' : '0 2px 8px rgba(0, 0, 0, 0.04)',
+    boxShadow: focusedField === fieldName ? '0 0 0 4px rgba(27, 43, 90, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05)' : '0 2px 8px rgba(0, 0, 0, 0.04)',
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', outline: 'none',
   });
 
   const getInputStyle = (fieldName) => ({
     width: '100%', padding: '18px 20px', fontSize: 16,
     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-    border: focusedField === fieldName ? `2px solid ${brand.gold}` : `1px solid ${brand.border}`,
+    border: focusedField === fieldName ? `2px solid #1B2B5A` : `1px solid ${brand.border}`,
     borderRadius: 12, background: brand.bgCard, color: brand.text, boxSizing: 'border-box',
-    boxShadow: focusedField === fieldName ? '0 0 0 4px rgba(201, 176, 55, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05)' : '0 2px 8px rgba(0, 0, 0, 0.04)',
+    boxShadow: focusedField === fieldName ? '0 0 0 4px rgba(27, 43, 90, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05)' : '0 2px 8px rgba(0, 0, 0, 0.04)',
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', outline: 'none',
   });
 
@@ -733,7 +733,7 @@ function BookingFlowInner() {
       </header>
 
       <main className="booking-main" style={{ maxWidth: 580, margin: '0 auto', padding: '64px 24px 100px', paddingBottom: isMobileOrTablet && canBook ? 140 : 100 }}>
-        <div style={{ width: 60, height: 3, background: `linear-gradient(90deg, ${brand.gold}, ${brand.primary})`, margin: '0 auto 32px', borderRadius: 2 }} />
+        <div style={{ width: 60, height: 3, background: `linear-gradient(90deg, #1B2B5A, ${brand.primary})`, margin: '0 auto 32px', borderRadius: 2 }} />
         <h1 style={{ fontSize: 42, fontWeight: 300, textAlign: 'center', marginBottom: 12, color: brand.text, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>Schedule Your Service</h1>
         <p style={{ textAlign: 'center', color: brand.textLight, marginBottom: 56, fontSize: 17 }}>Premium window care for luxury residences</p>
 
@@ -758,7 +758,7 @@ function BookingFlowInner() {
               {stepLabels.map((_, i) => (
                 <div key={i} style={{
                   flex: 1, height: 4, borderRadius: 2,
-                  background: i < currentStep ? brand.gold : i === currentStep ? brand.primaryDark : brand.borderLight,
+                  background: i < currentStep ? '#1B2B5A' : i === currentStep ? brand.primaryDark : brand.borderLight,
                   transition: 'background 0.4s ease',
                 }} />
               ))}
@@ -770,8 +770,8 @@ function BookingFlowInner() {
         {isRebook && rebookBuildingName && (
           <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 16, padding: '20px 28px', marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, animation: 'fadeIn 0.4s ease' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <div style={{ width: 40, height: 40, background: brand.goldLight, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={brand.gold} strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <div style={{ width: 40, height: 40, background: 'rgba(27, 43, 90, 0.08)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B2B5A" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
               </div>
               <div>
                 <p style={{ fontSize: 15, fontWeight: 600, color: '#92400E', marginBottom: 2 }}>Booking again at {rebookBuildingName}</p>
@@ -1102,18 +1102,18 @@ function BookingFlowInner() {
                   {addOns.map(addon => (
                     <div key={addon.id} onClick={() => toggleAddOn(addon.id)} style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderRadius: 12,
-                      border: selectedAddOns.includes(addon.id) ? `2px solid ${brand.gold}` : `1px solid ${brand.border}`,
-                      background: selectedAddOns.includes(addon.id) ? brand.goldLight : brand.bgCard,
+                      border: selectedAddOns.includes(addon.id) ? `2px solid #1B2B5A` : `1px solid ${brand.border}`,
+                      background: selectedAddOns.includes(addon.id) ? 'rgba(27, 43, 90, 0.06)' : brand.bgCard,
                       cursor: 'pointer', transition: 'all 0.3s ease',
-                      boxShadow: selectedAddOns.includes(addon.id) ? '0 4px 12px rgba(201, 176, 55, 0.15)' : '0 2px 8px rgba(0, 0, 0, 0.02)',
+                      boxShadow: selectedAddOns.includes(addon.id) ? '0 4px 12px rgba(27, 43, 90, 0.15)' : '0 2px 8px rgba(0, 0, 0, 0.02)',
                     }}>
                       <span style={{ fontSize: 15, fontWeight: 500, color: brand.text }}>{addon.name}</span>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <span style={{ fontSize: 15, fontWeight: 600, color: selectedAddOns.includes(addon.id) ? brand.goldDark : brand.textLight }}>+${addon.price}</span>
+                        <span style={{ fontSize: 15, fontWeight: 600, color: selectedAddOns.includes(addon.id) ? '#1B2B5A' : brand.textLight }}>+${addon.price}</span>
                         <div style={{
                           width: 22, height: 22, borderRadius: 6,
-                          border: selectedAddOns.includes(addon.id) ? `2px solid ${brand.gold}` : `2px solid ${brand.border}`,
-                          background: selectedAddOns.includes(addon.id) ? brand.gold : 'transparent',
+                          border: selectedAddOns.includes(addon.id) ? `2px solid #1B2B5A` : `2px solid ${brand.border}`,
+                          background: selectedAddOns.includes(addon.id) ? '#1B2B5A' : 'transparent',
                           display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease'
                         }}>
                           {selectedAddOns.includes(addon.id) && (

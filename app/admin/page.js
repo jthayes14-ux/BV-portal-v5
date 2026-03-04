@@ -290,6 +290,13 @@ export default function AdminPanel() {
     }
   };
 
+  const handleAddFloorPlanToBuilding = async (buildingId) => {
+    setCrudError('');
+    const result = await supabase.from('floor_plans').insert({ name: 'New Floor Plan', price: 0, duration_minutes: 60, building_id: buildingId }).select().single();
+    if (result.error) { setCrudError('Failed to add: ' + result.error.message); return; }
+    if (result.data) { setFloorPlans([...floorPlans, result.data]); setEditingId(`floorplan-${result.data.id}`); setEditValue({ name: 'New Floor Plan', price: 0, duration_minutes: 60, building_id: buildingId }); }
+  };
+
   const handleSave = async (type, id) => {
     setCrudError('');
     let result;
@@ -1647,17 +1654,25 @@ export default function AdminPanel() {
                     <input type="checkbox" checked={showArchivedFloorPlans} onChange={(e) => setShowArchivedFloorPlans(e.target.checked)} />
                     Show archived
                   </label>
-                  <button onClick={() => handleAdd('floorplans')} style={{ ...buttonStyle, background: brand.navy, color: '#fff' }}>+ Add Floor Plan</button>
                 </div>
               </div>
               {/* Group floor plans by building */}
               {(() => {
                 const grouped = {};
+                // Pre-populate with all visible buildings so they show even with 0 plans
+                const visibleBuildings = buildings.filter(b => {
+                  if (b.archived && !showArchivedFloorPlans) return false;
+                  if (selectedBuilding && String(b.id) !== String(selectedBuilding)) return false;
+                  return true;
+                });
+                visibleBuildings.forEach(b => {
+                  grouped[b.id] = { label: b.name, buildingId: b.id, plans: [] };
+                });
                 filteredFloorPlans.forEach(f => {
                   const bldg = buildings.find(b => b.id === f.building_id);
                   const key = bldg ? bldg.id : '_none';
                   const label = bldg ? bldg.name : 'No Building';
-                  if (!grouped[key]) grouped[key] = { label, plans: [] };
+                  if (!grouped[key]) grouped[key] = { label, buildingId: bldg?.id, plans: [] };
                   grouped[key].plans.push(f);
                 });
                 const groups = Object.entries(grouped);
@@ -1671,8 +1686,14 @@ export default function AdminPanel() {
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={brand.textLight} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)', transition: 'transform 0.15s' }}><polyline points="6 9 12 15 18 9"/></svg>
                         <span style={{ fontWeight: 600, fontSize: 14, color: brand.text }}>{group.label}</span>
                         <span style={{ fontSize: 12, color: brand.textLight }}>({group.plans.length} {group.plans.length === 1 ? 'plan' : 'plans'})</span>
+                        <div style={{ marginLeft: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                          {group.buildingId && <button onClick={() => handleAddFloorPlanToBuilding(group.buildingId)} style={{ ...buttonStyle, background: brand.navy, color: '#fff', padding: '4px 10px', fontSize: 11 }}>+ Add Floor Plan</button>}
+                        </div>
                       </div>
-                      {!isCollapsed && (
+                      {!isCollapsed && group.plans.length === 0 && (
+                        <div style={{ padding: '16px 16px', color: brand.textLight, fontSize: 13 }}>No floor plans yet. Click "+ Add Floor Plan" above to create one.</div>
+                      )}
+                      {!isCollapsed && group.plans.length > 0 && (
                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                           <thead>
                             <tr style={{ borderBottom: '1px solid ' + brand.border }}>
@@ -1715,7 +1736,7 @@ export default function AdminPanel() {
                                 <td style={{ padding: '8px 16px', textAlign: 'right' }}>
                                   {editingId === `floorplan-${f.id}` ? (
                                     <>
-                                      <select style={{ ...inputStyle, width: 140, display: 'inline-block', marginRight: 6 }} value={editValue.building_id || ''} onChange={(e) => setEditValue({ ...editValue, building_id: e.target.value })}>
+                                      <select style={{ ...inputStyle, width: 140, display: 'inline-block', marginRight: 6 }} value={editValue.building_id || ''} onChange={(e) => setEditValue({ ...editValue, building_id: Number(e.target.value) })}>
                                         {buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                                       </select>
                                       <button onClick={() => handleSave('floorplans', f.id)} style={{ ...buttonStyle, background: brand.navy, color: '#fff', marginRight: 6, padding: '5px 10px', fontSize: 12 }}>Save</button>
@@ -1811,7 +1832,7 @@ export default function AdminPanel() {
                                 <div key={ul.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '6px 16px 6px 56px', borderBottom: '1px solid ' + brand.border, opacity: ul.archived ? 0.6 : 1, fontSize: 13 }}>
                                   {isEditing ? (
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, flexWrap: 'wrap' }}>
-                                      <select style={{ ...inputStyle, width: 130 }} value={editValue.building_id || ''} onChange={(e) => setEditValue({ ...editValue, building_id: e.target.value })}>
+                                      <select style={{ ...inputStyle, width: 130 }} value={editValue.building_id || ''} onChange={(e) => setEditValue({ ...editValue, building_id: Number(e.target.value) })}>
                                         {buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                                       </select>
                                       <span style={{ color: brand.textLight, fontSize: 12 }}>Line</span>

@@ -717,6 +717,10 @@ export default function AdminPanel() {
   });
   const filteredFloorPlans = floorPlans.filter(f => {
     if (!showArchivedFloorPlans && f.archived) return false;
+    if (!showArchivedFloorPlans) {
+      const parentBuilding = buildings.find(b => b.id === f.building_id);
+      if (parentBuilding && parentBuilding.archived) return false;
+    }
     if (selectedBuilding && String(f.building_id) !== String(selectedBuilding)) return false;
     if (searchFloorPlans) {
       const s = searchFloorPlans.toLowerCase();
@@ -727,6 +731,10 @@ export default function AdminPanel() {
   });
   const filteredUnitLines = unitLines.filter(ul => {
     if (!showArchivedUnitLines && ul.archived) return false;
+    if (!showArchivedUnitLines) {
+      const parentBuilding = buildings.find(b => b.id === ul.building_id);
+      if (parentBuilding && parentBuilding.archived) return false;
+    }
     if (selectedBuildingUL && String(ul.building_id) !== String(selectedBuildingUL)) return false;
     if (searchUnitLines) {
       const s = searchUnitLines.toLowerCase();

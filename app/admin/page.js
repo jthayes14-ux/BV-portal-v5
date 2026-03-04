@@ -104,6 +104,10 @@ export default function AdminPanel() {
   const [searchFrequencies, setSearchFrequencies] = useState('');
   const [searchBookings, setSearchBookings] = useState('');
 
+  // Collapsible section state for grouped views
+  const [collapsedSections, setCollapsedSections] = useState({});
+  const toggleSection = (key) => setCollapsedSections(prev => ({ ...prev, [key]: !prev[key] }));
+
   // Availability management state
   const [availabilitySubTab, setAvailabilitySubTab] = useState('weekly');
   const [availability, setAvailability] = useState([]);
@@ -703,7 +707,7 @@ export default function AdminPanel() {
   });
   const filteredBuildings = buildings.filter(b => {
     if (!showArchivedBuildings && b.archived) return false;
-    if (selectedNeighborhood && b.neighborhood_id !== selectedNeighborhood) return false;
+    if (selectedNeighborhood && String(b.neighborhood_id) !== String(selectedNeighborhood)) return false;
     if (searchBuildings) {
       const s = searchBuildings.toLowerCase();
       const nName = (neighborhoods.find(n => n.id === b.neighborhood_id)?.name || '').toLowerCase();
@@ -713,7 +717,7 @@ export default function AdminPanel() {
   });
   const filteredFloorPlans = floorPlans.filter(f => {
     if (!showArchivedFloorPlans && f.archived) return false;
-    if (selectedBuilding && f.building_id !== selectedBuilding) return false;
+    if (selectedBuilding && String(f.building_id) !== String(selectedBuilding)) return false;
     if (searchFloorPlans) {
       const s = searchFloorPlans.toLowerCase();
       const bName = (buildings.find(b => b.id === f.building_id)?.name || '').toLowerCase();
@@ -723,7 +727,7 @@ export default function AdminPanel() {
   });
   const filteredUnitLines = unitLines.filter(ul => {
     if (!showArchivedUnitLines && ul.archived) return false;
-    if (selectedBuildingUL && ul.building_id !== selectedBuildingUL) return false;
+    if (selectedBuildingUL && String(ul.building_id) !== String(selectedBuildingUL)) return false;
     if (searchUnitLines) {
       const s = searchUnitLines.toLowerCase();
       const bName = (buildings.find(b => b.id === ul.building_id)?.name || '').toLowerCase();
@@ -1524,12 +1528,12 @@ export default function AdminPanel() {
           {activeTab === 'buildings' && (
             <div>
               <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 22, fontWeight: 700, color: brand.text, letterSpacing: '-0.02em' }}>Buildings</h1>
+                <h1 style={{ fontSize: 22, fontWeight: 700, color: brand.text, letterSpacing: '-0.02em' }}>Buildings <span style={{ fontSize: 14, fontWeight: 400, color: brand.textLight }}>({filteredBuildings.length})</span></h1>
                 <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input type="text" placeholder="Search buildings..." value={searchBuildings} onChange={(e) => setSearchBuildings(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <select value={selectedNeighborhood} onChange={(e) => setSelectedNeighborhood(e.target.value)} style={{ ...inputStyle, width: 180 }}>
                     <option value="">All Neighborhoods</option>
-                    {neighborhoods.map(n => <option key={n.id} value={n.id}>{n.name}</option>)}
+                    {neighborhoods.filter(n => !n.archived).map(n => <option key={n.id} value={String(n.id)}>{n.name}</option>)}
                   </select>
                   <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
                     <input type="checkbox" checked={showArchivedBuildings} onChange={(e) => setShowArchivedBuildings(e.target.checked)} />
@@ -1538,69 +1542,85 @@ export default function AdminPanel() {
                   <button onClick={() => handleAdd('buildings')} style={{ ...buttonStyle, background: brand.navy, color: '#fff' }}>+ Add Building</button>
                 </div>
               </div>
-              <div className="table-wrapper">
-                <div style={{ background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border, overflow: 'hidden' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead>
-                      <tr style={{ borderBottom: '1px solid ' + brand.border }}>
-                        <th style={thStyle}>Name</th>
-                        <th style={thStyle}>Address</th>
-                        <th style={thStyle}>Neighborhood</th>
-                        <th style={thStyle}>Status</th>
-                        <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredBuildings.map(b => (
-                        <tr key={b.id} style={{ borderBottom: '1px solid ' + brand.border, opacity: b.archived ? 0.6 : 1 }}>
-                          <td style={{ padding: '16px' }}>
-                            {editingId === `building-${b.id}` ? (
-                              <input style={inputStyle} value={editValue.name || ''} onChange={(e) => setEditValue({ ...editValue, name: e.target.value })} />
-                            ) : (
-                              <span style={{ fontWeight: 500, color: brand.text }}>{b.name}</span>
-                            )}
-                          </td>
-                          <td style={{ padding: '16px' }}>
-                            {editingId === `building-${b.id}` ? (
-                              <input style={inputStyle} value={editValue.address || ''} onChange={(e) => setEditValue({ ...editValue, address: e.target.value })} />
-                            ) : (
-                              <span style={{ color: brand.textLight }}>{b.address}</span>
-                            )}
-                          </td>
-                          <td style={{ padding: '16px' }}>
-                            {editingId === `building-${b.id}` ? (
-                              <select style={inputStyle} value={editValue.neighborhood_id || ''} onChange={(e) => setEditValue({ ...editValue, neighborhood_id: e.target.value })}>
-                                {neighborhoods.map(n => <option key={n.id} value={n.id}>{n.name}</option>)}
-                              </select>
-                            ) : (
-                              <span style={{ color: brand.textLight }}>{neighborhoods.find(n => n.id === b.neighborhood_id)?.name}</span>
-                            )}
-                          </td>
-                          <td style={{ padding: '16px' }}>
-                            <span style={{ fontSize: 11, fontWeight: 500, padding: '3px 8px', borderRadius: 4, background: b.archived ? '#fee2e2' : '#dcfce7', color: b.archived ? brand.danger : '#16a34a' }}>
-                              {b.archived ? 'Archived' : 'Active'}
-                            </span>
-                          </td>
-                          <td style={{ padding: '16px', textAlign: 'right' }}>
-                            {editingId === `building-${b.id}` ? (
-                              <button onClick={() => handleSave('buildings', b.id)} style={{ ...buttonStyle, background: brand.navy, color: '#fff', marginRight: 6 }}>Save</button>
-                            ) : (
-                              <button onClick={() => { setEditingId(`building-${b.id}`); setEditValue({ name: b.name, address: b.address, neighborhood_id: b.neighborhood_id }); }} style={{ ...buttonStyle, background: '#fff', color: brand.text, marginRight: 6, border: '1px solid ' + brand.border }}>Edit</button>
-                            )}
-                            <button onClick={() => handleToggleArchive('buildings', b.id, b.archived)} style={{ ...buttonStyle, background: b.archived ? '#DBEAFE' : '#FFFBEB', color: b.archived ? '#2563EB' : '#D97706', marginRight: 6 }}>
-                              {b.archived ? 'Unarchive' : 'Archive'}
-                            </button>
-                            <button onClick={() => handleDelete('buildings', b.id)} style={{ ...buttonStyle, background: '#FEF2F2', color: brand.danger }}>Delete</button>
-                          </td>
-                        </tr>
-                      ))}
-                      {filteredBuildings.length === 0 && (
-                        <tr><td colSpan={5} style={{ padding: 24, textAlign: 'center', color: brand.textLight }}>No buildings found.</td></tr>
+              {/* Group buildings by neighborhood */}
+              {(() => {
+                const grouped = {};
+                filteredBuildings.forEach(b => {
+                  const nhood = neighborhoods.find(n => n.id === b.neighborhood_id);
+                  const key = nhood ? nhood.id : '_none';
+                  const label = nhood ? nhood.name : 'No Neighborhood';
+                  if (!grouped[key]) grouped[key] = { label, buildings: [] };
+                  grouped[key].buildings.push(b);
+                });
+                const groups = Object.entries(grouped);
+                if (groups.length === 0) return <div style={{ padding: 24, textAlign: 'center', color: brand.textLight, background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border }}>No buildings found.</div>;
+                return groups.map(([key, group]) => {
+                  const sectionKey = `building-nh-${key}`;
+                  const isCollapsed = collapsedSections[sectionKey];
+                  return (
+                    <div key={key} style={{ marginBottom: 12, background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border, overflow: 'hidden' }}>
+                      <div onClick={() => toggleSection(sectionKey)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', cursor: 'pointer', userSelect: 'none', background: brand.bg, borderBottom: isCollapsed ? 'none' : '1px solid ' + brand.border }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={brand.textLight} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)', transition: 'transform 0.15s' }}><polyline points="6 9 12 15 18 9"/></svg>
+                        <span style={{ fontWeight: 600, fontSize: 14, color: brand.text }}>{group.label}</span>
+                        <span style={{ fontSize: 12, color: brand.textLight }}>({group.buildings.length})</span>
+                      </div>
+                      {!isCollapsed && (
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                          <thead>
+                            <tr style={{ borderBottom: '1px solid ' + brand.border }}>
+                              <th style={thStyle}>Name</th>
+                              <th style={thStyle}>Address</th>
+                              <th style={thStyle}>Status</th>
+                              <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {group.buildings.map(b => (
+                              <tr key={b.id} style={{ borderBottom: '1px solid ' + brand.border, opacity: b.archived ? 0.6 : 1 }}>
+                                <td style={{ padding: '8px 16px' }}>
+                                  {editingId === `building-${b.id}` ? (
+                                    <input style={inputStyle} value={editValue.name || ''} onChange={(e) => setEditValue({ ...editValue, name: e.target.value })} />
+                                  ) : (
+                                    <span style={{ fontWeight: 500, color: brand.text, fontSize: 13 }}>{b.name}</span>
+                                  )}
+                                </td>
+                                <td style={{ padding: '8px 16px' }}>
+                                  {editingId === `building-${b.id}` ? (
+                                    <input style={inputStyle} value={editValue.address || ''} onChange={(e) => setEditValue({ ...editValue, address: e.target.value })} />
+                                  ) : (
+                                    <span style={{ color: brand.textLight, fontSize: 13 }}>{b.address}</span>
+                                  )}
+                                </td>
+                                <td style={{ padding: '8px 16px' }}>
+                                  <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 6px', borderRadius: 4, background: b.archived ? '#fee2e2' : '#dcfce7', color: b.archived ? brand.danger : '#16a34a' }}>
+                                    {b.archived ? 'Archived' : 'Active'}
+                                  </span>
+                                </td>
+                                <td style={{ padding: '8px 16px', textAlign: 'right' }}>
+                                  {editingId === `building-${b.id}` ? (
+                                    <>
+                                      <select style={{ ...inputStyle, width: 140, display: 'inline-block', marginRight: 6 }} value={editValue.neighborhood_id || ''} onChange={(e) => setEditValue({ ...editValue, neighborhood_id: e.target.value })}>
+                                        {neighborhoods.map(n => <option key={n.id} value={n.id}>{n.name}</option>)}
+                                      </select>
+                                      <button onClick={() => handleSave('buildings', b.id)} style={{ ...buttonStyle, background: brand.navy, color: '#fff', marginRight: 6, padding: '5px 10px', fontSize: 12 }}>Save</button>
+                                    </>
+                                  ) : (
+                                    <button onClick={() => { setEditingId(`building-${b.id}`); setEditValue({ name: b.name, address: b.address, neighborhood_id: b.neighborhood_id }); }} style={{ ...buttonStyle, background: '#fff', color: brand.text, marginRight: 6, border: '1px solid ' + brand.border, padding: '5px 10px', fontSize: 12 }}>Edit</button>
+                                  )}
+                                  <button onClick={() => handleToggleArchive('buildings', b.id, b.archived)} style={{ ...buttonStyle, background: b.archived ? '#DBEAFE' : '#FFFBEB', color: b.archived ? '#2563EB' : '#D97706', marginRight: 6, padding: '5px 10px', fontSize: 12 }}>
+                                    {b.archived ? 'Unarchive' : 'Archive'}
+                                  </button>
+                                  <button onClick={() => handleDelete('buildings', b.id)} style={{ ...buttonStyle, background: '#FEF2F2', color: brand.danger, padding: '5px 10px', fontSize: 12 }}>Delete</button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
                       )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+                    </div>
+                  );
+                });
+              })()}
             </div>
           )}
 
@@ -1608,12 +1628,12 @@ export default function AdminPanel() {
           {activeTab === 'floorplans' && (
             <div>
               <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 22, fontWeight: 700, color: brand.text, letterSpacing: '-0.02em' }}>Floor Plans</h1>
+                <h1 style={{ fontSize: 22, fontWeight: 700, color: brand.text, letterSpacing: '-0.02em' }}>Floor Plans <span style={{ fontSize: 14, fontWeight: 400, color: brand.textLight }}>({filteredFloorPlans.length})</span></h1>
                 <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input type="text" placeholder="Search floor plans..." value={searchFloorPlans} onChange={(e) => setSearchFloorPlans(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <select value={selectedBuilding} onChange={(e) => setSelectedBuilding(e.target.value)} style={{ ...inputStyle, width: 200 }}>
                     <option value="">All Buildings</option>
-                    {buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                    {buildings.filter(b => !b.archived).map(b => <option key={b.id} value={String(b.id)}>{b.name}</option>)}
                   </select>
                   <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
                     <input type="checkbox" checked={showArchivedFloorPlans} onChange={(e) => setShowArchivedFloorPlans(e.target.checked)} />
@@ -1622,77 +1642,93 @@ export default function AdminPanel() {
                   <button onClick={() => handleAdd('floorplans')} style={{ ...buttonStyle, background: brand.navy, color: '#fff' }}>+ Add Floor Plan</button>
                 </div>
               </div>
-              <div className="table-wrapper">
-                <div style={{ background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border, overflow: 'hidden' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead>
-                      <tr style={{ borderBottom: '1px solid ' + brand.border }}>
-                        <th style={thStyle}>Name</th>
-                        <th style={thStyle}>Building</th>
-                        <th style={thStyle}>Price</th>
-                        <th style={thStyle}>Duration</th>
-                        <th style={thStyle}>Status</th>
-                        <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredFloorPlans.map(f => (
-                        <tr key={f.id} style={{ borderBottom: '1px solid ' + brand.border, opacity: f.archived ? 0.6 : 1 }}>
-                          <td style={{ padding: '16px' }}>
-                            {editingId === `floorplan-${f.id}` ? (
-                              <input style={inputStyle} value={editValue.name || ''} onChange={(e) => setEditValue({ ...editValue, name: e.target.value })} />
-                            ) : (
-                              <span style={{ fontWeight: 500, color: brand.text }}>{f.name}</span>
-                            )}
-                          </td>
-                          <td style={{ padding: '16px' }}>
-                            {editingId === `floorplan-${f.id}` ? (
-                              <select style={inputStyle} value={editValue.building_id || ''} onChange={(e) => setEditValue({ ...editValue, building_id: e.target.value })}>
-                                {buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-                              </select>
-                            ) : (
-                              <span style={{ color: brand.textLight }}>{buildings.find(b => b.id === f.building_id)?.name}</span>
-                            )}
-                          </td>
-                          <td style={{ padding: '16px' }}>
-                            {editingId === `floorplan-${f.id}` ? (
-                              <input style={{ ...inputStyle, width: 100 }} type="number" value={editValue.price || 0} onChange={(e) => setEditValue({ ...editValue, price: Number(e.target.value) })} />
-                            ) : (
-                              <span style={{ fontWeight: 600, color: brand.text }}>${f.price}</span>
-                            )}
-                          </td>
-                          <td style={{ padding: '16px' }}>
-                            {editingId === `floorplan-${f.id}` ? (
-                              <input style={{ ...inputStyle, width: 80 }} type="number" min="15" step="15" value={editValue.duration_minutes || 60} onChange={(e) => setEditValue({ ...editValue, duration_minutes: Number(e.target.value) })} />
-                            ) : (
-                              <span style={{ color: brand.textLight }}>{f.duration_minutes || 60} min</span>
-                            )}
-                          </td>
-                          <td style={{ padding: '16px' }}>
-                            <span style={{ fontSize: 11, fontWeight: 500, padding: '3px 8px', borderRadius: 4, background: f.archived ? '#fee2e2' : '#dcfce7', color: f.archived ? brand.danger : '#16a34a' }}>
-                              {f.archived ? 'Archived' : 'Active'}
-                            </span>
-                          </td>
-                          <td style={{ padding: '16px', textAlign: 'right' }}>
-                            {editingId === `floorplan-${f.id}` ? (
-                              <button onClick={() => handleSave('floorplans', f.id)} style={{ ...buttonStyle, background: brand.navy, color: '#fff', marginRight: 6 }}>Save</button>
-                            ) : (
-                              <button onClick={() => { setEditingId(`floorplan-${f.id}`); setEditValue({ name: f.name, price: f.price, duration_minutes: f.duration_minutes || 60, building_id: f.building_id }); }} style={{ ...buttonStyle, background: '#fff', color: brand.text, marginRight: 6, border: '1px solid ' + brand.border }}>Edit</button>
-                            )}
-                            <button onClick={() => handleToggleArchive('floorplans', f.id, f.archived)} style={{ ...buttonStyle, background: f.archived ? '#DBEAFE' : '#FFFBEB', color: f.archived ? '#2563EB' : '#D97706', marginRight: 6 }}>
-                              {f.archived ? 'Unarchive' : 'Archive'}
-                            </button>
-                            <button onClick={() => handleDelete('floorplans', f.id)} style={{ ...buttonStyle, background: '#FEF2F2', color: brand.danger }}>Delete</button>
-                          </td>
-                        </tr>
-                      ))}
-                      {filteredFloorPlans.length === 0 && (
-                        <tr><td colSpan={6} style={{ padding: 24, textAlign: 'center', color: brand.textLight }}>No floor plans found.</td></tr>
+              {/* Group floor plans by building */}
+              {(() => {
+                const grouped = {};
+                filteredFloorPlans.forEach(f => {
+                  const bldg = buildings.find(b => b.id === f.building_id);
+                  const key = bldg ? bldg.id : '_none';
+                  const label = bldg ? bldg.name : 'No Building';
+                  if (!grouped[key]) grouped[key] = { label, plans: [] };
+                  grouped[key].plans.push(f);
+                });
+                const groups = Object.entries(grouped);
+                if (groups.length === 0) return <div style={{ padding: 24, textAlign: 'center', color: brand.textLight, background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border }}>No floor plans found.</div>;
+                return groups.map(([key, group]) => {
+                  const sectionKey = `fp-bldg-${key}`;
+                  const isCollapsed = collapsedSections[sectionKey];
+                  return (
+                    <div key={key} style={{ marginBottom: 12, background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border, overflow: 'hidden' }}>
+                      <div onClick={() => toggleSection(sectionKey)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', cursor: 'pointer', userSelect: 'none', background: brand.bg, borderBottom: isCollapsed ? 'none' : '1px solid ' + brand.border }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={brand.textLight} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)', transition: 'transform 0.15s' }}><polyline points="6 9 12 15 18 9"/></svg>
+                        <span style={{ fontWeight: 600, fontSize: 14, color: brand.text }}>{group.label}</span>
+                        <span style={{ fontSize: 12, color: brand.textLight }}>({group.plans.length} {group.plans.length === 1 ? 'plan' : 'plans'})</span>
+                      </div>
+                      {!isCollapsed && (
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                          <thead>
+                            <tr style={{ borderBottom: '1px solid ' + brand.border }}>
+                              <th style={thStyle}>Name</th>
+                              <th style={thStyle}>Price</th>
+                              <th style={thStyle}>Duration</th>
+                              <th style={thStyle}>Status</th>
+                              <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {group.plans.map(f => (
+                              <tr key={f.id} style={{ borderBottom: '1px solid ' + brand.border, opacity: f.archived ? 0.6 : 1 }}>
+                                <td style={{ padding: '8px 16px' }}>
+                                  {editingId === `floorplan-${f.id}` ? (
+                                    <input style={inputStyle} value={editValue.name || ''} onChange={(e) => setEditValue({ ...editValue, name: e.target.value })} />
+                                  ) : (
+                                    <span style={{ fontWeight: 500, color: brand.text, fontSize: 13 }}>{f.name}</span>
+                                  )}
+                                </td>
+                                <td style={{ padding: '8px 16px' }}>
+                                  {editingId === `floorplan-${f.id}` ? (
+                                    <input style={{ ...inputStyle, width: 100 }} type="number" value={editValue.price || 0} onChange={(e) => setEditValue({ ...editValue, price: Number(e.target.value) })} />
+                                  ) : (
+                                    <span style={{ fontWeight: 600, color: brand.text, fontSize: 13 }}>${f.price}</span>
+                                  )}
+                                </td>
+                                <td style={{ padding: '8px 16px' }}>
+                                  {editingId === `floorplan-${f.id}` ? (
+                                    <input style={{ ...inputStyle, width: 80 }} type="number" min="15" step="15" value={editValue.duration_minutes || 60} onChange={(e) => setEditValue({ ...editValue, duration_minutes: Number(e.target.value) })} />
+                                  ) : (
+                                    <span style={{ color: brand.textLight, fontSize: 13 }}>{f.duration_minutes || 60} min</span>
+                                  )}
+                                </td>
+                                <td style={{ padding: '8px 16px' }}>
+                                  <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 6px', borderRadius: 4, background: f.archived ? '#fee2e2' : '#dcfce7', color: f.archived ? brand.danger : '#16a34a' }}>
+                                    {f.archived ? 'Archived' : 'Active'}
+                                  </span>
+                                </td>
+                                <td style={{ padding: '8px 16px', textAlign: 'right' }}>
+                                  {editingId === `floorplan-${f.id}` ? (
+                                    <>
+                                      <select style={{ ...inputStyle, width: 140, display: 'inline-block', marginRight: 6 }} value={editValue.building_id || ''} onChange={(e) => setEditValue({ ...editValue, building_id: e.target.value })}>
+                                        {buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                                      </select>
+                                      <button onClick={() => handleSave('floorplans', f.id)} style={{ ...buttonStyle, background: brand.navy, color: '#fff', marginRight: 6, padding: '5px 10px', fontSize: 12 }}>Save</button>
+                                    </>
+                                  ) : (
+                                    <button onClick={() => { setEditingId(`floorplan-${f.id}`); setEditValue({ name: f.name, price: f.price, duration_minutes: f.duration_minutes || 60, building_id: f.building_id }); }} style={{ ...buttonStyle, background: '#fff', color: brand.text, marginRight: 6, border: '1px solid ' + brand.border, padding: '5px 10px', fontSize: 12 }}>Edit</button>
+                                  )}
+                                  <button onClick={() => handleToggleArchive('floorplans', f.id, f.archived)} style={{ ...buttonStyle, background: f.archived ? '#DBEAFE' : '#FFFBEB', color: f.archived ? '#2563EB' : '#D97706', marginRight: 6, padding: '5px 10px', fontSize: 12 }}>
+                                    {f.archived ? 'Unarchive' : 'Archive'}
+                                  </button>
+                                  <button onClick={() => handleDelete('floorplans', f.id)} style={{ ...buttonStyle, background: '#FEF2F2', color: brand.danger, padding: '5px 10px', fontSize: 12 }}>Delete</button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
                       )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+                    </div>
+                  );
+                });
+              })()}
             </div>
           )}
 
@@ -1700,12 +1736,12 @@ export default function AdminPanel() {
           {activeTab === 'unitlines' && (
             <div>
               <div className="admin-tab-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-                <h1 style={{ fontSize: 22, fontWeight: 700, color: brand.text, letterSpacing: '-0.02em' }}>Unit Lines</h1>
+                <h1 style={{ fontSize: 22, fontWeight: 700, color: brand.text, letterSpacing: '-0.02em' }}>Unit Lines <span style={{ fontSize: 14, fontWeight: 400, color: brand.textLight }}>({filteredUnitLines.length})</span></h1>
                 <div className="admin-filter-controls" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input type="text" placeholder="Search unit lines..." value={searchUnitLines} onChange={(e) => setSearchUnitLines(e.target.value)} style={{ ...inputStyle, width: 200 }} />
                   <select value={selectedBuildingUL} onChange={(e) => setSelectedBuildingUL(e.target.value)} style={{ ...inputStyle, width: 200 }}>
                     <option value="">All Buildings</option>
-                    {buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                    {buildings.filter(b => !b.archived).map(b => <option key={b.id} value={String(b.id)}>{b.name}</option>)}
                   </select>
                   <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: brand.textLight, cursor: 'pointer' }}>
                     <input type="checkbox" checked={showArchivedUnitLines} onChange={(e) => setShowArchivedUnitLines(e.target.checked)} />
@@ -1714,100 +1750,101 @@ export default function AdminPanel() {
                   <button onClick={() => handleAdd('unitlines')} style={{ ...buttonStyle, background: brand.navy, color: '#fff' }}>+ Add Unit Line</button>
                 </div>
               </div>
-              <div className="table-wrapper">
-                <div style={{ background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border, overflow: 'hidden' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead>
-                      <tr style={{ borderBottom: '1px solid ' + brand.border }}>
-                        <th style={thStyle}>Building</th>
-                        <th style={thStyle}>Line Number</th>
-                        <th style={thStyle}>Floor Range</th>
-                        <th style={thStyle}>Floor Plan</th>
-                        <th style={thStyle}>Price</th>
-                        <th style={thStyle}>Status</th>
-                        <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredUnitLines.map(ul => {
-                        const fp = floorPlans.find(f => f.id === ul.floor_plan_id);
-                        const displayPrice = ul.custom_price != null ? `$${ul.custom_price}` : (fp ? `$${fp.price}` : '—');
-                        const isEditing = editingId === `unitline-${ul.id}`;
+              {/* Group unit lines by building, then by floor plan */}
+              {(() => {
+                // First group by building
+                const byBuilding = {};
+                filteredUnitLines.forEach(ul => {
+                  const bldg = buildings.find(b => b.id === ul.building_id);
+                  const bKey = bldg ? bldg.id : '_none';
+                  const bLabel = bldg ? bldg.name : 'No Building';
+                  if (!byBuilding[bKey]) byBuilding[bKey] = { label: bLabel, unitLines: [] };
+                  byBuilding[bKey].unitLines.push(ul);
+                });
+                const buildingGroups = Object.entries(byBuilding);
+                if (buildingGroups.length === 0) return <div style={{ padding: 24, textAlign: 'center', color: brand.textLight, background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border }}>No unit lines found. Click &quot;+ Add Unit Line&quot; to create one.</div>;
+                return buildingGroups.map(([bKey, bGroup]) => {
+                  const bSectionKey = `ul-bldg-${bKey}`;
+                  const bCollapsed = collapsedSections[bSectionKey];
+                  // Sub-group by floor plan within this building
+                  const byFloorPlan = {};
+                  bGroup.unitLines.forEach(ul => {
+                    const fp = floorPlans.find(f => f.id === ul.floor_plan_id);
+                    const fpKey = fp ? fp.id : '_none';
+                    const fpLabel = fp ? fp.name : 'No Floor Plan';
+                    if (!byFloorPlan[fpKey]) byFloorPlan[fpKey] = { label: fpLabel, lines: [] };
+                    byFloorPlan[fpKey].lines.push(ul);
+                  });
+                  const fpGroups = Object.entries(byFloorPlan);
+                  return (
+                    <div key={bKey} style={{ marginBottom: 12, background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border, overflow: 'hidden' }}>
+                      {/* Building header */}
+                      <div onClick={() => toggleSection(bSectionKey)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', cursor: 'pointer', userSelect: 'none', background: brand.bg, borderBottom: bCollapsed ? 'none' : '1px solid ' + brand.border }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={brand.textLight} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: bCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)', transition: 'transform 0.15s' }}><polyline points="6 9 12 15 18 9"/></svg>
+                        <span style={{ fontWeight: 600, fontSize: 14, color: brand.text }}>{bGroup.label}</span>
+                        <span style={{ fontSize: 12, color: brand.textLight }}>({bGroup.unitLines.length} {bGroup.unitLines.length === 1 ? 'line' : 'lines'})</span>
+                      </div>
+                      {!bCollapsed && fpGroups.map(([fpKey, fpGroup]) => {
+                        const fpSectionKey = `ul-fp-${bKey}-${fpKey}`;
+                        const fpCollapsed = collapsedSections[fpSectionKey];
                         return (
-                          <tr key={ul.id} style={{ borderBottom: '1px solid ' + brand.border, opacity: ul.archived ? 0.6 : 1 }}>
-                            <td style={{ padding: '16px' }}>
-                              {isEditing ? (
-                                <select style={inputStyle} value={editValue.building_id || ''} onChange={(e) => setEditValue({ ...editValue, building_id: e.target.value })}>
-                                  {buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-                                </select>
-                              ) : (
-                                <span style={{ fontWeight: 500, color: brand.text }}>{buildings.find(b => b.id === ul.building_id)?.name}</span>
-                              )}
-                            </td>
-                            <td style={{ padding: '16px' }}>
-                              {isEditing ? (
-                                <input style={{ ...inputStyle, width: 80 }} value={editValue.line_number || ''} onChange={(e) => setEditValue({ ...editValue, line_number: e.target.value })} />
-                              ) : (
-                                <span style={{ fontWeight: 500, color: brand.text }}>{ul.line_number}</span>
-                              )}
-                            </td>
-                            <td style={{ padding: '16px' }}>
-                              {isEditing ? (
-                                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                                  <input style={{ ...inputStyle, width: 70 }} type="number" min="1" value={editValue.floor_min || 1} onChange={(e) => setEditValue({ ...editValue, floor_min: Number(e.target.value) })} />
-                                  <span style={{ color: brand.textLight }}>-</span>
-                                  <input style={{ ...inputStyle, width: 70 }} type="number" min="1" value={editValue.floor_max || 99} onChange={(e) => setEditValue({ ...editValue, floor_max: Number(e.target.value) })} />
+                          <div key={fpKey}>
+                            {/* Floor plan sub-header */}
+                            <div onClick={() => toggleSection(fpSectionKey)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px 8px 36px', cursor: 'pointer', userSelect: 'none', background: '#fff', borderBottom: fpCollapsed ? '1px solid ' + brand.border : '1px solid ' + brand.border }}>
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={brand.textLight} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: fpCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)', transition: 'transform 0.15s' }}><polyline points="6 9 12 15 18 9"/></svg>
+                              <span style={{ fontWeight: 500, fontSize: 13, color: brand.text }}>{fpGroup.label}</span>
+                              <span style={{ fontSize: 12, color: brand.textLight }}>({fpGroup.lines.length} {fpGroup.lines.length === 1 ? 'line' : 'lines'})</span>
+                            </div>
+                            {!fpCollapsed && fpGroup.lines.map(ul => {
+                              const fp = floorPlans.find(f => f.id === ul.floor_plan_id);
+                              const displayPrice = ul.custom_price != null ? `$${ul.custom_price}` : (fp ? `$${fp.price}` : '—');
+                              const isEditing = editingId === `unitline-${ul.id}`;
+                              return (
+                                <div key={ul.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '6px 16px 6px 56px', borderBottom: '1px solid ' + brand.border, opacity: ul.archived ? 0.6 : 1, fontSize: 13 }}>
+                                  {isEditing ? (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, flexWrap: 'wrap' }}>
+                                      <select style={{ ...inputStyle, width: 130 }} value={editValue.building_id || ''} onChange={(e) => setEditValue({ ...editValue, building_id: e.target.value })}>
+                                        {buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                                      </select>
+                                      <span style={{ color: brand.textLight, fontSize: 12 }}>Line</span>
+                                      <input style={{ ...inputStyle, width: 60 }} value={editValue.line_number || ''} onChange={(e) => setEditValue({ ...editValue, line_number: e.target.value })} />
+                                      <span style={{ color: brand.textLight, fontSize: 12 }}>Floors</span>
+                                      <input style={{ ...inputStyle, width: 55 }} type="number" min="1" value={editValue.floor_min || 1} onChange={(e) => setEditValue({ ...editValue, floor_min: Number(e.target.value) })} />
+                                      <span style={{ color: brand.textLight }}>-</span>
+                                      <input style={{ ...inputStyle, width: 55 }} type="number" min="1" value={editValue.floor_max || 99} onChange={(e) => setEditValue({ ...editValue, floor_max: Number(e.target.value) })} />
+                                      <select style={{ ...inputStyle, width: 120 }} value={editValue.floor_plan_id || ''} onChange={(e) => setEditValue({ ...editValue, floor_plan_id: e.target.value })}>
+                                        <option value="">— None —</option>
+                                        {floorPlans.filter(f => f.building_id === (editValue.building_id || ul.building_id)).map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+                                      </select>
+                                      <span style={{ color: brand.textLight, fontSize: 12 }}>$</span>
+                                      <input style={{ ...inputStyle, width: 70 }} type="number" placeholder={fp ? `${fp.price}` : ''} value={editValue.custom_price ?? ''} onChange={(e) => setEditValue({ ...editValue, custom_price: e.target.value })} />
+                                      <button onClick={() => handleSave('unitlines', ul.id)} style={{ ...buttonStyle, background: brand.navy, color: '#fff', padding: '5px 10px', fontSize: 12 }}>Save</button>
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <span style={{ color: brand.text, minWidth: 60 }}>Line {ul.line_number}</span>
+                                      <span style={{ color: brand.textLight }}>floors {ul.floor_min}-{ul.floor_max}</span>
+                                      <span style={{ fontWeight: 600, color: brand.text }}>{displayPrice}{ul.custom_price != null ? <span style={{ fontSize: 11, color: brand.textLight, marginLeft: 2 }}>(custom)</span> : ''}</span>
+                                      {ul.archived && <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 6px', borderRadius: 4, background: '#fee2e2', color: brand.danger }}>Archived</span>}
+                                      <div style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>
+                                        <button onClick={() => { setEditingId(`unitline-${ul.id}`); setEditValue({ building_id: ul.building_id, line_number: ul.line_number, floor_min: ul.floor_min, floor_max: ul.floor_max, floor_plan_id: ul.floor_plan_id || '', custom_price: ul.custom_price ?? '' }); }} style={{ ...buttonStyle, background: '#fff', color: brand.text, border: '1px solid ' + brand.border, padding: '4px 8px', fontSize: 11 }}>Edit</button>
+                                        <button onClick={() => handleToggleArchive('unitlines', ul.id, ul.archived)} style={{ ...buttonStyle, background: ul.archived ? '#DBEAFE' : '#FFFBEB', color: ul.archived ? '#2563EB' : '#D97706', padding: '4px 8px', fontSize: 11 }}>
+                                          {ul.archived ? 'Unarchive' : 'Archive'}
+                                        </button>
+                                        <button onClick={() => handleDelete('unitlines', ul.id)} style={{ ...buttonStyle, background: '#FEF2F2', color: brand.danger, padding: '4px 8px', fontSize: 11 }}>Delete</button>
+                                      </div>
+                                    </>
+                                  )}
                                 </div>
-                              ) : (
-                                <span style={{ color: brand.textLight }}>{ul.floor_min} - {ul.floor_max}</span>
-                              )}
-                            </td>
-                            <td style={{ padding: '16px' }}>
-                              {isEditing ? (
-                                <select style={inputStyle} value={editValue.floor_plan_id || ''} onChange={(e) => setEditValue({ ...editValue, floor_plan_id: e.target.value })}>
-                                  <option value="">— None —</option>
-                                  {floorPlans.filter(f => f.building_id === (editValue.building_id || ul.building_id)).map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
-                                </select>
-                              ) : (
-                                <span style={{ color: brand.textLight }}>{fp?.name || '—'}</span>
-                              )}
-                            </td>
-                            <td style={{ padding: '16px' }}>
-                              {isEditing ? (
-                                <input style={{ ...inputStyle, width: 100 }} type="number" placeholder={fp ? `${fp.price}` : ''} value={editValue.custom_price ?? ''} onChange={(e) => setEditValue({ ...editValue, custom_price: e.target.value })} />
-                              ) : (
-                                <span style={{ fontWeight: 600, color: brand.text }}>
-                                  {displayPrice}
-                                  {ul.custom_price != null && <span style={{ fontSize: 11, color: brand.textLight, marginLeft: 4 }}>(custom)</span>}
-                                </span>
-                              )}
-                            </td>
-                            <td style={{ padding: '16px' }}>
-                              <span style={{ fontSize: 11, fontWeight: 500, padding: '3px 8px', borderRadius: 4, background: ul.archived ? '#fee2e2' : '#dcfce7', color: ul.archived ? brand.danger : '#16a34a' }}>
-                                {ul.archived ? 'Archived' : 'Active'}
-                              </span>
-                            </td>
-                            <td style={{ padding: '16px', textAlign: 'right' }}>
-                              {isEditing ? (
-                                <button onClick={() => handleSave('unitlines', ul.id)} style={{ ...buttonStyle, background: brand.navy, color: '#fff', marginRight: 6 }}>Save</button>
-                              ) : (
-                                <button onClick={() => { setEditingId(`unitline-${ul.id}`); setEditValue({ building_id: ul.building_id, line_number: ul.line_number, floor_min: ul.floor_min, floor_max: ul.floor_max, floor_plan_id: ul.floor_plan_id || '', custom_price: ul.custom_price ?? '' }); }} style={{ ...buttonStyle, background: '#fff', color: brand.text, marginRight: 6, border: '1px solid ' + brand.border }}>Edit</button>
-                              )}
-                              <button onClick={() => handleToggleArchive('unitlines', ul.id, ul.archived)} style={{ ...buttonStyle, background: ul.archived ? '#DBEAFE' : '#FFFBEB', color: ul.archived ? '#2563EB' : '#D97706', marginRight: 6 }}>
-                                {ul.archived ? 'Unarchive' : 'Archive'}
-                              </button>
-                              <button onClick={() => handleDelete('unitlines', ul.id)} style={{ ...buttonStyle, background: '#FEF2F2', color: brand.danger }}>Delete</button>
-                            </td>
-                          </tr>
+                              );
+                            })}
+                          </div>
                         );
                       })}
-                      {filteredUnitLines.length === 0 && (
-                        <tr><td colSpan={7} style={{ padding: 24, textAlign: 'center', color: brand.textLight }}>No unit lines found. Click &quot;+ Add Unit Line&quot; to create one.</td></tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+                    </div>
+                  );
+                });
+              })()}
             </div>
           )}
 

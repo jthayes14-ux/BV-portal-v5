@@ -1087,7 +1087,7 @@ function BookingFlowInner() {
                   ))}
                 </select>
                 {selectedFrequency && Number(selectedFrequency.discount_percent) > 0 && (
-                  <p style={{ fontSize: 13, color: brand.gold, fontWeight: 600, marginTop: 8 }}>
+                  <p style={{ fontSize: 13, color: '#10B981', fontWeight: 600, marginTop: 8 }}>
                     Save {selectedFrequency.discount_percent}% with {selectedFrequency.name.toLowerCase()} service
                   </p>
                 )}

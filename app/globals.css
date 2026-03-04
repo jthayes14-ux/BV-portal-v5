@@ -72,6 +72,44 @@ html, body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ===== Booking form mobile/tablet breakpoint (1024px) ===== */
+@media (max-width: 1023px) {
+  /* Smooth scroll for booking form auto-scroll */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Booking progress bar - sticky positioning */
+  .mobile-progress-bar {
+    position: sticky !important;
+    top: 64px !important;
+  }
+
+  /* Booking form sections get scroll-margin for centered scrolling */
+  .booking-form > div > div {
+    scroll-margin-top: 140px;
+  }
+
+  /* Ensure booking header is compact on tablets */
+  .booking-header {
+    padding: 14px 20px !important;
+  }
+
+  .booking-main {
+    padding-top: 32px !important;
+  }
+
+  .booking-main h1 {
+    font-size: 34px !important;
+    margin-bottom: 8px !important;
+  }
+
+  /* Sticky CTA safe area */
+  .mobile-sticky-cta {
+    padding-bottom: max(12px, env(safe-area-inset-bottom)) !important;
+  }
+}
+
 /* ===== Tablet breakpoint (768px) ===== */
 @media (max-width: 768px) {
   /* --- Hamburger Menu --- */

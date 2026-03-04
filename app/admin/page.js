@@ -1850,18 +1850,18 @@ export default function AdminPanel() {
                               const displayPrice = ul.custom_price != null ? `$${ul.custom_price}` : (fp ? `$${fp.price}` : '—');
                               const isEditing = editingId === `unitline-${ul.id}`;
                               return (
-                                <div key={ul.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '6px 16px 6px 56px', borderBottom: '1px solid ' + brand.border, opacity: ul.archived ? 0.6 : 1, fontSize: 13 }}>
+                                <div key={ul.id} style={{ padding: '6px 16px 6px 56px', borderBottom: '1px solid ' + brand.border, opacity: ul.archived ? 0.6 : 1, fontSize: 13 }}>
                                   {isEditing ? (
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, flexWrap: 'wrap' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', padding: '4px 0' }}>
                                       <select style={{ ...inputStyle, width: 130 }} value={editValue.building_id || ''} onChange={(e) => setEditValue({ ...editValue, building_id: Number(e.target.value) })}>
                                         {buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                                       </select>
                                       <span style={{ color: brand.textLight, fontSize: 12 }}>Line</span>
                                       <input style={{ ...inputStyle, width: 60 }} value={editValue.line_number || ''} onChange={(e) => setEditValue({ ...editValue, line_number: e.target.value })} />
                                       <span style={{ color: brand.textLight, fontSize: 12 }}>Floors</span>
-                                      <input style={{ ...inputStyle, width: 55 }} type="number" min="1" value={editValue.floor_min || 1} onChange={(e) => setEditValue({ ...editValue, floor_min: Number(e.target.value) })} />
+                                      <input style={{ ...inputStyle, width: 65 }} type="number" min="1" value={editValue.floor_min || 1} onChange={(e) => setEditValue({ ...editValue, floor_min: Number(e.target.value) })} />
                                       <span style={{ color: brand.textLight }}>-</span>
-                                      <input style={{ ...inputStyle, width: 55 }} type="number" min="1" value={editValue.floor_max || 99} onChange={(e) => setEditValue({ ...editValue, floor_max: Number(e.target.value) })} />
+                                      <input style={{ ...inputStyle, width: 65 }} type="number" min="1" value={editValue.floor_max || 99} onChange={(e) => setEditValue({ ...editValue, floor_max: Number(e.target.value) })} />
                                       <select style={{ ...inputStyle, width: 120 }} value={editValue.floor_plan_id || ''} onChange={(e) => setEditValue({ ...editValue, floor_plan_id: e.target.value ? Number(e.target.value) : '' })}>
                                         <option value="">— None —</option>
                                         {floorPlans.filter(f => f.building_id === (editValue.building_id || ul.building_id) && !f.archived).map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
@@ -1871,7 +1871,7 @@ export default function AdminPanel() {
                                       <button onClick={() => handleSave('unitlines', ul.id)} style={{ ...buttonStyle, background: brand.navy, color: '#fff', padding: '5px 10px', fontSize: 12 }}>Save</button>
                                     </div>
                                   ) : (
-                                    <>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                                       <span style={{ color: brand.text, minWidth: 60 }}>Line {ul.line_number}</span>
                                       <span style={{ color: brand.textLight }}>floors {ul.floor_min}-{ul.floor_max}</span>
                                       <span style={{ fontWeight: 600, color: brand.text }}>{displayPrice}{ul.custom_price != null ? <span style={{ fontSize: 11, color: brand.textLight, marginLeft: 2 }}>(custom)</span> : ''}</span>
@@ -1883,7 +1883,7 @@ export default function AdminPanel() {
                                         </button>
                                         <button onClick={() => handleDelete('unitlines', ul.id)} style={{ ...buttonStyle, background: '#FEF2F2', color: brand.danger, padding: '4px 8px', fontSize: 11 }}>Delete</button>
                                       </div>
-                                    </>
+                                    </div>
                                   )}
                                 </div>
                               );

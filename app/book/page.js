@@ -677,7 +677,7 @@ function BookingFlowInner() {
       <main className="booking-main" style={{ maxWidth: 580, margin: '0 auto', padding: '64px 24px 100px' }}>
         <div style={{ width: 60, height: 3, background: `linear-gradient(90deg, ${brand.gold}, ${brand.primary})`, margin: '0 auto 32px', borderRadius: 2 }} />
         <h1 style={{ fontSize: 42, fontWeight: 300, textAlign: 'center', marginBottom: 12, color: brand.text, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>Schedule Your Service</h1>
-        <p style={{ textAlign: 'center', color: brand.textLight, marginBottom: 56, fontSize: 17 }}>Premium window care for discerning residences</p>
+        <p style={{ textAlign: 'center', color: brand.textLight, marginBottom: 56, fontSize: 17 }}>Premium window care for luxury residences</p>
 
         {/* Rebook Banner */}
         {isRebook && rebookBuildingName && (

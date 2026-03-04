@@ -1859,9 +1859,9 @@ export default function AdminPanel() {
                                       <span style={{ color: brand.textLight, fontSize: 12 }}>Line</span>
                                       <input style={{ ...inputStyle, width: 60 }} value={editValue.line_number || ''} onChange={(e) => setEditValue({ ...editValue, line_number: e.target.value })} />
                                       <span style={{ color: brand.textLight, fontSize: 12 }}>Floors</span>
-                                      <input style={{ ...inputStyle, width: 65 }} type="number" min="1" value={editValue.floor_min || 1} onChange={(e) => setEditValue({ ...editValue, floor_min: Number(e.target.value) })} />
+                                      <input style={{ ...inputStyle, width: 65 }} type="number" min="1" value={editValue.floor_min ?? 1} onChange={(e) => setEditValue({ ...editValue, floor_min: e.target.value === '' ? '' : Number(e.target.value) })} />
                                       <span style={{ color: brand.textLight }}>-</span>
-                                      <input style={{ ...inputStyle, width: 65 }} type="number" min="1" value={editValue.floor_max || 99} onChange={(e) => setEditValue({ ...editValue, floor_max: Number(e.target.value) })} />
+                                      <input style={{ ...inputStyle, width: 65 }} type="number" min="1" value={editValue.floor_max ?? 99} onChange={(e) => setEditValue({ ...editValue, floor_max: e.target.value === '' ? '' : Number(e.target.value) })} />
                                       <select style={{ ...inputStyle, width: 120 }} value={editValue.floor_plan_id || ''} onChange={(e) => setEditValue({ ...editValue, floor_plan_id: e.target.value ? Number(e.target.value) : '' })}>
                                         <option value="">— None —</option>
                                         {floorPlans.filter(f => f.building_id === (editValue.building_id || ul.building_id) && !f.archived).map(f => <option key={f.id} value={f.id}>{f.name}</option>)}

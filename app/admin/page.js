@@ -297,6 +297,14 @@ export default function AdminPanel() {
     if (result.data) { setFloorPlans([...floorPlans, result.data]); setEditingId(`floorplan-${result.data.id}`); setEditValue({ name: 'New Floor Plan', price: 0, duration_minutes: 60, building_id: buildingId }); }
   };
 
+  const handleAddUnitLineToBuilding = async (buildingId) => {
+    setCrudError('');
+    const buildingPlans = floorPlans.filter(fp => fp.building_id === buildingId);
+    const result = await supabase.from('unit_lines').insert({ building_id: buildingId, line_number: '01', floor_min: 1, floor_max: 99, floor_plan_id: buildingPlans[0]?.id || null, custom_price: null }).select().single();
+    if (result.error) { setCrudError('Failed to add: ' + result.error.message); return; }
+    if (result.data) { setUnitLines([...unitLines, result.data]); setEditingId(`unitline-${result.data.id}`); setEditValue({ building_id: result.data.building_id, line_number: result.data.line_number, floor_min: result.data.floor_min, floor_max: result.data.floor_max, floor_plan_id: result.data.floor_plan_id || '', custom_price: result.data.custom_price ?? '' }); }
+  };
+
   const handleSave = async (type, id) => {
     setCrudError('');
     let result;
@@ -1776,22 +1784,29 @@ export default function AdminPanel() {
                     <input type="checkbox" checked={showArchivedUnitLines} onChange={(e) => setShowArchivedUnitLines(e.target.checked)} />
                     Show archived
                   </label>
-                  <button onClick={() => handleAdd('unitlines')} style={{ ...buttonStyle, background: brand.navy, color: '#fff' }}>+ Add Unit Line</button>
                 </div>
               </div>
               {/* Group unit lines by building, then by floor plan */}
               {(() => {
-                // First group by building
+                // First group by building, pre-populate with all visible buildings
                 const byBuilding = {};
+                const visibleBuildingsUL = buildings.filter(b => {
+                  if (b.archived && !showArchivedUnitLines) return false;
+                  if (selectedBuildingUL && String(b.id) !== String(selectedBuildingUL)) return false;
+                  return true;
+                });
+                visibleBuildingsUL.forEach(b => {
+                  byBuilding[b.id] = { label: b.name, buildingId: b.id, unitLines: [] };
+                });
                 filteredUnitLines.forEach(ul => {
                   const bldg = buildings.find(b => b.id === ul.building_id);
                   const bKey = bldg ? bldg.id : '_none';
                   const bLabel = bldg ? bldg.name : 'No Building';
-                  if (!byBuilding[bKey]) byBuilding[bKey] = { label: bLabel, unitLines: [] };
+                  if (!byBuilding[bKey]) byBuilding[bKey] = { label: bLabel, buildingId: bldg?.id, unitLines: [] };
                   byBuilding[bKey].unitLines.push(ul);
                 });
                 const buildingGroups = Object.entries(byBuilding);
-                if (buildingGroups.length === 0) return <div style={{ padding: 24, textAlign: 'center', color: brand.textLight, background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border }}>No unit lines found. Click &quot;+ Add Unit Line&quot; to create one.</div>;
+                if (buildingGroups.length === 0) return <div style={{ padding: 24, textAlign: 'center', color: brand.textLight, background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border }}>No unit lines found.</div>;
                 return buildingGroups.map(([bKey, bGroup]) => {
                   const bSectionKey = `ul-bldg-${bKey}`;
                   const bCollapsed = collapsedSections[bSectionKey];
@@ -1812,7 +1827,13 @@ export default function AdminPanel() {
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={brand.textLight} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: bCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)', transition: 'transform 0.15s' }}><polyline points="6 9 12 15 18 9"/></svg>
                         <span style={{ fontWeight: 600, fontSize: 14, color: brand.text }}>{bGroup.label}</span>
                         <span style={{ fontSize: 12, color: brand.textLight }}>({bGroup.unitLines.length} {bGroup.unitLines.length === 1 ? 'line' : 'lines'})</span>
+                        <div style={{ marginLeft: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                          {bGroup.buildingId && <button onClick={() => handleAddUnitLineToBuilding(bGroup.buildingId)} style={{ ...buttonStyle, background: brand.navy, color: '#fff', padding: '4px 10px', fontSize: 11 }}>+ Add Unit Line</button>}
+                        </div>
                       </div>
+                      {!bCollapsed && bGroup.unitLines.length === 0 && (
+                        <div style={{ padding: '16px 16px', color: brand.textLight, fontSize: 13 }}>No unit lines yet. Click "+ Add Unit Line" above to create one.</div>
+                      )}
                       {!bCollapsed && fpGroups.map(([fpKey, fpGroup]) => {
                         const fpSectionKey = `ul-fp-${bKey}-${fpKey}`;
                         const fpCollapsed = collapsedSections[fpSectionKey];

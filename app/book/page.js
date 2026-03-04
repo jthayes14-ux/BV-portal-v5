@@ -119,10 +119,6 @@ function BookingFlowInner() {
     if (time) scrollToRef(frequencyRef);
   }, [time]);
 
-  useEffect(() => {
-    if (serviceSelected && !contactValid) scrollToRef(contactRef);
-  }, [serviceSelected]);
-
   // Rebook state
   const [isRebook, setIsRebook] = useState(false);
   const [rebookBuildingName, setRebookBuildingName] = useState('');
@@ -619,6 +615,11 @@ function BookingFlowInner() {
   const contactValid = firstName.trim() && lastName.trim() && email.trim() && phone.trim();
   const canBook = serviceSelected && contactValid;
   const today = new Date().toISOString().split('T')[0];
+
+  // Auto-scroll to contact section when service is fully selected
+  useEffect(() => {
+    if (serviceSelected && !contactValid) scrollToRef(contactRef);
+  }, [serviceSelected]);
 
   // Compute current step for progress indicator
   const currentStep = !neighborhood ? 0 : !buildingId ? 1 : !unitReady ? 2 : !date ? 3 : !time ? 3 : !contactValid ? 4 : canBook ? 5 : 4;

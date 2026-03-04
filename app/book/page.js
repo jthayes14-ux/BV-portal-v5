@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '../../lib/supabase';
@@ -70,6 +70,58 @@ function BookingFlowInner() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [specialInstructions, setSpecialInstructions] = useState('');
+
+  // Mobile scroll refs
+  const neighborhoodRef = useRef(null);
+  const buildingRef = useRef(null);
+  const unitRef = useRef(null);
+  const dateRef = useRef(null);
+  const frequencyRef = useRef(null);
+  const addOnsRef = useRef(null);
+  const contactRef = useRef(null);
+  const totalRef = useRef(null);
+  const [isMobileOrTablet, setIsMobileOrTablet] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobileOrTablet(window.innerWidth < 1024);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
+  const scrollToRef = useCallback((ref) => {
+    if (!isMobileOrTablet || !ref?.current) return;
+    setTimeout(() => {
+      const el = ref.current;
+      const rect = el.getBoundingClientRect();
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      // Center the element in the viewport, accounting for sticky header (~120px)
+      const targetY = scrollTop + rect.top - (window.innerHeight / 2) + (rect.height / 2);
+      const offset = Math.max(0, targetY - 60);
+      window.scrollTo({ top: offset, behavior: 'smooth' });
+    }, 150);
+  }, [isMobileOrTablet]);
+
+  // Auto-scroll when fields are completed
+  useEffect(() => {
+    if (neighborhood && !buildingId) scrollToRef(buildingRef);
+  }, [neighborhood]);
+
+  useEffect(() => {
+    if (buildingId && !unit) scrollToRef(unitRef);
+  }, [buildingId]);
+
+  useEffect(() => {
+    if (floorPlanId && !date) scrollToRef(dateRef);
+  }, [floorPlanId]);
+
+  useEffect(() => {
+    if (time) scrollToRef(frequencyRef);
+  }, [time]);
+
+  useEffect(() => {
+    if (serviceSelected && !contactValid) scrollToRef(contactRef);
+  }, [serviceSelected]);
 
   // Rebook state
   const [isRebook, setIsRebook] = useState(false);
@@ -568,6 +620,11 @@ function BookingFlowInner() {
   const canBook = serviceSelected && contactValid;
   const today = new Date().toISOString().split('T')[0];
 
+  // Compute current step for progress indicator
+  const currentStep = !neighborhood ? 0 : !buildingId ? 1 : !unitReady ? 2 : !date ? 3 : !time ? 3 : !contactValid ? 4 : canBook ? 5 : 4;
+  const stepLabels = ['Location', 'Building', 'Unit', 'Date & Time', 'Contact', 'Review'];
+  const totalSteps = stepLabels.length;
+
   const handleContinue = () => {
     if (!canBook) return;
     const bookingData = {
@@ -674,10 +731,39 @@ function BookingFlowInner() {
         </div>
       </header>
 
-      <main className="booking-main" style={{ maxWidth: 580, margin: '0 auto', padding: '64px 24px 100px' }}>
+      <main className="booking-main" style={{ maxWidth: 580, margin: '0 auto', padding: '64px 24px 100px', paddingBottom: isMobileOrTablet && canBook ? 140 : 100 }}>
         <div style={{ width: 60, height: 3, background: `linear-gradient(90deg, ${brand.gold}, ${brand.primary})`, margin: '0 auto 32px', borderRadius: 2 }} />
         <h1 style={{ fontSize: 42, fontWeight: 300, textAlign: 'center', marginBottom: 12, color: brand.text, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>Schedule Your Service</h1>
         <p style={{ textAlign: 'center', color: brand.textLight, marginBottom: 56, fontSize: 17 }}>Premium window care for luxury residences</p>
+
+        {/* Mobile Progress Indicator */}
+        {isMobileOrTablet && (
+          <div className="mobile-progress-bar" style={{
+            position: 'sticky', top: 64, zIndex: 90,
+            background: 'rgba(255, 255, 255, 0.97)', backdropFilter: 'blur(12px)',
+            borderRadius: 16, padding: '14px 20px', marginBottom: 24,
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+            border: `1px solid ${brand.borderLight}`,
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: brand.text }}>
+                {currentStep < totalSteps ? stepLabels[currentStep] : 'Ready'}
+              </span>
+              <span style={{ fontSize: 12, fontWeight: 500, color: brand.textMuted }}>
+                Step {Math.min(currentStep + 1, totalSteps)} of {totalSteps}
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: 4 }}>
+              {stepLabels.map((_, i) => (
+                <div key={i} style={{
+                  flex: 1, height: 4, borderRadius: 2,
+                  background: i < currentStep ? brand.gold : i === currentStep ? brand.primaryDark : brand.borderLight,
+                  transition: 'background 0.4s ease',
+                }} />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Rebook Banner */}
         {isRebook && rebookBuildingName && (
@@ -709,7 +795,7 @@ function BookingFlowInner() {
         <div className="booking-form" style={{ background: brand.bgCard, borderRadius: 24, padding: '40px 36px', boxShadow: '0 8px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04)', border: `1px solid ${brand.borderLight}` }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
             {/* Neighborhood */}
-            <div>
+            <div ref={neighborhoodRef}>
               <label style={labelStyle}>Neighborhood</label>
               <select value={neighborhood} onChange={(e) => { setNeighborhood(e.target.value); setBuildingId(''); setFloorPlanId(''); setUnit(''); setBuildings([]); setFloorPlans([]); setUnitLookupResult(null); setShowFloorPlanFallback(false); if (e.target.value) loadBuildings(e.target.value); }} onFocus={() => setFocusedField('neighborhood')} onBlur={() => setFocusedField(null)} style={getSelectStyle('neighborhood')}>
                 <option value="">Select your neighborhood</option>
@@ -719,7 +805,7 @@ function BookingFlowInner() {
 
             {/* Building */}
             {neighborhood && (
-              <div style={{ animation: 'fadeIn 0.4s ease' }}>
+              <div ref={buildingRef} style={{ animation: 'fadeIn 0.4s ease' }}>
                 <label style={labelStyle}>Building</label>
                 <select value={buildingId} onChange={(e) => { setBuildingId(e.target.value); setFloorPlanId(''); setFloorPlans([]); setUnit(''); setUnitLookupResult(null); setShowFloorPlanFallback(false); }} onFocus={() => setFocusedField('building')} onBlur={() => setFocusedField(null)} style={getSelectStyle('building')}>
                   <option value="">Select your building</option>
@@ -730,7 +816,7 @@ function BookingFlowInner() {
 
             {/* Unit Number */}
             {buildingId && (
-              <div style={{ animation: 'fadeIn 0.4s ease' }}>
+              <div ref={unitRef} style={{ animation: 'fadeIn 0.4s ease' }}>
                 <label style={labelStyle}>Unit Number</label>
                 <input
                   type="text"
@@ -809,7 +895,7 @@ function BookingFlowInner() {
 
             {/* Date & Time */}
             {unitReady && (
-              <div style={{ animation: 'fadeIn 0.4s ease' }}>
+              <div ref={dateRef} style={{ animation: 'fadeIn 0.4s ease' }}>
                 <label style={labelStyle}>Preferred Date</label>
                 {(() => {
                   const todayObj = new Date();
@@ -990,7 +1076,7 @@ function BookingFlowInner() {
 
             {/* Frequency */}
             {time && (
-              <div style={{ animation: 'fadeIn 0.4s ease' }}>
+              <div ref={frequencyRef} style={{ animation: 'fadeIn 0.4s ease' }}>
                 <label style={labelStyle}>Frequency</label>
                 <select value={frequencyId} onChange={(e) => setFrequencyId(e.target.value)} onFocus={() => setFocusedField('frequency')} onBlur={() => setFocusedField(null)} style={getSelectStyle('frequency')}>
                   {frequencies.map(f => (
@@ -1044,7 +1130,7 @@ function BookingFlowInner() {
 
         {/* Contact Information */}
         {serviceSelected && (
-          <div style={{ marginTop: 32, background: brand.bgCard, borderRadius: 24, padding: '40px 36px', boxShadow: '0 8px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04)', border: `1px solid ${brand.borderLight}`, animation: 'fadeIn 0.4s ease' }}>
+          <div ref={contactRef} style={{ marginTop: 32, background: brand.bgCard, borderRadius: 24, padding: '40px 36px', boxShadow: '0 8px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04)', border: `1px solid ${brand.borderLight}`, animation: 'fadeIn 0.4s ease' }}>
             <div style={{ marginBottom: 28 }}>
               <h2 style={{ fontSize: 20, fontWeight: 600, color: brand.text, marginBottom: 4, fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 28, fontWeight: 400 }}>Your Information</h2>
               <p style={{ fontSize: 14, color: brand.textLight }}>How can we reach you about your booking?</p>
@@ -1078,7 +1164,7 @@ function BookingFlowInner() {
 
         {/* Total & Book */}
         {time && (
-          <div style={{ marginTop: 32, padding: 32, background: brand.bgCard, borderRadius: 20, boxShadow: '0 8px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04)', border: `1px solid ${brand.borderLight}`, animation: 'fadeIn 0.4s ease' }}>
+          <div ref={totalRef} style={{ marginTop: 32, padding: 32, background: brand.bgCard, borderRadius: 20, boxShadow: '0 8px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04)', border: `1px solid ${brand.borderLight}`, animation: 'fadeIn 0.4s ease' }}>
             <div style={{ marginBottom: 24 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, fontSize: 15, color: brand.textLight }}>
                 <span>Window Cleaning ({unitLookupResult?.found ? unitLookupResult.floorPlan.name : selectedPlan?.name})</span>
@@ -1148,6 +1234,35 @@ function BookingFlowInner() {
         </div>
       </main>
 
+      {/* Sticky bottom CTA for mobile/tablet */}
+      {isMobileOrTablet && canBook && (
+        <div className="mobile-sticky-cta" style={{
+          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 95,
+          background: 'rgba(255, 255, 255, 0.97)', backdropFilter: 'blur(12px)',
+          borderTop: `1px solid ${brand.borderLight}`,
+          padding: '12px 20px', paddingBottom: 'max(12px, env(safe-area-inset-bottom))',
+          boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.08)',
+          animation: 'slideUp 0.3s ease',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, maxWidth: 580, margin: '0 auto' }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 12, fontWeight: 500, color: brand.textMuted, marginBottom: 2 }}>Total</div>
+              <div style={{ fontSize: 22, fontWeight: 600, color: brand.text, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>${total.toFixed(2)}</div>
+            </div>
+            <button onClick={handleContinue} style={{
+              padding: '14px 28px', fontSize: 15, fontWeight: 600,
+              background: `linear-gradient(135deg, ${brand.gold} 0%, ${brand.goldDark} 100%)`,
+              border: 'none', borderRadius: 12, color: '#FFFFFF',
+              cursor: 'pointer', letterSpacing: '0.04em', textTransform: 'uppercase',
+              boxShadow: '0 4px 16px rgba(201, 176, 55, 0.35)',
+              whiteSpace: 'nowrap',
+            }}>
+              Continue to Payment
+            </button>
+          </div>
+        </div>
+      )}
+
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&display=swap');
         @keyframes fadeIn {
@@ -1161,6 +1276,10 @@ function BookingFlowInner() {
         select option { padding: 12px; }
         .cal-day:not(:disabled):hover {
           background: #E8EDFC !important;
+        }
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
         }
         @media (max-width: 480px) {
           .cal-grid { gap: 1px !important; }

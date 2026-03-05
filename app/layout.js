@@ -4,6 +4,9 @@ import { Providers } from '../lib/providers';
 export const metadata = {
   title: 'BetterView - Window Cleaning',
   description: 'Professional window cleaning for Miami high-rises',
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export const viewport = {

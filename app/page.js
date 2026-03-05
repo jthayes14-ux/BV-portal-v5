@@ -504,7 +504,7 @@ export default function LandingPage() {
 
           <FAQItem
             question="How long does a cleaning take?"
-            answer="Most units take 30-60 minutes depending on the number of windows and their condition. We'll give you a more accurate estimate when you book based on your floor plan."
+            answer="Most units take 1 to 2 hours depending on the number of windows and their condition. We'll give you a more accurate estimate when you book based on your floor plan."
           />
           <FAQItem
             question="Do I need to be home?"
@@ -512,7 +512,7 @@ export default function LandingPage() {
           />
           <FAQItem
             question="What's included in the cleaning?"
-            answer="We clean all interior window surfaces, window sills, and tracks. We use professional-grade, eco-friendly cleaning solutions that leave no streaks or residue."
+            answer="We clean all interior and exterior balcony glass. Including your window, doors and railing glass."
           />
           <FAQItem
             question="How do you access my building?"
@@ -524,7 +524,7 @@ export default function LandingPage() {
           />
           <FAQItem
             question="Do you clean balcony windows?"
-            answer="Yes! Interior balcony windows and doors are included. Exterior high-rise windows require specialized equipment - contact us for a custom quote."
+            answer="Yes! That is our specialty."
           />
         </div>
       </section>

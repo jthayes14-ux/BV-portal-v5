@@ -588,8 +588,8 @@ export default function LandingPage() {
 
           <div className="footer-links" style={{ display: 'flex', gap: 32, fontSize: 14, opacity: 0.8 }}>
             <span>Miami, FL</span>
-            <span>hello@betterview.com</span>
-            <span>(305) 555-0123</span>
+            <span>jack@betterviewwindowcleanings.com</span>
+            <span>(954) 758-9829</span>
           </div>
         </div>
 

@@ -394,6 +394,68 @@ export default function AdminPanel() {
     setter(items.map(item => item.id === id ? { ...item, archived: newArchived } : item));
   };
 
+  // Duplicate a building along with all its floor plans and unit lines
+  const handleDuplicateBuilding = async (buildingId) => {
+    setCrudError('');
+    const building = buildings.find(b => b.id === buildingId);
+    if (!building) return;
+    // 1. Duplicate the building
+    const { data: newBuilding, error: bErr } = await supabase.from('buildings')
+      .insert({ name: building.name + ' (Copy)', address: building.address, neighborhood_id: building.neighborhood_id })
+      .select().single();
+    if (bErr) { setCrudError('Failed to duplicate building: ' + bErr.message); return; }
+    // 2. Duplicate all floor plans for this building and build old->new ID map
+    const buildingPlans = floorPlans.filter(fp => fp.building_id === buildingId);
+    const fpIdMap = {};
+    const newFloorPlansArr = [];
+    for (const fp of buildingPlans) {
+      const { data: newFp, error: fpErr } = await supabase.from('floor_plans')
+        .insert({ name: fp.name, price: fp.price, duration_minutes: fp.duration_minutes, building_id: newBuilding.id, archived: fp.archived })
+        .select().single();
+      if (fpErr) { setCrudError('Failed to duplicate floor plan: ' + fpErr.message); return; }
+      fpIdMap[fp.id] = newFp.id;
+      newFloorPlansArr.push(newFp);
+    }
+    // 3. Duplicate all unit lines for this building, remapping floor_plan_id
+    const buildingUnitLines = unitLines.filter(ul => ul.building_id === buildingId);
+    const newUnitLinesArr = [];
+    for (const ul of buildingUnitLines) {
+      const { data: newUl, error: ulErr } = await supabase.from('unit_lines')
+        .insert({ building_id: newBuilding.id, line_number: ul.line_number, floor_min: ul.floor_min, floor_max: ul.floor_max, floor_plan_id: ul.floor_plan_id ? (fpIdMap[ul.floor_plan_id] || null) : null, custom_price: ul.custom_price, archived: ul.archived })
+        .select().single();
+      if (ulErr) { setCrudError('Failed to duplicate unit line: ' + ulErr.message); return; }
+      newUnitLinesArr.push(newUl);
+    }
+    // Update local state
+    setBuildings(prev => [...prev, newBuilding]);
+    setFloorPlans(prev => [...prev, ...newFloorPlansArr]);
+    setUnitLines(prev => [...prev, ...newUnitLinesArr]);
+  };
+
+  // Duplicate a single floor plan
+  const handleDuplicateFloorPlan = async (floorPlanId) => {
+    setCrudError('');
+    const fp = floorPlans.find(f => f.id === floorPlanId);
+    if (!fp) return;
+    const { data: newFp, error } = await supabase.from('floor_plans')
+      .insert({ name: fp.name + ' (Copy)', price: fp.price, duration_minutes: fp.duration_minutes, building_id: fp.building_id, archived: fp.archived })
+      .select().single();
+    if (error) { setCrudError('Failed to duplicate floor plan: ' + error.message); return; }
+    setFloorPlans(prev => [...prev, newFp]);
+  };
+
+  // Duplicate a single unit line
+  const handleDuplicateUnitLine = async (unitLineId) => {
+    setCrudError('');
+    const ul = unitLines.find(u => u.id === unitLineId);
+    if (!ul) return;
+    const { data: newUl, error } = await supabase.from('unit_lines')
+      .insert({ building_id: ul.building_id, line_number: ul.line_number, floor_min: ul.floor_min, floor_max: ul.floor_max, floor_plan_id: ul.floor_plan_id, custom_price: ul.custom_price, archived: ul.archived })
+      .select().single();
+    if (error) { setCrudError('Failed to duplicate unit line: ' + error.message); return; }
+    setUnitLines(prev => [...prev, newUl]);
+  };
+
   const handleToggleAddonsSection = async () => {
     const newValue = !addonsSectionVisible;
     const { error } = await supabase.from('site_settings').upsert({ key: 'addons_section_visible', value: String(newValue) }, { onConflict: 'key' });
@@ -1630,6 +1692,7 @@ export default function AdminPanel() {
                                   ) : (
                                     <button onClick={() => { setEditingId(`building-${b.id}`); setEditValue({ name: b.name, address: b.address, neighborhood_id: b.neighborhood_id }); }} style={{ ...buttonStyle, background: '#fff', color: brand.text, marginRight: 6, border: '1px solid ' + brand.border, padding: '5px 10px', fontSize: 12 }}>Edit</button>
                                   )}
+                                  <button onClick={() => handleDuplicateBuilding(b.id)} style={{ ...buttonStyle, background: '#EEF2FF', color: '#4F46E5', marginRight: 6, padding: '5px 10px', fontSize: 12 }}>Duplicate</button>
                                   <button onClick={() => handleToggleArchive('buildings', b.id, b.archived)} style={{ ...buttonStyle, background: b.archived ? '#DBEAFE' : '#FFFBEB', color: b.archived ? '#2563EB' : '#D97706', marginRight: 6, padding: '5px 10px', fontSize: 12 }}>
                                     {b.archived ? 'Unarchive' : 'Archive'}
                                   </button>
@@ -1752,6 +1815,7 @@ export default function AdminPanel() {
                                   ) : (
                                     <button onClick={() => { setEditingId(`floorplan-${f.id}`); setEditValue({ name: f.name, price: f.price, duration_minutes: f.duration_minutes || 60, building_id: f.building_id }); }} style={{ ...buttonStyle, background: '#fff', color: brand.text, marginRight: 6, border: '1px solid ' + brand.border, padding: '5px 10px', fontSize: 12 }}>Edit</button>
                                   )}
+                                  <button onClick={() => handleDuplicateFloorPlan(f.id)} style={{ ...buttonStyle, background: '#EEF2FF', color: '#4F46E5', marginRight: 6, padding: '5px 10px', fontSize: 12 }}>Duplicate</button>
                                   <button onClick={() => handleToggleArchive('floorplans', f.id, f.archived)} style={{ ...buttonStyle, background: f.archived ? '#DBEAFE' : '#FFFBEB', color: f.archived ? '#2563EB' : '#D97706', marginRight: 6, padding: '5px 10px', fontSize: 12 }}>
                                     {f.archived ? 'Unarchive' : 'Archive'}
                                   </button>
@@ -1878,6 +1942,7 @@ export default function AdminPanel() {
                                       {ul.archived && <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 6px', borderRadius: 4, background: '#fee2e2', color: brand.danger }}>Archived</span>}
                                       <div style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>
                                         <button onClick={() => { setEditingId(`unitline-${ul.id}`); setEditValue({ building_id: ul.building_id, line_number: ul.line_number, floor_min: ul.floor_min, floor_max: ul.floor_max, floor_plan_id: ul.floor_plan_id || '', custom_price: ul.custom_price ?? '' }); }} style={{ ...buttonStyle, background: '#fff', color: brand.text, border: '1px solid ' + brand.border, padding: '4px 8px', fontSize: 11 }}>Edit</button>
+                                        <button onClick={() => handleDuplicateUnitLine(ul.id)} style={{ ...buttonStyle, background: '#EEF2FF', color: '#4F46E5', padding: '4px 8px', fontSize: 11 }}>Duplicate</button>
                                         <button onClick={() => handleToggleArchive('unitlines', ul.id, ul.archived)} style={{ ...buttonStyle, background: ul.archived ? '#DBEAFE' : '#FFFBEB', color: ul.archived ? '#2563EB' : '#D97706', padding: '4px 8px', fontSize: 11 }}>
                                           {ul.archived ? 'Unarchive' : 'Archive'}
                                         </button>

@@ -312,9 +312,11 @@ export default function AdminPanel() {
       case 'neighborhoods':
         result = await supabase.from('neighborhoods').update({ name: editValue.name }).eq('id', id);
         break;
-      case 'buildings':
-        result = await supabase.from('buildings').update(editValue).eq('id', id);
+      case 'buildings': {
+        const bPayload = { ...editValue, unit_format_example: editValue.unit_format_example?.trim() || null };
+        result = await supabase.from('buildings').update(bPayload).eq('id', id);
         break;
+      }
       case 'floorplans':
         result = await supabase.from('floor_plans').update(editValue).eq('id', id);
         break;
@@ -401,7 +403,7 @@ export default function AdminPanel() {
     if (!building) return;
     // 1. Duplicate the building
     const { data: newBuilding, error: bErr } = await supabase.from('buildings')
-      .insert({ name: building.name + ' (Copy)', address: building.address, neighborhood_id: building.neighborhood_id })
+      .insert({ name: building.name + ' (Copy)', address: building.address, neighborhood_id: building.neighborhood_id, unit_format_example: building.unit_format_example || null })
       .select().single();
     if (bErr) { setCrudError('Failed to duplicate building: ' + bErr.message); return; }
     // 2. Duplicate all floor plans for this building and build old->new ID map
@@ -1655,6 +1657,7 @@ export default function AdminPanel() {
                             <tr style={{ borderBottom: '1px solid ' + brand.border }}>
                               <th style={thStyle}>Name</th>
                               <th style={thStyle}>Address</th>
+                              <th style={thStyle}>Unit Example</th>
                               <th style={thStyle}>Status</th>
                               <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
                             </tr>
@@ -1677,6 +1680,13 @@ export default function AdminPanel() {
                                   )}
                                 </td>
                                 <td style={{ padding: '8px 16px' }}>
+                                  {editingId === `building-${b.id}` ? (
+                                    <input style={{ ...inputStyle, width: 90 }} placeholder="e.g. N5-F" value={editValue.unit_format_example || ''} onChange={(e) => setEditValue({ ...editValue, unit_format_example: e.target.value })} />
+                                  ) : (
+                                    <span style={{ color: brand.textLight, fontSize: 13 }}>{b.unit_format_example || '—'}</span>
+                                  )}
+                                </td>
+                                <td style={{ padding: '8px 16px' }}>
                                   <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 6px', borderRadius: 4, background: b.archived ? '#fee2e2' : '#dcfce7', color: b.archived ? brand.danger : '#16a34a' }}>
                                     {b.archived ? 'Archived' : 'Active'}
                                   </span>
@@ -1690,7 +1700,7 @@ export default function AdminPanel() {
                                       <button onClick={() => handleSave('buildings', b.id)} style={{ ...buttonStyle, background: brand.navy, color: '#fff', marginRight: 6, padding: '5px 10px', fontSize: 12 }}>Save</button>
                                     </>
                                   ) : (
-                                    <button onClick={() => { setEditingId(`building-${b.id}`); setEditValue({ name: b.name, address: b.address, neighborhood_id: b.neighborhood_id }); }} style={{ ...buttonStyle, background: '#fff', color: brand.text, marginRight: 6, border: '1px solid ' + brand.border, padding: '5px 10px', fontSize: 12 }}>Edit</button>
+                                    <button onClick={() => { setEditingId(`building-${b.id}`); setEditValue({ name: b.name, address: b.address, neighborhood_id: b.neighborhood_id, unit_format_example: b.unit_format_example || '' }); }} style={{ ...buttonStyle, background: '#fff', color: brand.text, marginRight: 6, border: '1px solid ' + brand.border, padding: '5px 10px', fontSize: 12 }}>Edit</button>
                                   )}
                                   <button onClick={() => handleDuplicateBuilding(b.id)} style={{ ...buttonStyle, background: '#EEF2FF', color: '#4F46E5', marginRight: 6, padding: '5px 10px', fontSize: 12 }}>Duplicate</button>
                                   <button onClick={() => handleToggleArchive('buildings', b.id, b.archived)} style={{ ...buttonStyle, background: b.archived ? '#DBEAFE' : '#FFFBEB', color: b.archived ? '#2563EB' : '#D97706', marginRight: 6, padding: '5px 10px', fontSize: 12 }}>

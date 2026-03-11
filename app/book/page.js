@@ -517,8 +517,15 @@ function BookingFlowInner() {
 
   // Parse unit number into floor and line components
   const parseUnitNumber = (unitStr) => {
-    const trimmed = (unitStr || '').trim();
+    // Strip dashes and whitespace so formats like "N7-J" become "N7J"
+    const trimmed = (unitStr || '').replace(/[-\s]/g, '').trim();
     if (!trimmed) return null;
+
+    // Prefix letter(s) + digits + letter(s): e.g. "N7J" -> ignore prefix, floor = 7, line = J
+    const prefixMatch = trimmed.match(/^[A-Za-z]+(\d+)([A-Za-z]+)$/);
+    if (prefixMatch) {
+      return { floor: parseInt(prefixMatch[1], 10), line: prefixMatch[2].toUpperCase() };
+    }
 
     // Check if unit ends in letter(s): e.g. "57D", "12M", "3AB"
     const letterMatch = trimmed.match(/^(\d+)([A-Za-z]+)$/);
@@ -842,7 +849,7 @@ function BookingFlowInner() {
                     }
                   }}
                   onFocus={() => setFocusedField('unit')}
-                  placeholder="e.g. 2207 or 57D"
+                  placeholder={selectedBuilding?.unit_format_example ? `e.g. ${selectedBuilding.unit_format_example}` : 'e.g. 2207 or 57D'}
                   style={getInputStyle('unit')}
                 />
 

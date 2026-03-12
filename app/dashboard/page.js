@@ -217,6 +217,7 @@ export default function CustomerDashboard() {
 
         for (let slotStart = startMinutes; slotStart + slotDuration <= endMinutes; slotStart += 60) {
           const slotEnd = slotStart + slotDuration;
+          const slotEndWithBuffer = slotStart + slotDuration + buffer;
 
           if (selectedDate === now.toISOString().split('T')[0]) {
             const slotDateTime = new Date(selectedDate + 'T00:00:00');
@@ -224,7 +225,7 @@ export default function CustomerDashboard() {
             if (slotDateTime < minNoticeTime) continue;
           }
 
-          if (bookedRanges.some(r => slotStart < r.end && slotEnd > r.start)) continue;
+          if (bookedRanges.some(r => slotStart < r.end && slotEndWithBuffer > r.start)) continue;
           if (partialBlocks.some(r => slotStart < r.end && slotEnd > r.start)) continue;
 
           const hour = Math.floor(slotStart / 60);

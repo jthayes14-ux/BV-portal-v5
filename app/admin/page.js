@@ -82,9 +82,10 @@ export default function AdminPanel() {
   const [selectedBuildingUL, setSelectedBuildingUL] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sortField, setSortField] = useState('booking_date');
-  const [sortDirection, setSortDirection] = useState('desc');
+  const [sortDirection, setSortDirection] = useState('asc');
   const [showCancelled, setShowCancelled] = useState(false);
   const [showSkipped, setShowSkipped] = useState(false);
+  const [bookingsView, setBookingsView] = useState('active'); // 'active' or 'completed'
   const [showArchivedAddOns, setShowArchivedAddOns] = useState(false);
   const [showArchivedNeighborhoods, setShowArchivedNeighborhoods] = useState(false);
   const [showArchivedBuildings, setShowArchivedBuildings] = useState(false);
@@ -661,6 +662,14 @@ export default function AdminPanel() {
     setBookings(bookings.map(b => b.id === bookingId ? { ...b, status: 'cancelled' } : b));
   };
 
+  const handleDeleteBooking = async (bookingId) => {
+    if (!confirm('Permanently delete this booking? This cannot be undone.')) return;
+    setCrudError('');
+    const { error } = await supabase.from('bookings').delete().eq('id', bookingId);
+    if (error) { setCrudError('Failed to delete booking: ' + error.message); return; }
+    setBookings(bookings.filter(b => b.id !== bookingId));
+  };
+
   const handleSaveBookingEdit = async (bookingId) => {
     setCrudError('');
     const updates = {};
@@ -723,6 +732,12 @@ export default function AdminPanel() {
   };
 
   const filteredBookings = bookings.filter(b => {
+    // Split by view: active vs completed
+    if (bookingsView === 'active') {
+      if (b.status === 'completed') return false;
+    } else {
+      if (b.status !== 'completed') return false;
+    }
     if (b.status === 'cancelled' && !showCancelled) return false;
     if (b.status === 'skipped' && !showSkipped) return false;
     if (searchBookings) {
@@ -753,6 +768,21 @@ export default function AdminPanel() {
         bVal = (b.building || '').toLowerCase();
         return aVal < bVal ? -dir : aVal > bVal ? dir : 0;
       case 'booking_date':
+        // For active view, sort by proximity to today (closest first)
+        if (bookingsView === 'active' && sortDirection === 'asc') {
+          const today = new Date().toISOString().split('T')[0];
+          const aDate = a.booking_date || '';
+          const bDate = b.booking_date || '';
+          const aDiff = Math.abs(new Date(aDate) - new Date(today));
+          const bDiff = Math.abs(new Date(bDate) - new Date(today));
+          // Prefer future dates, then closest past dates
+          const aIsFuture = aDate >= today;
+          const bIsFuture = bDate >= today;
+          if (aIsFuture && !bIsFuture) return -1;
+          if (!aIsFuture && bIsFuture) return 1;
+          if (aIsFuture && bIsFuture) return aDate < bDate ? -1 : aDate > bDate ? 1 : 0;
+          return aDiff - bDiff;
+        }
         aVal = a.booking_date || '';
         bVal = b.booking_date || '';
         return aVal < bVal ? -dir : aVal > bVal ? dir : 0;
@@ -993,18 +1023,33 @@ export default function AdminPanel() {
             const weekRevenue = weekBookings.filter(b => b.payment_status === 'paid').reduce((sum, b) => sum + (Number(b.total_price) || 0), 0);
             const upcomingCount = bookings.filter(b => ['upcoming', 'scheduled'].includes(b.status)).length;
             const pendingPayments = bookings.filter(b => b.payment_status === 'pending' && ['upcoming', 'scheduled'].includes(b.status)).length;
+            const completedCount = bookings.filter(b => b.status === 'completed').length;
+            const activeCount = bookings.filter(b => b.status !== 'completed').length;
+
+            const getRelativeDateLabel = (dateStr) => {
+              if (!dateStr) return '';
+              const bookDate = new Date(dateStr + 'T00:00:00');
+              const todayDate = new Date(today + 'T00:00:00');
+              const diffDays = Math.round((bookDate - todayDate) / 86400000);
+              if (diffDays === 0) return 'Today';
+              if (diffDays === 1) return 'Tomorrow';
+              if (diffDays === -1) return 'Yesterday';
+              if (diffDays > 1 && diffDays <= 7) return `In ${diffDays} days`;
+              if (diffDays < -1 && diffDays >= -7) return `${Math.abs(diffDays)} days ago`;
+              return '';
+            };
 
             return (
             <div>
               <div style={{ marginBottom: 24 }}>
                 <h1 style={{ fontSize: 22, fontWeight: 700, color: brand.text, letterSpacing: '-0.02em', marginBottom: 4 }}>Bookings</h1>
-                <p style={{ fontSize: 13, color: brand.textLight }}>{sortedBookings.length} booking{sortedBookings.length !== 1 ? 's' : ''} total</p>
+                <p style={{ fontSize: 13, color: brand.textLight }}>{sortedBookings.length} booking{sortedBookings.length !== 1 ? 's' : ''} shown</p>
               </div>
 
               {/* Stats Cards */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 24 }}>
                 {[
-                  { label: "Today's Bookings", value: todayBookings.length, sub: today },
+                  { label: "Today's Bookings", value: todayBookings.length, sub: formatDate(today) },
                   { label: 'Upcoming', value: upcomingCount, sub: 'Scheduled jobs' },
                   { label: 'Week Revenue', value: `$${weekRevenue.toFixed(0)}`, sub: 'Last 7 days' },
                   { label: 'Pending Payments', value: pendingPayments, sub: 'Needs attention' },
@@ -1017,24 +1062,56 @@ export default function AdminPanel() {
                 ))}
               </div>
 
+              {/* Active / Completed Toggle */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 16, background: '#F1F5F9', borderRadius: 8, padding: 3, width: 'fit-content' }}>
+                <button
+                  onClick={() => { setBookingsView('active'); setSortField('booking_date'); setSortDirection('asc'); }}
+                  style={{
+                    padding: '8px 20px', fontSize: 13, fontWeight: bookingsView === 'active' ? 600 : 400, border: 'none', borderRadius: 6, cursor: 'pointer',
+                    background: bookingsView === 'active' ? '#fff' : 'transparent',
+                    color: bookingsView === 'active' ? brand.navy : brand.textLight,
+                    boxShadow: bookingsView === 'active' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  Active ({activeCount})
+                </button>
+                <button
+                  onClick={() => { setBookingsView('completed'); setSortField('booking_date'); setSortDirection('desc'); }}
+                  style={{
+                    padding: '8px 20px', fontSize: 13, fontWeight: bookingsView === 'completed' ? 600 : 400, border: 'none', borderRadius: 6, cursor: 'pointer',
+                    background: bookingsView === 'completed' ? '#fff' : 'transparent',
+                    color: bookingsView === 'completed' ? '#16A34A' : brand.textLight,
+                    boxShadow: bookingsView === 'completed' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  Completed ({completedCount})
+                </button>
+              </div>
+
               {/* Filters */}
               <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginBottom: 16 }}>
                 <input type="text" placeholder="Search bookings..." value={searchBookings} onChange={(e) => setSearchBookings(e.target.value)} style={{ ...inputStyle, width: 240 }} />
-                <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: brand.textLight, cursor: 'pointer', background: showCancelled ? '#FEF2F2' : '#fff', padding: '6px 12px', borderRadius: 6, border: '1px solid ' + brand.border }}>
-                  <input type="checkbox" checked={showCancelled} onChange={(e) => setShowCancelled(e.target.checked)} style={{ cursor: 'pointer' }} />
-                  Cancelled
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: brand.textLight, cursor: 'pointer', background: showSkipped ? '#FFFBEB' : '#fff', padding: '6px 12px', borderRadius: 6, border: '1px solid ' + brand.border }}>
-                  <input type="checkbox" checked={showSkipped} onChange={(e) => setShowSkipped(e.target.checked)} style={{ cursor: 'pointer' }} />
-                  Skipped
-                </label>
+                {bookingsView === 'active' && (
+                  <>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: brand.textLight, cursor: 'pointer', background: showCancelled ? '#FEF2F2' : '#fff', padding: '6px 12px', borderRadius: 6, border: '1px solid ' + brand.border }}>
+                      <input type="checkbox" checked={showCancelled} onChange={(e) => setShowCancelled(e.target.checked)} style={{ cursor: 'pointer' }} />
+                      Cancelled
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: brand.textLight, cursor: 'pointer', background: showSkipped ? '#FFFBEB' : '#fff', padding: '6px 12px', borderRadius: 6, border: '1px solid ' + brand.border }}>
+                      <input type="checkbox" checked={showSkipped} onChange={(e) => setShowSkipped(e.target.checked)} style={{ cursor: 'pointer' }} />
+                      Skipped
+                    </label>
+                  </>
+                )}
               </div>
 
               <div className="table-wrapper">
                 <div style={{ background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border, overflow: 'hidden', minWidth: 800 }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
-                      <tr style={{ borderBottom: '1px solid ' + brand.border }}>
+                      <tr style={{ borderBottom: '2px solid ' + brand.border, background: '#FAFBFC' }}>
                         {[
                           { field: 'customer_name', label: 'Customer' },
                           { field: 'building', label: 'Property' },
@@ -1044,38 +1121,58 @@ export default function AdminPanel() {
                           { field: 'payment_status', label: 'Payment' },
                           { field: 'worker_id', label: 'Worker' },
                         ].map(col => (
-                          <th key={col.field} onClick={() => handleSort(col.field)} style={{ ...thStyle, cursor: 'pointer', userSelect: 'none', position: 'sticky', top: 0, background: '#fff', zIndex: 1 }}>
+                          <th key={col.field} onClick={() => handleSort(col.field)} style={{ ...thStyle, cursor: 'pointer', userSelect: 'none', position: 'sticky', top: 0, background: '#FAFBFC', zIndex: 1 }}>
                             {col.label}{sortIndicator(col.field)}
                           </th>
                         ))}
-                        <th style={{ ...thStyle, textAlign: 'right', position: 'sticky', top: 0, background: '#fff', zIndex: 1 }}>Actions</th>
+                        <th style={{ ...thStyle, textAlign: 'right', position: 'sticky', top: 0, background: '#FAFBFC', zIndex: 1 }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {sortedBookings.map(booking => {
+                      {sortedBookings.map((booking, idx) => {
                         const freqName = getFrequencyName(booking.frequency_id);
                         const statusStyle = getStatusStyle(booking.status);
                         const isRecurring = !!booking.recurring_group_id;
                         const isActionable = ['upcoming', 'scheduled'].includes(booking.status);
+                        const isToday = booking.booking_date === today;
+                        const relativeLabel = getRelativeDateLabel(booking.booking_date);
+                        const isPast = booking.booking_date < today;
 
                         return (
-                          <tr key={booking.id} className="table-row-hover" style={{ borderBottom: '1px solid ' + brand.border }}>
+                          <tr key={booking.id} className="table-row-hover" style={{
+                            borderBottom: '1px solid ' + brand.border,
+                            background: isToday ? '#FFFFF0' : (idx % 2 === 0 ? '#fff' : '#FAFBFC'),
+                            borderLeft: isToday ? '3px solid ' + brand.warning : '3px solid transparent',
+                          }}>
                             <td style={tdStyle}>
-                              <p style={{ fontWeight: 500, color: brand.text, fontSize: 13 }}>{booking.customer_name}</p>
-                              <p style={{ fontSize: 12, color: brand.textLight }}>{booking.customer_email}</p>
+                              <p style={{ fontWeight: 500, color: brand.text, fontSize: 13, marginBottom: 2 }}>{booking.customer_name}</p>
+                              <p style={{ fontSize: 11, color: brand.textLight }}>{booking.customer_email}</p>
                             </td>
                             <td style={tdStyle}>
-                              <p style={{ fontWeight: 500, color: brand.text, fontSize: 13 }}>{booking.building}</p>
-                              <p style={{ fontSize: 12, color: brand.textLight }}>Unit {booking.unit_number} · {booking.floor_plan}</p>
+                              <p style={{ fontWeight: 500, color: brand.text, fontSize: 13, marginBottom: 2 }}>{booking.building}</p>
+                              <p style={{ fontSize: 11, color: brand.textLight }}>Unit {booking.unit_number} · {booking.floor_plan}</p>
                             </td>
                             <td style={tdStyle}>
-                              <p style={{ fontWeight: 500, color: brand.text, fontSize: 13 }}>{formatDate(booking.booking_date)}</p>
-                              <p style={{ fontSize: 12, color: brand.textLight }}>{booking.booking_time}</p>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <div>
+                                  <p style={{ fontWeight: 500, color: isPast && bookingsView === 'active' ? brand.textLight : brand.text, fontSize: 13, marginBottom: 2 }}>{formatDate(booking.booking_date)}</p>
+                                  <p style={{ fontSize: 11, color: brand.textLight }}>{booking.booking_time}</p>
+                                </div>
+                                {relativeLabel && (
+                                  <span style={{
+                                    fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4,
+                                    background: isToday ? '#FEF3C7' : isPast ? '#F1F5F9' : '#DBEAFE',
+                                    color: isToday ? '#92400E' : isPast ? brand.textLight : '#1E40AF',
+                                  }}>
+                                    {relativeLabel}
+                                  </span>
+                                )}
+                              </div>
                               {freqName && freqName !== 'One-Time' && (
-                                <p style={{ fontSize: 11, color: brand.navy, fontWeight: 600 }}>{freqName}</p>
+                                <p style={{ fontSize: 11, color: brand.navy, fontWeight: 600, marginTop: 2 }}>{freqName}</p>
                               )}
                               {isRecurring && (
-                                <p style={{ fontSize: 11, color: brand.textLight }}>Recurring</p>
+                                <p style={{ fontSize: 10, color: brand.textLight }}>Recurring</p>
                               )}
                             </td>
                             <td style={tdStyle}>
@@ -1085,13 +1182,13 @@ export default function AdminPanel() {
                               )}
                             </td>
                             <td style={tdStyle}>
-                              <span style={{ padding: '3px 8px', borderRadius: 4, fontSize: 12, fontWeight: 500, ...statusStyle }}>
+                              <span style={{ padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, textTransform: 'capitalize', ...statusStyle }}>
                                 {booking.status}
                               </span>
                             </td>
                             <td style={tdStyle}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                                <span style={{ padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 500, ...getPaymentStatusStyle(booking.payment_status) }}>
+                                <span style={{ padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 500, ...getPaymentStatusStyle(booking.payment_status) }}>
                                   {booking.payment_status || 'n/a'}
                                 </span>
                                 {booking.payment_status === 'pending' && booking.stripe_customer_id && (
@@ -1112,7 +1209,7 @@ export default function AdminPanel() {
                                 style={{ ...inputStyle, width: 120, fontSize: 12, padding: '6px 8px' }}
                               >
                                 <option value="">Unassigned</option>
-                                {workers.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                                {workers.filter(w => !w.archived).map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                               </select>
                             </td>
                             <td style={{ ...tdStyle, textAlign: 'right' }}>
@@ -1130,6 +1227,9 @@ export default function AdminPanel() {
                                     </button>
                                   </>
                                 )}
+                                <button onClick={() => handleDeleteBooking(booking.id)} title="Delete" style={{ ...iconBtnStyle, background: '#FEF2F2', color: brand.danger }}>
+                                  <SidebarIcon name="trash" />
+                                </button>
                               </div>
                             </td>
                           </tr>
@@ -1138,8 +1238,12 @@ export default function AdminPanel() {
                       {sortedBookings.length === 0 && (
                         <tr>
                           <td colSpan={8} style={{ padding: 48, textAlign: 'center' }}>
-                            <p style={{ fontSize: 14, color: brand.textLight, marginBottom: 4 }}>No bookings found</p>
-                            <p style={{ fontSize: 12, color: brand.textLight }}>Try adjusting your filters</p>
+                            <p style={{ fontSize: 14, color: brand.textLight, marginBottom: 4 }}>
+                              {bookingsView === 'completed' ? 'No completed bookings yet' : 'No bookings found'}
+                            </p>
+                            <p style={{ fontSize: 12, color: brand.textLight }}>
+                              {bookingsView === 'completed' ? 'Bookings will appear here once marked as completed' : 'Try adjusting your filters'}
+                            </p>
                           </td>
                         </tr>
                       )}

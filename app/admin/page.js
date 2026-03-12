@@ -165,11 +165,6 @@ export default function AdminPanel() {
     { value: '20:00', label: '8:00 PM' },
   ];
 
-  const SLOT_DURATION_OPTIONS = [
-    { value: '60', label: '1 hour' }, { value: '120', label: '2 hours' },
-    { value: '180', label: '3 hours' }, { value: '240', label: '4 hours' },
-  ];
-
   const BUFFER_OPTIONS = [
     { value: '0', label: '0 minutes' }, { value: '15', label: '15 minutes' },
     { value: '30', label: '30 minutes' }, { value: '45', label: '45 minutes' },
@@ -2249,27 +2244,30 @@ export default function AdminPanel() {
           {/* AVAILABILITY TAB */}
           {activeTab === 'availability' && (
             <div>
-              <h1 style={{ fontSize: 22, fontWeight: 700, color: brand.text, letterSpacing: '-0.02em', marginBottom: 20 }}>Availability</h1>
+              <h1 style={{ fontSize: 22, fontWeight: 700, color: brand.text, letterSpacing: '-0.02em', marginBottom: 8 }}>Availability</h1>
+              <p style={{ fontSize: 14, color: brand.textLight, marginBottom: 24 }}>Manage worker schedules, block off dates, and set one-time overrides.</p>
 
               {/* Sub-tab navigation */}
-              <div style={{ display: 'inline-flex', gap: 1, marginBottom: 24, background: '#F1F5F9', borderRadius: 8, padding: 3 }}>
+              <div style={{ display: 'inline-flex', gap: 2, marginBottom: 28, background: '#F1F5F9', borderRadius: 10, padding: 4 }}>
                 {[
-                  { id: 'weekly', label: 'Weekly Schedules' },
-                  { id: 'blocked', label: 'Blocked Dates' },
-                  { id: 'overrides', label: 'Schedule Overrides' },
+                  { id: 'weekly', label: 'Weekly Schedules', icon: (<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>) },
+                  { id: 'blocked', label: 'Blocked Dates', icon: (<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>) },
+                  { id: 'overrides', label: 'Overrides', icon: (<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>) },
                 ].map(tab => (
                   <button
                     key={tab.id}
                     onClick={() => setAvailabilitySubTab(tab.id)}
                     style={{
-                      padding: '7px 16px', fontSize: 13, fontWeight: 500,
+                      padding: '8px 18px', fontSize: 13, fontWeight: 500,
                       color: availabilitySubTab === tab.id ? brand.text : brand.textLight,
                       background: availabilitySubTab === tab.id ? '#fff' : 'transparent',
-                      border: 'none', borderRadius: 6, cursor: 'pointer',
-                      transition: 'all 0.15s ease',
-                      boxShadow: availabilitySubTab === tab.id ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                      border: 'none', borderRadius: 8, cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      boxShadow: availabilitySubTab === tab.id ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
+                      display: 'flex', alignItems: 'center', gap: 7,
                     }}
                   >
+                    {tab.icon}
                     {tab.label}
                   </button>
                 ))}
@@ -2280,8 +2278,7 @@ export default function AdminPanel() {
                 <div>
                   {!selectedWorkerAvail ? (
                     <div>
-                      <p style={{ fontSize: 14, color: brand.textLight, marginBottom: 20 }}>Click on a worker to view and edit their weekly schedule.</p>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: 16 }}>
                         {workers.map(w => {
                           const workerAvail = getWorkerAvailability(w.id);
                           const activeDays = workerAvail.filter(d => d.is_active && !d.isNew).length;
@@ -2292,132 +2289,168 @@ export default function AdminPanel() {
                               onClick={() => { setSelectedWorkerAvail(w.id); setEditingAvailability(getWorkerAvailability(w.id)); }}
                               className="table-row-hover"
                               style={{
-                                background: '#fff', borderRadius: 8, border: '1px solid ' + brand.border, padding: '14px 18px',
-                                cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                transition: 'all 0.15s',
+                                background: '#fff', borderRadius: 14, border: '1px solid ' + brand.border, padding: '20px 22px',
+                                cursor: 'pointer', transition: 'all 0.2s ease', position: 'relative', overflow: 'hidden',
                               }}
                             >
-                              <div>
-                                <p style={{ fontWeight: 600, color: brand.text, fontSize: 15, marginBottom: 4 }}>{w.name}</p>
-                                <p style={{ fontSize: 13, color: brand.textLight }}>
-                                  {hasSchedule ? `${activeDays} day${activeDays !== 1 ? 's' : ''} active` : 'No schedule set'}
-                                </p>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+                                <div>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg, #1B2B5A 0%, #3B4F8A 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 14, fontWeight: 700 }}>
+                                      {w.name?.charAt(0)?.toUpperCase()}
+                                    </div>
+                                    <div>
+                                      <p style={{ fontWeight: 600, color: brand.text, fontSize: 15 }}>{w.name}</p>
+                                      <p style={{ fontSize: 12, color: brand.textLight }}>
+                                        {hasSchedule ? `${activeDays} working day${activeDays !== 1 ? 's' : ''} per week` : 'No schedule configured'}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={brand.textLight} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                               </div>
-                              <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                              <div style={{ display: 'flex', gap: 6 }}>
                                 {DAY_NAMES.map((d, idx) => {
                                   const day = workerAvail[idx];
                                   const active = day.is_active && !day.isNew;
+                                  const off = !day.isNew && !day.is_active;
                                   return (
                                     <div key={idx} style={{
-                                      width: 28, height: 28, borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                      background: active ? '#dcfce7' : day.isNew ? '#f3f4f6' : '#fee2e2',
-                                      fontSize: 11, fontWeight: 600,
-                                      color: active ? '#16a34a' : day.isNew ? brand.textLight : brand.danger,
+                                      flex: 1, padding: '8px 0', borderRadius: 8, textAlign: 'center',
+                                      background: active ? '#F0FDF4' : off ? '#FEF2F2' : '#F8FAFC',
+                                      border: `1px solid ${active ? '#BBF7D0' : off ? '#FECACA' : '#E2E8F0'}`,
                                     }}>
-                                      {d.slice(0, 2)}
+                                      <div style={{ fontSize: 10, fontWeight: 700, color: active ? '#16A34A' : off ? '#DC2626' : brand.textLight, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2 }}>
+                                        {d.slice(0, 3)}
+                                      </div>
+                                      {active && (
+                                        <div style={{ fontSize: 10, color: '#15803D' }}>
+                                          {day.start_time?.slice(0, 5)}-{day.end_time?.slice(0, 5)}
+                                        </div>
+                                      )}
+                                      {off && <div style={{ fontSize: 10, color: '#DC2626' }}>Off</div>}
+                                      {day.isNew && <div style={{ fontSize: 10, color: brand.textLight }}>--</div>}
                                     </div>
                                   );
                                 })}
-                                <span style={{ marginLeft: 8, color: brand.textLight, fontSize: 18 }}>&#8250;</span>
                               </div>
                             </div>
                           );
                         })}
                         {workers.length === 0 && (
-                          <div style={{ padding: 32, textAlign: 'center', color: brand.textLight, background: '#fff', borderRadius: 16, border: '1px solid #E8EDFC' }}>
-                            No workers found. Add workers first in the Workers tab.
+                          <div style={{ gridColumn: '1 / -1', padding: 48, textAlign: 'center', color: brand.textLight, background: '#fff', borderRadius: 16, border: '1px dashed ' + brand.border }}>
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={brand.textLight} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 12, opacity: 0.5 }}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            <p style={{ fontSize: 15, fontWeight: 500 }}>No workers found</p>
+                            <p style={{ fontSize: 13, marginTop: 4 }}>Add workers in the Workers tab first.</p>
                           </div>
                         )}
                       </div>
                     </div>
                   ) : (
                     <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                           <button
                             onClick={() => { setSelectedWorkerAvail(''); setEditingAvailability(null); }}
-                            style={{ ...buttonStyle, background: '#fff', color: brand.text, border: '1px solid ' + brand.border, padding: '6px 12px' }}
+                            style={{ width: 36, height: 36, borderRadius: 10, border: '1px solid ' + brand.border, background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}
                           >
-                            &larr; Back
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={brand.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
                           </button>
-                          <h2 style={{ fontSize: 18, fontWeight: 600, color: brand.text }}>
-                            {workers.find(w => w.id === selectedWorkerAvail)?.name} — Weekly Schedule
-                          </h2>
+                          <div>
+                            <h2 style={{ fontSize: 18, fontWeight: 700, color: brand.text, marginBottom: 2 }}>
+                              {workers.find(w => w.id === selectedWorkerAvail)?.name}
+                            </h2>
+                            <p style={{ fontSize: 13, color: brand.textLight }}>Set working hours for each day. Changes apply to every week.</p>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="table-wrapper">
-                        <div style={{ background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border, overflow: 'hidden' }}>
-                          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            <thead>
-                              <tr style={{ background: brand.bg }}>
-                                <th style={thStyle}>Day</th>
-                                <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: 13, fontWeight: 600, color: brand.textLight }}>Day Off</th>
-                                <th style={thStyle}>Start Time</th>
-                                <th style={thStyle}>End Time</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {(editingAvailability || getWorkerAvailability(selectedWorkerAvail)).map((day, idx) => (
-                                <tr key={idx} style={{ borderBottom: '1px solid ' + brand.border, opacity: day.is_active ? 1 : 0.5 }}>
-                                  <td style={{ padding: '16px', fontWeight: 500, color: brand.text }}>{DAY_NAMES[idx]}</td>
-                                  <td style={{ padding: '16px', textAlign: 'center' }}>
-                                    <input
-                                      type="checkbox"
-                                      checked={!day.is_active}
-                                      onChange={(e) => {
-                                        const updated = [...(editingAvailability || getWorkerAvailability(selectedWorkerAvail))];
-                                        updated[idx] = { ...updated[idx], is_active: !e.target.checked };
-                                        setEditingAvailability(updated);
-                                      }}
-                                      style={{ width: 18, height: 18, cursor: 'pointer' }}
-                                    />
-                                  </td>
-                                  <td style={{ padding: '12px 16px' }}>
-                                    <select
-                                      value={day.start_time?.slice(0, 5) || '09:00'}
-                                      onChange={(e) => {
-                                        const updated = [...(editingAvailability || getWorkerAvailability(selectedWorkerAvail))];
-                                        updated[idx] = { ...updated[idx], start_time: e.target.value };
-                                        setEditingAvailability(updated);
-                                      }}
-                                      disabled={!day.is_active}
-                                      style={{ ...inputStyle, width: 150 }}
-                                    >
-                                      {HOUR_OPTIONS.map(h => <option key={h.value} value={h.value}>{h.label}</option>)}
-                                    </select>
-                                  </td>
-                                  <td style={{ padding: '12px 16px' }}>
-                                    <select
-                                      value={day.end_time?.slice(0, 5) || '16:00'}
-                                      onChange={(e) => {
-                                        const updated = [...(editingAvailability || getWorkerAvailability(selectedWorkerAvail))];
-                                        updated[idx] = { ...updated[idx], end_time: e.target.value };
-                                        setEditingAvailability(updated);
-                                      }}
-                                      disabled={!day.is_active}
-                                      style={{ ...inputStyle, width: 150 }}
-                                    >
-                                      {HOUR_OPTIONS.map(h => <option key={h.value} value={h.value}>{h.label}</option>)}
-                                    </select>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        {(editingAvailability || getWorkerAvailability(selectedWorkerAvail)).map((day, idx) => {
+                          const isActive = day.is_active;
+                          return (
+                            <div key={idx} style={{
+                              background: '#fff', borderRadius: 12, border: `1px solid ${isActive ? brand.border : '#FECACA'}`,
+                              padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 16,
+                              transition: 'all 0.2s ease', opacity: isActive ? 1 : 0.7,
+                            }}>
+                              <div style={{ width: 80, flexShrink: 0 }}>
+                                <p style={{ fontWeight: 600, color: isActive ? brand.text : brand.textLight, fontSize: 14 }}>{DAY_NAMES[idx]}</p>
+                              </div>
+
+                              {/* Toggle switch */}
+                              <div
+                                onClick={() => {
+                                  const updated = [...(editingAvailability || getWorkerAvailability(selectedWorkerAvail))];
+                                  updated[idx] = { ...updated[idx], is_active: !isActive };
+                                  setEditingAvailability(updated);
+                                }}
+                                style={{
+                                  width: 44, height: 24, borderRadius: 12, cursor: 'pointer', position: 'relative',
+                                  background: isActive ? '#22C55E' : '#E2E8F0', transition: 'background 0.2s ease', flexShrink: 0,
+                                }}
+                              >
+                                <div style={{
+                                  width: 18, height: 18, borderRadius: 9, background: '#fff',
+                                  position: 'absolute', top: 3,
+                                  left: isActive ? 23 : 3,
+                                  transition: 'left 0.2s ease',
+                                  boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+                                }} />
+                              </div>
+
+                              <span style={{ fontSize: 12, fontWeight: 600, color: isActive ? '#16A34A' : '#94A3B8', width: 28, flexShrink: 0 }}>
+                                {isActive ? 'On' : 'Off'}
+                              </span>
+
+                              {isActive ? (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
+                                  <select
+                                    value={day.start_time?.slice(0, 5) || '09:00'}
+                                    onChange={(e) => {
+                                      const updated = [...(editingAvailability || getWorkerAvailability(selectedWorkerAvail))];
+                                      updated[idx] = { ...updated[idx], start_time: e.target.value };
+                                      setEditingAvailability(updated);
+                                    }}
+                                    style={{ ...inputStyle, flex: 1, maxWidth: 160, padding: '10px 12px', fontSize: 13 }}
+                                  >
+                                    {HOUR_OPTIONS.map(h => <option key={h.value} value={h.value}>{h.label}</option>)}
+                                  </select>
+                                  <span style={{ color: brand.textLight, fontSize: 13, fontWeight: 500 }}>to</span>
+                                  <select
+                                    value={day.end_time?.slice(0, 5) || '16:00'}
+                                    onChange={(e) => {
+                                      const updated = [...(editingAvailability || getWorkerAvailability(selectedWorkerAvail))];
+                                      updated[idx] = { ...updated[idx], end_time: e.target.value };
+                                      setEditingAvailability(updated);
+                                    }}
+                                    style={{ ...inputStyle, flex: 1, maxWidth: 160, padding: '10px 12px', fontSize: 13 }}
+                                  >
+                                    {HOUR_OPTIONS.map(h => <option key={h.value} value={h.value}>{h.label}</option>)}
+                                  </select>
+                                </div>
+                              ) : (
+                                <span style={{ fontSize: 13, color: '#94A3B8', fontStyle: 'italic' }}>Day off</span>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
-                      <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+
+                      <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
                         <button
                           onClick={() => handleSaveWeeklySchedule(selectedWorkerAvail)}
                           disabled={availSaving}
-                          style={{ ...buttonStyle, background: brand.navy, color: '#fff', opacity: availSaving ? 0.6 : 1 }}
+                          style={{
+                            ...buttonStyle, background: brand.navy, color: '#fff', padding: '12px 28px', fontSize: 14, fontWeight: 600,
+                            borderRadius: 10, opacity: availSaving ? 0.6 : 1, boxShadow: '0 2px 8px rgba(27,43,90,0.2)',
+                          }}
                         >
                           {availSaving ? 'Saving...' : 'Save Schedule'}
                         </button>
                         <button
                           onClick={() => { setSelectedWorkerAvail(''); setEditingAvailability(null); }}
-                          style={{ ...buttonStyle, background: '#fff', color: brand.text, border: '1px solid ' + brand.border }}
+                          style={{ ...buttonStyle, background: '#fff', color: brand.text, border: '1px solid ' + brand.border, padding: '12px 24px', borderRadius: 10, fontSize: 14 }}
                         >
                           Cancel
                         </button>
@@ -2430,137 +2463,253 @@ export default function AdminPanel() {
               {/* SUB-TAB 2: Blocked Dates */}
               {availabilitySubTab === 'blocked' && (
                 <div>
-                  <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-                    {/* Left: Calendar + Form */}
-                    <div style={{ flex: '1 1 400px', minWidth: 320 }}>
-                      <div style={{ marginBottom: 16 }}>
-                        <select
-                          value={blockedDateForm.worker_id}
-                          onChange={(e) => setBlockedDateForm({ ...blockedDateForm, worker_id: e.target.value })}
-                          style={{ ...inputStyle, width: 240, marginBottom: 16 }}
-                        >
-                          <option value="">Select worker...</option>
-                          {workers.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
-                        </select>
-                      </div>
+                  {/* Worker filter pills */}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 24 }}>
+                    <button
+                      onClick={() => setBlockedDateForm({ ...blockedDateForm, worker_id: '' })}
+                      style={{
+                        padding: '8px 16px', fontSize: 13, fontWeight: 500, borderRadius: 20, border: 'none', cursor: 'pointer',
+                        background: !blockedDateForm.worker_id ? brand.navy : '#F1F5F9',
+                        color: !blockedDateForm.worker_id ? '#fff' : brand.textLight,
+                        transition: 'all 0.15s',
+                      }}
+                    >
+                      All Workers
+                    </button>
+                    {workers.map(w => (
+                      <button
+                        key={w.id}
+                        onClick={() => setBlockedDateForm({ ...blockedDateForm, worker_id: w.id })}
+                        style={{
+                          padding: '8px 16px', fontSize: 13, fontWeight: 500, borderRadius: 20, border: 'none', cursor: 'pointer',
+                          background: blockedDateForm.worker_id === w.id ? brand.navy : '#F1F5F9',
+                          color: blockedDateForm.worker_id === w.id ? '#fff' : brand.textLight,
+                          transition: 'all 0.15s',
+                        }}
+                      >
+                        {w.name}
+                      </button>
+                    ))}
+                  </div>
 
-                      {/* Calendar */}
-                      <div style={{ background: '#fff', borderRadius: 8, border: '1px solid ' + brand.border, padding: 16, marginBottom: 16 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                          <button onClick={() => { if (calendarMonth === 0) { setCalendarMonth(11); setCalendarYear(calendarYear - 1); } else setCalendarMonth(calendarMonth - 1); }} style={{ ...buttonStyle, background: '#fff', color: brand.text, padding: '5px 12px', border: '1px solid ' + brand.border }}>&lt;</button>
-                          <span style={{ fontSize: 16, fontWeight: 600, color: brand.text }}>{MONTH_NAMES[calendarMonth]} {calendarYear}</span>
-                          <button onClick={() => { if (calendarMonth === 11) { setCalendarMonth(0); setCalendarYear(calendarYear + 1); } else setCalendarMonth(calendarMonth + 1); }} style={{ ...buttonStyle, background: '#fff', color: brand.text, padding: '5px 12px', border: '1px solid ' + brand.border }}>&gt;</button>
+                  <div style={{ display: 'flex', gap: 28, flexWrap: 'wrap' }}>
+                    {/* Left: Calendar */}
+                    <div style={{ flex: '1 1 420px', minWidth: 340 }}>
+                      <div style={{ background: '#fff', borderRadius: 16, border: '1px solid ' + brand.border, padding: 24, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                        {/* Month navigation */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                          <button onClick={() => { if (calendarMonth === 0) { setCalendarMonth(11); setCalendarYear(calendarYear - 1); } else setCalendarMonth(calendarMonth - 1); }} style={{ width: 36, height: 36, borderRadius: 10, border: '1px solid ' + brand.border, background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={brand.text} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                          </button>
+                          <span style={{ fontSize: 17, fontWeight: 700, color: brand.text, letterSpacing: '-0.01em' }}>{MONTH_NAMES[calendarMonth]} {calendarYear}</span>
+                          <button onClick={() => { if (calendarMonth === 11) { setCalendarMonth(0); setCalendarYear(calendarYear + 1); } else setCalendarMonth(calendarMonth + 1); }} style={{ width: 36, height: 36, borderRadius: 10, border: '1px solid ' + brand.border, background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={brand.text} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                          </button>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
-                          {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map(d => (
-                            <div key={d} style={{ padding: '6px 0', textAlign: 'center', fontSize: 12, fontWeight: 600, color: brand.textLight }}>{d}</div>
+
+                        {/* Day headers */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginBottom: 8 }}>
+                          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => (
+                            <div key={d} style={{ padding: '6px 0', textAlign: 'center', fontSize: 11, fontWeight: 700, color: brand.textLight, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{d}</div>
                           ))}
+                        </div>
+
+                        {/* Day grid */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
                           {getCalendarDays(calendarYear, calendarMonth).map((day, i) => {
                             const dateStr = formatDateISO(day.date);
                             const workerBlocked = blockedDates.filter(bd => bd.blocked_date === dateStr && (!blockedDateForm.worker_id || bd.worker_id === blockedDateForm.worker_id));
                             const isBlocked = workerBlocked.length > 0;
+                            const isAllDayBlocked = workerBlocked.some(bd => bd.all_day);
+                            const isPartialBlocked = isBlocked && !isAllDayBlocked;
                             const isSelected = blockedDateForm.blocked_date === dateStr;
                             const isToday = formatDateISO(new Date()) === dateStr;
+                            const isPast = day.date < new Date(new Date().setHours(0,0,0,0));
                             return (
                               <button
                                 key={i}
                                 onClick={() => {
-                                  if (blockedDateForm.worker_id) {
+                                  if (blockedDateForm.worker_id && day.isCurrentMonth && !isPast) {
                                     setBlockedDateForm({ ...blockedDateForm, blocked_date: dateStr });
                                   }
                                 }}
                                 style={{
-                                  padding: '8px 4px', textAlign: 'center', fontSize: 13, border: 'none', borderRadius: 4,
-                                  cursor: blockedDateForm.worker_id ? 'pointer' : 'default',
-                                  background: isSelected ? brand.primary : isBlocked ? '#fee2e2' : isToday ? '#DBEAFE' : 'transparent',
-                                  color: day.isCurrentMonth ? (isBlocked ? brand.danger : brand.text) : '#ccc',
-                                  fontWeight: isToday || isSelected ? 600 : 400,
+                                  padding: '10px 4px', textAlign: 'center', fontSize: 13, border: 'none', borderRadius: 10,
+                                  cursor: blockedDateForm.worker_id && day.isCurrentMonth && !isPast ? 'pointer' : 'default',
+                                  background: isSelected ? brand.navy
+                                    : isAllDayBlocked ? '#FEE2E2'
+                                    : isPartialBlocked ? '#FEF3C7'
+                                    : isToday ? '#EEF2FF'
+                                    : 'transparent',
+                                  color: isSelected ? '#fff'
+                                    : !day.isCurrentMonth ? '#D1D5DB'
+                                    : isPast ? '#CBD5E1'
+                                    : isAllDayBlocked ? '#DC2626'
+                                    : isPartialBlocked ? '#D97706'
+                                    : brand.text,
+                                  fontWeight: isToday || isSelected ? 700 : 500,
+                                  transition: 'all 0.15s ease',
+                                  position: 'relative',
                                 }}
                               >
                                 {day.date.getDate()}
+                                {isBlocked && !isSelected && (
+                                  <div style={{
+                                    position: 'absolute', bottom: 3, left: '50%', transform: 'translateX(-50%)',
+                                    width: 5, height: 5, borderRadius: '50%',
+                                    background: isAllDayBlocked ? '#DC2626' : '#D97706',
+                                  }} />
+                                )}
                               </button>
                             );
                           })}
                         </div>
+
+                        {/* Legend */}
+                        <div style={{ display: 'flex', gap: 16, marginTop: 16, paddingTop: 16, borderTop: '1px solid ' + brand.border }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: brand.textLight }}>
+                            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#DC2626' }} />All Day
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: brand.textLight }}>
+                            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#D97706' }} />Partial
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: brand.textLight }}>
+                            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#818CF8' }} />Today
+                          </div>
+                        </div>
                       </div>
 
-                      {/* Add Blocked Date Form */}
+                      {/* Block date form - appears when worker + date selected */}
                       {blockedDateForm.worker_id && blockedDateForm.blocked_date && (
-                        <div style={{ background: '#fff', borderRadius: 8, border: '1px solid ' + brand.border, padding: 16 }}>
-                          <p style={{ fontSize: 13, fontWeight: 600, color: brand.text, marginBottom: 12 }}>
-                            Block {formatDate(blockedDateForm.blocked_date)} for {workers.find(w => w.id === blockedDateForm.worker_id)?.name}
-                          </p>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                            <label style={{ fontSize: 13, color: brand.text, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
-                              <input
-                                type="checkbox"
-                                checked={blockedDateForm.all_day}
-                                onChange={(e) => setBlockedDateForm({ ...blockedDateForm, all_day: e.target.checked })}
-                              />
-                              All Day
-                            </label>
+                        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid ' + brand.border, padding: 24, marginTop: 16, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+                            <div style={{ width: 32, height: 32, borderRadius: 8, background: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                            </div>
+                            <div>
+                              <p style={{ fontSize: 14, fontWeight: 600, color: brand.text }}>
+                                Block {formatDate(blockedDateForm.blocked_date)}
+                              </p>
+                              <p style={{ fontSize: 12, color: brand.textLight }}>for {workers.find(w => w.id === blockedDateForm.worker_id)?.name}</p>
+                            </div>
                           </div>
+
+                          {/* All day toggle */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, padding: '12px 16px', background: '#F8FAFC', borderRadius: 10 }}>
+                            <div
+                              onClick={() => setBlockedDateForm({ ...blockedDateForm, all_day: !blockedDateForm.all_day })}
+                              style={{
+                                width: 44, height: 24, borderRadius: 12, cursor: 'pointer', position: 'relative',
+                                background: blockedDateForm.all_day ? '#DC2626' : '#E2E8F0', transition: 'background 0.2s ease',
+                              }}
+                            >
+                              <div style={{
+                                width: 18, height: 18, borderRadius: 9, background: '#fff', position: 'absolute', top: 3,
+                                left: blockedDateForm.all_day ? 23 : 3, transition: 'left 0.2s ease',
+                                boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+                              }} />
+                            </div>
+                            <span style={{ fontSize: 13, fontWeight: 500, color: brand.text }}>Block entire day</span>
+                          </div>
+
                           {!blockedDateForm.all_day && (
-                            <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
-                              <div>
-                                <label style={{ fontSize: 12, color: brand.textLight, display: 'block', marginBottom: 4 }}>Start</label>
-                                <input type="time" value={blockedDateForm.start_time} onChange={(e) => setBlockedDateForm({ ...blockedDateForm, start_time: e.target.value })} style={{ ...inputStyle, width: 140 }} />
+                            <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+                              <div style={{ flex: 1 }}>
+                                <label style={{ fontSize: 12, fontWeight: 600, color: brand.textLight, display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>From</label>
+                                <input type="time" value={blockedDateForm.start_time} onChange={(e) => setBlockedDateForm({ ...blockedDateForm, start_time: e.target.value })} style={{ ...inputStyle, width: '100%', padding: '10px 12px' }} />
                               </div>
-                              <div>
-                                <label style={{ fontSize: 12, color: brand.textLight, display: 'block', marginBottom: 4 }}>End</label>
-                                <input type="time" value={blockedDateForm.end_time} onChange={(e) => setBlockedDateForm({ ...blockedDateForm, end_time: e.target.value })} style={{ ...inputStyle, width: 140 }} />
+                              <div style={{ flex: 1 }}>
+                                <label style={{ fontSize: 12, fontWeight: 600, color: brand.textLight, display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Until</label>
+                                <input type="time" value={blockedDateForm.end_time} onChange={(e) => setBlockedDateForm({ ...blockedDateForm, end_time: e.target.value })} style={{ ...inputStyle, width: '100%', padding: '10px 12px' }} />
                               </div>
                             </div>
                           )}
-                          <div style={{ marginBottom: 12 }}>
-                            <label style={{ fontSize: 12, color: brand.textLight, display: 'block', marginBottom: 4 }}>Reason (optional)</label>
+
+                          <div style={{ marginBottom: 18 }}>
+                            <label style={{ fontSize: 12, fontWeight: 600, color: brand.textLight, display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Reason (optional)</label>
                             <input
                               type="text"
                               value={blockedDateForm.reason}
                               onChange={(e) => setBlockedDateForm({ ...blockedDateForm, reason: e.target.value })}
-                              placeholder="e.g. Vacation, Doctor's appointment..."
-                              style={inputStyle}
+                              placeholder="e.g. Vacation, Appointment..."
+                              style={{ ...inputStyle, width: '100%', padding: '10px 14px' }}
                             />
                           </div>
-                          <button onClick={handleAddBlockedDate} style={{ ...buttonStyle, background: brand.danger, color: '#fff' }}>
+
+                          <button onClick={handleAddBlockedDate} style={{
+                            ...buttonStyle, background: '#DC2626', color: '#fff', width: '100%', padding: '12px 20px',
+                            borderRadius: 10, fontSize: 14, fontWeight: 600, boxShadow: '0 2px 8px rgba(220,38,38,0.2)',
+                          }}>
                             Block This Date
                           </button>
                         </div>
                       )}
+
+                      {!blockedDateForm.worker_id && (
+                        <div style={{ marginTop: 16, padding: '16px 20px', background: '#FFFBEB', borderRadius: 12, border: '1px solid #FDE68A', display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                          <span style={{ fontSize: 13, color: '#92400E', fontWeight: 500 }}>Select a worker above to block dates on the calendar.</span>
+                        </div>
+                      )}
                     </div>
 
-                    {/* Right: List of blocked dates */}
-                    <div style={{ flex: '1 1 380px', minWidth: 300 }}>
-                      <p style={{ fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 12 }}>
-                        Upcoming Blocked Dates
-                      </p>
-                      <div style={{ background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border, overflow: 'hidden' }}>
+                    {/* Right: Upcoming blocked dates list */}
+                    <div style={{ flex: '1 1 360px', minWidth: 300 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                        <p style={{ fontSize: 15, fontWeight: 700, color: brand.text }}>
+                          Upcoming Blocks
+                        </p>
+                        <span style={{ fontSize: 12, color: brand.textLight, background: '#F1F5F9', padding: '4px 10px', borderRadius: 20, fontWeight: 500 }}>
+                          {blockedDates.filter(bd => (!blockedDateForm.worker_id || bd.worker_id === blockedDateForm.worker_id) && bd.blocked_date >= formatDateISO(new Date())).length} total
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                         {blockedDates
                           .filter(bd => !blockedDateForm.worker_id || bd.worker_id === blockedDateForm.worker_id)
                           .filter(bd => bd.blocked_date >= formatDateISO(new Date()))
                           .sort((a, b) => a.blocked_date.localeCompare(b.blocked_date))
                           .map(bd => (
-                            <div key={bd.id} style={{ padding: '12px 16px', borderBottom: `1px solid ${brand.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <div>
-                                <p style={{ fontWeight: 500, color: brand.text, fontSize: 14 }}>
-                                  {formatDate(bd.blocked_date)}
-                                  <span style={{ fontSize: 12, color: brand.textLight, marginLeft: 8 }}>
-                                    {workers.find(w => w.id === bd.worker_id)?.name}
-                                  </span>
-                                </p>
-                                <p style={{ fontSize: 12, color: brand.textLight }}>
-                                  {bd.all_day ? 'All day' : `${bd.start_time?.slice(0, 5)} - ${bd.end_time?.slice(0, 5)}`}
-                                  {bd.reason && ` · ${bd.reason}`}
-                                </p>
+                            <div key={bd.id} style={{
+                              background: '#fff', borderRadius: 12, border: '1px solid ' + brand.border, padding: '14px 18px',
+                              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                              transition: 'all 0.15s',
+                            }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                <div style={{
+                                  width: 40, height: 40, borderRadius: 10,
+                                  background: bd.all_day ? '#FEF2F2' : '#FFFBEB',
+                                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                                }}>
+                                  <div style={{ fontSize: 9, fontWeight: 700, color: bd.all_day ? '#DC2626' : '#D97706', textTransform: 'uppercase' }}>
+                                    {new Date(bd.blocked_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short' })}
+                                  </div>
+                                  <div style={{ fontSize: 15, fontWeight: 700, color: bd.all_day ? '#DC2626' : '#D97706', lineHeight: 1 }}>
+                                    {new Date(bd.blocked_date + 'T00:00:00').getDate()}
+                                  </div>
+                                </div>
+                                <div>
+                                  <p style={{ fontWeight: 600, color: brand.text, fontSize: 13, marginBottom: 2 }}>
+                                    {workers.find(w => w.id === bd.worker_id)?.name || 'Unknown'}
+                                  </p>
+                                  <p style={{ fontSize: 12, color: brand.textLight }}>
+                                    {bd.all_day ? 'All day' : `${bd.start_time?.slice(0, 5)} - ${bd.end_time?.slice(0, 5)}`}
+                                    {bd.reason && <span> &middot; {bd.reason}</span>}
+                                  </p>
+                                </div>
                               </div>
-                              <button onClick={() => handleDeleteBlockedDate(bd.id)} style={{ ...buttonStyle, background: '#FEF2F2', color: brand.danger, fontSize: 12, padding: '5px 10px' }}>
-                                Delete
+                              <button
+                                onClick={() => handleDeleteBlockedDate(bd.id)}
+                                style={{ width: 32, height: 32, borderRadius: 8, border: '1px solid #FECACA', background: '#FEF2F2', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s', flexShrink: 0 }}
+                              >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                               </button>
                             </div>
                           ))}
-                        {blockedDates.filter(bd => !blockedDateForm.worker_id || bd.worker_id === blockedDateForm.worker_id).filter(bd => bd.blocked_date >= formatDateISO(new Date())).length === 0 && (
-                          <div style={{ padding: 24, textAlign: 'center', color: brand.textLight, fontSize: 14 }}>
-                            No upcoming blocked dates.
+                        {blockedDates.filter(bd => (!blockedDateForm.worker_id || bd.worker_id === blockedDateForm.worker_id) && bd.blocked_date >= formatDateISO(new Date())).length === 0 && (
+                          <div style={{ padding: 40, textAlign: 'center', color: brand.textLight, background: '#fff', borderRadius: 16, border: '1px dashed ' + brand.border }}>
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={brand.textLight} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 8, opacity: 0.4 }}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            <p style={{ fontSize: 14, fontWeight: 500 }}>No upcoming blocks</p>
+                            <p style={{ fontSize: 12, marginTop: 4 }}>Select a worker and click a date to block it.</p>
                           </div>
                         )}
                       </div>
@@ -2573,92 +2722,112 @@ export default function AdminPanel() {
               {availabilitySubTab === 'overrides' && (
                 <div>
                   {/* Add Override Form */}
-                  <div style={{ background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border, padding: 20, marginBottom: 24 }}>
-                    <p style={{ fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 14 }}>Add Schedule Override</p>
+                  <div style={{ background: '#fff', borderRadius: 16, border: '1px solid ' + brand.border, padding: 24, marginBottom: 24, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+                      <div style={{ width: 32, height: 32, borderRadius: 8, background: '#EEF2FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366F1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                      </div>
+                      <div>
+                        <p style={{ fontSize: 14, fontWeight: 600, color: brand.text }}>Add One-Time Override</p>
+                        <p style={{ fontSize: 12, color: brand.textLight }}>Change a worker's availability for a specific date.</p>
+                      </div>
+                    </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
                       <div>
-                        <label style={{ fontSize: 12, color: brand.textLight, display: 'block', marginBottom: 4 }}>Worker</label>
-                        <select value={overrideForm.worker_id} onChange={(e) => setOverrideForm({ ...overrideForm, worker_id: e.target.value })} style={inputStyle}>
+                        <label style={{ fontSize: 12, fontWeight: 600, color: brand.textLight, display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Worker</label>
+                        <select value={overrideForm.worker_id} onChange={(e) => setOverrideForm({ ...overrideForm, worker_id: e.target.value })} style={{ ...inputStyle, padding: '10px 12px' }}>
                           <option value="">Select worker...</option>
                           {workers.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                         </select>
                       </div>
                       <div>
-                        <label style={{ fontSize: 12, color: brand.textLight, display: 'block', marginBottom: 4 }}>Date</label>
-                        <input type="date" value={overrideForm.override_date} onChange={(e) => setOverrideForm({ ...overrideForm, override_date: e.target.value })} style={inputStyle} />
+                        <label style={{ fontSize: 12, fontWeight: 600, color: brand.textLight, display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Date</label>
+                        <input type="date" value={overrideForm.override_date} onChange={(e) => setOverrideForm({ ...overrideForm, override_date: e.target.value })} style={{ ...inputStyle, padding: '10px 12px' }} />
                       </div>
                       <div>
-                        <label style={{ fontSize: 12, color: brand.textLight, display: 'block', marginBottom: 4 }}>Start Time</label>
-                        <input type="time" value={overrideForm.start_time} onChange={(e) => setOverrideForm({ ...overrideForm, start_time: e.target.value })} style={inputStyle} />
+                        <label style={{ fontSize: 12, fontWeight: 600, color: brand.textLight, display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Start</label>
+                        <input type="time" value={overrideForm.start_time} onChange={(e) => setOverrideForm({ ...overrideForm, start_time: e.target.value })} style={{ ...inputStyle, padding: '10px 12px' }} />
                       </div>
                       <div>
-                        <label style={{ fontSize: 12, color: brand.textLight, display: 'block', marginBottom: 4 }}>End Time</label>
-                        <input type="time" value={overrideForm.end_time} onChange={(e) => setOverrideForm({ ...overrideForm, end_time: e.target.value })} style={inputStyle} />
+                        <label style={{ fontSize: 12, fontWeight: 600, color: brand.textLight, display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>End</label>
+                        <input type="time" value={overrideForm.end_time} onChange={(e) => setOverrideForm({ ...overrideForm, end_time: e.target.value })} style={{ ...inputStyle, padding: '10px 12px' }} />
                       </div>
                       <div>
-                        <label style={{ fontSize: 12, color: brand.textLight, display: 'block', marginBottom: 4 }}>Status</label>
-                        <select value={overrideForm.is_available ? 'available' : 'unavailable'} onChange={(e) => setOverrideForm({ ...overrideForm, is_available: e.target.value === 'available' })} style={inputStyle}>
+                        <label style={{ fontSize: 12, fontWeight: 600, color: brand.textLight, display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Status</label>
+                        <select value={overrideForm.is_available ? 'available' : 'unavailable'} onChange={(e) => setOverrideForm({ ...overrideForm, is_available: e.target.value === 'available' })} style={{ ...inputStyle, padding: '10px 12px' }}>
                           <option value="available">Available</option>
                           <option value="unavailable">Unavailable</option>
                         </select>
                       </div>
                       <div>
-                        <label style={{ fontSize: 12, color: brand.textLight, display: 'block', marginBottom: 4 }}>Reason</label>
-                        <input type="text" value={overrideForm.reason} onChange={(e) => setOverrideForm({ ...overrideForm, reason: e.target.value })} placeholder="e.g. Working Saturday" style={inputStyle} />
+                        <label style={{ fontSize: 12, fontWeight: 600, color: brand.textLight, display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Reason</label>
+                        <input type="text" value={overrideForm.reason} onChange={(e) => setOverrideForm({ ...overrideForm, reason: e.target.value })} placeholder="e.g. Working Saturday" style={{ ...inputStyle, padding: '10px 12px' }} />
                       </div>
                     </div>
-                    <button onClick={handleAddOverride} style={{ ...buttonStyle, background: brand.navy, color: '#fff', marginTop: 14 }}>
+                    <button onClick={handleAddOverride} style={{
+                      ...buttonStyle, background: brand.navy, color: '#fff', marginTop: 18, padding: '12px 24px',
+                      borderRadius: 10, fontSize: 14, fontWeight: 600, boxShadow: '0 2px 8px rgba(27,43,90,0.2)',
+                    }}>
                       + Add Override
                     </button>
                   </div>
 
                   {/* Overrides List */}
-                  <div className="table-wrapper">
-                    <div style={{ background: '#fff', borderRadius: 10, border: '1px solid ' + brand.border, overflow: 'hidden' }}>
-                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                          <tr style={{ background: brand.bg }}>
-                            <th style={thStyle}>Worker</th>
-                            <th style={thStyle}>Date</th>
-                            <th style={thStyle}>Hours</th>
-                            <th style={thStyle}>Status</th>
-                            <th style={thStyle}>Reason</th>
-                            <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {scheduleOverrides
-                            .sort((a, b) => a.override_date.localeCompare(b.override_date))
-                            .map(so => (
-                              <tr key={so.id} style={{ borderBottom: '1px solid ' + brand.border }}>
-                                <td style={{ padding: '16px', fontWeight: 500, color: brand.text }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {scheduleOverrides
+                      .sort((a, b) => a.override_date.localeCompare(b.override_date))
+                      .map(so => (
+                        <div key={so.id} style={{
+                          background: '#fff', borderRadius: 12, border: '1px solid ' + brand.border, padding: '14px 18px',
+                          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                            <div style={{
+                              width: 40, height: 40, borderRadius: 10,
+                              background: so.is_available ? '#F0FDF4' : '#FEF2F2',
+                              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                            }}>
+                              <div style={{ fontSize: 9, fontWeight: 700, color: so.is_available ? '#16A34A' : '#DC2626', textTransform: 'uppercase' }}>
+                                {new Date(so.override_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short' })}
+                              </div>
+                              <div style={{ fontSize: 15, fontWeight: 700, color: so.is_available ? '#16A34A' : '#DC2626', lineHeight: 1 }}>
+                                {new Date(so.override_date + 'T00:00:00').getDate()}
+                              </div>
+                            </div>
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+                                <p style={{ fontWeight: 600, color: brand.text, fontSize: 13 }}>
                                   {workers.find(w => w.id === so.worker_id)?.name || 'Unknown'}
-                                </td>
-                                <td style={{ padding: '16px', color: brand.text }}>{formatDate(so.override_date)}</td>
-                                <td style={{ padding: '16px', color: brand.text }}>{so.start_time?.slice(0, 5)} - {so.end_time?.slice(0, 5)}</td>
-                                <td style={{ padding: '16px' }}>
-                                  <span style={{
-                                    padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 500,
-                                    background: so.is_available ? '#dcfce7' : '#fee2e2',
-                                    color: so.is_available ? '#16a34a' : brand.danger,
-                                  }}>
-                                    {so.is_available ? 'Available' : 'Unavailable'}
-                                  </span>
-                                </td>
-                                <td style={{ padding: '16px', color: brand.textLight, fontSize: 13 }}>{so.reason || '--'}</td>
-                                <td style={{ padding: '16px', textAlign: 'right' }}>
-                                  <button onClick={() => handleDeleteOverride(so.id)} style={{ ...buttonStyle, background: '#FEF2F2', color: brand.danger, fontSize: 12, padding: '5px 10px' }}>
-                                    Delete
-                                  </button>
-                                </td>
-                              </tr>
-                            ))}
-                          {scheduleOverrides.length === 0 && (
-                            <tr><td colSpan={6} style={{ padding: 32, textAlign: 'center', color: brand.textLight }}>No schedule overrides.</td></tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
+                                </p>
+                                <span style={{
+                                  padding: '2px 8px', borderRadius: 20, fontSize: 11, fontWeight: 600,
+                                  background: so.is_available ? '#DCFCE7' : '#FEE2E2',
+                                  color: so.is_available ? '#16A34A' : '#DC2626',
+                                }}>
+                                  {so.is_available ? 'Available' : 'Unavailable'}
+                                </span>
+                              </div>
+                              <p style={{ fontSize: 12, color: brand.textLight }}>
+                                {so.start_time?.slice(0, 5)} - {so.end_time?.slice(0, 5)}
+                                {so.reason && <span> &middot; {so.reason}</span>}
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteOverride(so.id)}
+                            style={{ width: 32, height: 32, borderRadius: 8, border: '1px solid #FECACA', background: '#FEF2F2', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                          </button>
+                        </div>
+                      ))}
+                    {scheduleOverrides.length === 0 && (
+                      <div style={{ padding: 40, textAlign: 'center', color: brand.textLight, background: '#fff', borderRadius: 16, border: '1px dashed ' + brand.border }}>
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={brand.textLight} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 8, opacity: 0.4 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        <p style={{ fontSize: 14, fontWeight: 500 }}>No schedule overrides</p>
+                        <p style={{ fontSize: 12, marginTop: 4 }}>Add an override to change availability for a specific date.</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -2674,7 +2843,6 @@ export default function AdminPanel() {
                 <p style={{ fontSize: 14, fontWeight: 600, color: brand.text, marginBottom: 20 }}>Scheduling Configuration</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
                   {[
-                    { key: 'slot_duration_minutes', label: 'Slot Duration', description: 'Length of each booking time slot', options: SLOT_DURATION_OPTIONS },
                     { key: 'buffer_between_jobs_minutes', label: 'Buffer Between Jobs', description: 'Break time between consecutive bookings', options: BUFFER_OPTIONS },
                     { key: 'minimum_notice_hours', label: 'Minimum Notice', description: 'Minimum hours before a booking can be made', options: NOTICE_OPTIONS },
                     { key: 'advance_booking_days', label: 'How Far in Advance', description: 'How far in advance customers can book', options: ADVANCE_OPTIONS },

@@ -211,6 +211,12 @@ html, body {
     gap: 24px !important;
     padding: 32px 16px !important;
   }
+  .checkout-summary-desktop {
+    display: none !important;
+  }
+  .checkout-summary-mobile {
+    display: block !important;
+  }
 
   /* --- Dashboard Page --- */
   .dashboard-header {

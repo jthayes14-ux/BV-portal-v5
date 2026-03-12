@@ -525,7 +525,7 @@ export default function AdminPanel() {
     };
     const { data, error } = await supabase.from('blocked_dates').insert(payload).select().single();
     if (error) { setCrudError('Failed to add blocked date: ' + error.message); return; }
-    setBlockedDates([...blockedDates, data]);
+    setBlockedDates(prev => [...prev, data]);
     setBlockedDateForm({ worker_id: blockedDateForm.worker_id, blocked_date: '', all_day: true, start_time: '09:00', end_time: '16:00', reason: '' });
   };
 
@@ -533,7 +533,7 @@ export default function AdminPanel() {
     if (!confirm('Remove this blocked date?')) return;
     const { error } = await supabase.from('blocked_dates').delete().eq('id', id);
     if (error) { setCrudError('Failed to delete: ' + error.message); return; }
-    setBlockedDates(blockedDates.filter(bd => bd.id !== id));
+    setBlockedDates(prev => prev.filter(bd => bd.id !== id));
   };
 
   const handleAddOverride = async () => {

@@ -57,7 +57,7 @@ export default function CustomerDashboard() {
 
   const loadData = async () => {
     const [bkRes, fqRes, svcRes, avRes, bdRes, soRes, wRes] = await Promise.all([
-      supabase.from('bookings').select('*').eq('user_id', user.id).order('booking_date', { ascending: false }).limit(10000),
+      supabase.from('bookings').select('*, floor_plans:floor_plan_id(duration_minutes)').eq('user_id', user.id).order('booking_date', { ascending: false }).limit(10000),
       supabase.from('frequencies').select('*').order('sort_order'),
       supabase.from('site_settings').select('*'),
       supabase.from('availability').select('*').order('day_of_week'),
@@ -109,7 +109,9 @@ export default function CustomerDashboard() {
     setRescheduleTime('');
     setAssignedWorkerId(null);
 
-    const slotDuration = Number(serviceSettings.slot_duration_minutes) || 60;
+    const globalSlotDuration = Number(serviceSettings.slot_duration_minutes) || 60;
+    const rescheduleFloorPlanDuration = Number(rescheduleBooking?.floor_plans?.duration_minutes) || globalSlotDuration;
+    const slotDuration = rescheduleFloorPlanDuration;
     const buffer = Number(serviceSettings.buffer_between_jobs_minutes) || 15;
     const minNoticeHours = Number(serviceSettings.minimum_notice_hours) || 24;
     const advanceDays = Number(serviceSettings.advance_booking_days) || 30;
@@ -141,7 +143,7 @@ export default function CustomerDashboard() {
     if (useWorkerSchedules) {
       const { data: existingBookings } = await supabase
         .from('bookings')
-        .select('booking_time, worker_id')
+        .select('booking_time, worker_id, floor_plan_id, floor_plans:floor_plan_id(duration_minutes)')
         .eq('booking_date', selectedDate)
         .in('status', ['upcoming', 'scheduled']);
       const bookedSlots = existingBookings || [];
@@ -203,7 +205,8 @@ export default function CustomerDashboard() {
           if (ampm === 'PM' && h !== 12) h += 12;
           if (ampm === 'AM' && h === 12) h = 0;
           const s = h * 60 + m;
-          return { start: s, end: s + slotDuration + buffer };
+          const bookingDuration = Number(b.floor_plans?.duration_minutes) || globalSlotDuration;
+          return { start: s, end: s + bookingDuration + buffer };
         }).filter(Boolean);
 
         const partialBlocks = blocked.filter(bd => !bd.all_day).map(bd => {
@@ -800,7 +803,25 @@ export default function CustomerDashboard() {
                         const cellDate = new Date(calendarYear, calendarMonth, day);
                         const isPast = cellDate < todayObj;
                         const isBeyondMax = maxDateObj && cellDate > maxDateObj;
-                        const disabled = isPast || isBeyondMax;
+
+                        // Check if date is fully blocked (all workers have all-day blocks or no availability)
+                        let isFullyBlocked = false;
+                        if (!isPast && !isBeyondMax && allWorkers.length > 0) {
+                          const jsDay = cellDate.getDay();
+                          const dbDay = jsDay === 0 ? 6 : jsDay - 1;
+                          const availableWorkerCount = allWorkers.filter(worker => {
+                            const override = allOverrides.find(o => o.worker_id === worker.id && o.override_date === dateStr);
+                            if (override) return override.is_available;
+                            const weeklyAvail = allAvailability.find(a => a.worker_id === worker.id && a.day_of_week === dbDay);
+                            if (weeklyAvail && !weeklyAvail.is_active) return false;
+                            const hasAllDayBlock = allBlockedDates.some(bd => bd.worker_id === worker.id && bd.blocked_date === dateStr && bd.all_day);
+                            if (hasAllDayBlock) return false;
+                            return true;
+                          }).length;
+                          isFullyBlocked = availableWorkerCount === 0;
+                        }
+
+                        const disabled = isPast || isBeyondMax || isFullyBlocked;
                         const isSelected = rescheduleDate === dateStr;
                         const isToday = cellDate.getTime() === todayObj.getTime();
 

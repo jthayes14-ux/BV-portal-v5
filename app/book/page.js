@@ -66,6 +66,7 @@ function BookingFlowInner() {
   const [allBlockedDates, setAllBlockedDates] = useState([]);
   const [allOverrides, setAllOverrides] = useState([]);
   const [allWorkers, setAllWorkers] = useState([]);
+  const [debugInfo, setDebugInfo] = useState(null);
   const [assignedWorkerId, setAssignedWorkerId] = useState(null);
   const [maxDate, setMaxDate] = useState('');
   const [calendarMonth, setCalendarMonth] = useState(new Date().getMonth());
@@ -370,6 +371,15 @@ function BookingFlowInner() {
     setAllBlockedDates(bdRes.data || []);
     setAllOverrides(soRes.data || []);
     setAllWorkers(wRes.data || []);
+    // Temporary diagnostic — remove after confirming fix works
+    setDebugInfo({
+      build: 'v4-parseLocalDate',
+      availCount: (avRes.data || []).length,
+      availError: avRes.error?.message || null,
+      workerCount: (wRes.data || []).length,
+      workerError: wRes.error?.message || null,
+      sample: (avRes.data || []).slice(0, 3).map(a => `dow=${a.day_of_week}(${typeof a.day_of_week}) active=${a.is_active}`),
+    });
 
     // Calculate max booking date
     const advanceDays = Number(settingsObj.advance_booking_days) || 30;
@@ -722,6 +732,15 @@ function BookingFlowInner() {
 
   return (
     <div style={{ minHeight: '100vh', background: `linear-gradient(180deg, ${brand.bg} 0%, ${brand.primaryLight} 100%)`, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+      {/* TEMPORARY DIAGNOSTIC — remove after confirming weekly schedule works */}
+      {debugInfo && (
+        <div style={{ background: '#1E293B', color: '#E2E8F0', padding: '8px 16px', fontSize: 11, fontFamily: 'monospace', display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+          <span style={{ color: '#4ADE80', fontWeight: 700 }}>{debugInfo.build}</span>
+          <span>avail: {debugInfo.availCount} records{debugInfo.availError ? ` | ERROR: ${debugInfo.availError}` : ''}</span>
+          <span>workers: {debugInfo.workerCount}{debugInfo.workerError ? ` | ERROR: ${debugInfo.workerError}` : ''}</span>
+          {debugInfo.sample.length > 0 && <span>sample: [{debugInfo.sample.join(', ')}]</span>}
+        </div>
+      )}
       <header className="booking-header" style={{ padding: '20px 40px', background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(20px)', borderBottom: `1px solid ${brand.borderLight}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
           <Logo />

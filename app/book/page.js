@@ -193,6 +193,11 @@ function BookingFlowInner() {
     // day_of_week: 0=Monday, 6=Sunday in our DB. JS getDay: 0=Sun, 1=Mon, ..., 6=Sat
     const jsDay = dateObj.getDay();
     const dbDayOfWeek = jsDay === 0 ? 6 : jsDay - 1;
+    console.log('[DEBUG] computeSlots for', selectedDate, '| jsDay:', jsDay, '| dbDayOfWeek:', dbDayOfWeek);
+    console.log('[DEBUG] allAvailability count:', allAvailability.length, '| allWorkers count:', allWorkers.length);
+    if (allAvailability.length > 0) {
+      console.log('[DEBUG] sample availability:', JSON.stringify(allAvailability.slice(0, 3).map(a => ({ worker_id: a.worker_id, day_of_week: a.day_of_week, type: typeof a.day_of_week, is_active: a.is_active }))));
+    }
 
     // If workers exist, use their schedules. Otherwise fall back to default 9-4 business hours.
     const useWorkerSchedules = allWorkers.length > 0;
@@ -359,6 +364,10 @@ function BookingFlowInner() {
     const settingsObj = {};
     allSettings.forEach(s => { settingsObj[s.key] = s.value; });
     setServiceSettings(settingsObj);
+    console.log('[DEBUG] availability data:', JSON.stringify(avRes.data));
+    console.log('[DEBUG] availability error:', avRes.error);
+    console.log('[DEBUG] workers data:', JSON.stringify(wRes.data?.map(w => ({ id: w.id, name: w.name }))));
+    console.log('[DEBUG] workers error:', wRes.error);
     setAllAvailability(avRes.data || []);
     setAllBlockedDates(bdRes.data || []);
     setAllOverrides(soRes.data || []);

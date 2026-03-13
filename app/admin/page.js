@@ -54,6 +54,11 @@ const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || '')
   .map((e) => e.trim().toLowerCase())
   .filter(Boolean);
 
+function parseLocalDate(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
 export default function AdminPanel() {
   const router = useRouter();
   const { user, loading: authLoading, signOut } = useAuth();
@@ -233,7 +238,7 @@ export default function AdminPanel() {
   };
 
   const formatDate = (dateStr) => {
-    return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return parseLocalDate(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
   const [crudError, setCrudError] = useState('');
@@ -1023,8 +1028,8 @@ export default function AdminPanel() {
 
             const getRelativeDateLabel = (dateStr) => {
               if (!dateStr) return '';
-              const bookDate = new Date(dateStr + 'T00:00:00');
-              const todayDate = new Date(today + 'T00:00:00');
+              const bookDate = parseLocalDate(dateStr);
+              const todayDate = parseLocalDate(today);
               const diffDays = Math.round((bookDate - todayDate) / 86400000);
               if (diffDays === 0) return 'Today';
               if (diffDays === 1) return 'Tomorrow';
@@ -2681,10 +2686,10 @@ export default function AdminPanel() {
                                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                                 }}>
                                   <div style={{ fontSize: 9, fontWeight: 700, color: bd.all_day ? '#DC2626' : '#D97706', textTransform: 'uppercase' }}>
-                                    {new Date(bd.blocked_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short' })}
+                                    {parseLocalDate(bd.blocked_date).toLocaleDateString('en-US', { month: 'short' })}
                                   </div>
                                   <div style={{ fontSize: 15, fontWeight: 700, color: bd.all_day ? '#DC2626' : '#D97706', lineHeight: 1 }}>
-                                    {new Date(bd.blocked_date + 'T00:00:00').getDate()}
+                                    {parseLocalDate(bd.blocked_date).getDate()}
                                   </div>
                                 </div>
                                 <div>
@@ -2788,10 +2793,10 @@ export default function AdminPanel() {
                               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                             }}>
                               <div style={{ fontSize: 9, fontWeight: 700, color: so.is_available ? '#16A34A' : '#DC2626', textTransform: 'uppercase' }}>
-                                {new Date(so.override_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short' })}
+                                {parseLocalDate(so.override_date).toLocaleDateString('en-US', { month: 'short' })}
                               </div>
                               <div style={{ fontSize: 15, fontWeight: 700, color: so.is_available ? '#16A34A' : '#DC2626', lineHeight: 1 }}>
-                                {new Date(so.override_date + 'T00:00:00').getDate()}
+                                {parseLocalDate(so.override_date).getDate()}
                               </div>
                             </div>
                             <div>

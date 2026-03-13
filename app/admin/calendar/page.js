@@ -20,6 +20,11 @@ const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || '')
   .map((e) => e.trim().toLowerCase())
   .filter(Boolean);
 
+function parseLocalDate(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
 export default function AdminCalendar() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
@@ -80,7 +85,7 @@ export default function AdminCalendar() {
   const dayBookings = selectedDay ? getBookingsForDay(selectedDay) : [];
 
   const formatDate = (dateStr) => {
-    return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+    return parseLocalDate(dateStr).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
   };
 
   const getStatusStyle = (status) => {

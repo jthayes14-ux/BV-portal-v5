@@ -15,6 +15,13 @@ function Logo() {
   );
 }
 
+// Safe cross-browser date parse: "YYYY-MM-DD" → local Date
+// (new Date("2026-03-13T00:00:00") is ambiguous — Safari/mobile can treat it as UTC)
+function parseLocalDate(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
 export default function CustomerDashboard() {
   const router = useRouter();
   const { user, loading: authLoading, signOut } = useAuth();
@@ -116,11 +123,11 @@ export default function CustomerDashboard() {
     const minNoticeHours = Number(serviceSettings.minimum_notice_hours) || 24;
     const advanceDays = Number(serviceSettings.advance_booking_days) || 30;
 
-    const dateObj = new Date(selectedDate + 'T00:00:00');
+    const dateObj = parseLocalDate(selectedDate);
     const now = new Date();
 
     const minNoticeTime = new Date(now.getTime() + minNoticeHours * 60 * 60 * 1000);
-    const endOfSelectedDay = new Date(selectedDate + 'T23:59:59');
+    const endOfSelectedDay = (() => { const d = parseLocalDate(selectedDate); d.setHours(23, 59, 59); return d; })();
     if (endOfSelectedDay < minNoticeTime) {
       setSlotsMessage('This date is too soon — minimum notice required.');
       setSlotsLoading(false);
@@ -220,7 +227,7 @@ export default function CustomerDashboard() {
           const slotEndWithBuffer = slotStart + slotDuration + buffer;
 
           if (selectedDate === now.toISOString().split('T')[0]) {
-            const slotDateTime = new Date(selectedDate + 'T00:00:00');
+            const slotDateTime = parseLocalDate(selectedDate);
             slotDateTime.setMinutes(slotDateTime.getMinutes() + slotStart);
             if (slotDateTime < minNoticeTime) continue;
           }
@@ -260,7 +267,7 @@ export default function CustomerDashboard() {
 
       for (let slotStart = businessStart; slotStart + slotDuration <= businessEnd; slotStart += 60) {
         if (selectedDate === now.toISOString().split('T')[0]) {
-          const slotDateTime = new Date(selectedDate + 'T00:00:00');
+          const slotDateTime = parseLocalDate(selectedDate);
           slotDateTime.setMinutes(slotDateTime.getMinutes() + slotStart);
           if (slotDateTime < minNoticeTime) continue;
         }
@@ -359,7 +366,7 @@ export default function CustomerDashboard() {
   const displayedBookings = activeTab === 'upcoming' ? upcomingBookings : pastBookings;
 
   const formatDate = (dateStr) => {
-    return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', {
+    return parseLocalDate(dateStr).toLocaleDateString('en-US', {
       weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
     });
   };
@@ -729,7 +736,7 @@ export default function CustomerDashboard() {
               {(() => {
                 const todayObj = new Date();
                 todayObj.setHours(0, 0, 0, 0);
-                const maxDateObj = maxDate ? new Date(maxDate + 'T00:00:00') : null;
+                const maxDateObj = maxDate ? parseLocalDate(maxDate) : null;
 
                 const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
                 const firstDayOfWeek = new Date(calendarYear, calendarMonth, 1).getDay();
@@ -876,7 +883,7 @@ export default function CustomerDashboard() {
                   ) : (
                     <div style={{ position: 'relative' }}>
                       <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#A0AEC0', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                        Available times for {new Date(rescheduleDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        Available times for {parseLocalDate(rescheduleDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </label>
                       <div style={{ position: 'relative' }}>
                         <select

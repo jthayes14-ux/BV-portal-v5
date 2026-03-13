@@ -15,6 +15,11 @@ function Logo() {
   );
 }
 
+function parseLocalDate(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
 export default function WorkerDashboard() {
   const router = useRouter();
   const { user, loading: authLoading, signOut } = useAuth();
@@ -68,7 +73,7 @@ export default function WorkerDashboard() {
   const displayedBookings = activeTab === 'upcoming' ? upcomingBookings : completedBookings;
 
   const formatDate = (dateStr) => {
-    return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', {
+    return parseLocalDate(dateStr).toLocaleDateString('en-US', {
       weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
     });
   };

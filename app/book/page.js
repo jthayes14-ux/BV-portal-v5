@@ -21,6 +21,13 @@ function formatHour(hour) {
   return `${h}:00 ${ampm}`;
 }
 
+// Safe cross-browser date parse: "YYYY-MM-DD" → local Date
+// (new Date("2026-03-13T00:00:00") is ambiguous — Safari/mobile can treat it as UTC)
+function parseLocalDate(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
 function BookingFlowInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -169,12 +176,12 @@ function BookingFlowInner() {
     const minNoticeHours = Number(serviceSettings.minimum_notice_hours) || 24;
     const advanceDays = Number(serviceSettings.advance_booking_days) || 30;
 
-    const dateObj = new Date(selectedDate + 'T00:00:00');
+    const dateObj = parseLocalDate(selectedDate);
     const now = new Date();
 
     // Check minimum notice
     const minNoticeTime = new Date(now.getTime() + minNoticeHours * 60 * 60 * 1000);
-    const endOfSelectedDay = new Date(selectedDate + 'T23:59:59');
+    const endOfSelectedDay = (() => { const d = parseLocalDate(selectedDate); d.setHours(23, 59, 59); return d; })();
     if (endOfSelectedDay < minNoticeTime) {
       setSlotsMessage('This date is too soon — minimum notice required.');
       setSlotsLoading(false);
@@ -193,11 +200,6 @@ function BookingFlowInner() {
     // day_of_week: 0=Monday, 6=Sunday in our DB. JS getDay: 0=Sun, 1=Mon, ..., 6=Sat
     const jsDay = dateObj.getDay();
     const dbDayOfWeek = jsDay === 0 ? 6 : jsDay - 1;
-    console.log('[DEBUG] computeSlots for', selectedDate, '| jsDay:', jsDay, '| dbDayOfWeek:', dbDayOfWeek);
-    console.log('[DEBUG] allAvailability count:', allAvailability.length, '| allWorkers count:', allWorkers.length);
-    if (allAvailability.length > 0) {
-      console.log('[DEBUG] sample availability:', JSON.stringify(allAvailability.slice(0, 3).map(a => ({ worker_id: a.worker_id, day_of_week: a.day_of_week, type: typeof a.day_of_week, is_active: a.is_active }))));
-    }
 
     // If workers exist, use their schedules. Otherwise fall back to default 9-4 business hours.
     const useWorkerSchedules = allWorkers.length > 0;
@@ -276,7 +278,7 @@ function BookingFlowInner() {
           const slotEndWithBuffer = slotStart + slotDuration + buffer;
 
           if (selectedDate === now.toISOString().split('T')[0]) {
-            const slotDateTime = new Date(selectedDate + 'T00:00:00');
+            const slotDateTime = parseLocalDate(selectedDate);
             slotDateTime.setMinutes(slotDateTime.getMinutes() + slotStart);
             if (slotDateTime < minNoticeTime) continue;
           }
@@ -319,7 +321,7 @@ function BookingFlowInner() {
 
       for (let slotStart = businessStart; slotStart + slotDuration <= businessEnd; slotStart += 60) {
         if (selectedDate === now.toISOString().split('T')[0]) {
-          const slotDateTime = new Date(selectedDate + 'T00:00:00');
+          const slotDateTime = parseLocalDate(selectedDate);
           slotDateTime.setMinutes(slotDateTime.getMinutes() + slotStart);
           if (slotDateTime < minNoticeTime) continue;
         }
@@ -364,10 +366,6 @@ function BookingFlowInner() {
     const settingsObj = {};
     allSettings.forEach(s => { settingsObj[s.key] = s.value; });
     setServiceSettings(settingsObj);
-    console.log('[DEBUG] availability data:', JSON.stringify(avRes.data));
-    console.log('[DEBUG] availability error:', avRes.error);
-    console.log('[DEBUG] workers data:', JSON.stringify(wRes.data?.map(w => ({ id: w.id, name: w.name }))));
-    console.log('[DEBUG] workers error:', wRes.error);
     setAllAvailability(avRes.data || []);
     setAllBlockedDates(bdRes.data || []);
     setAllOverrides(soRes.data || []);
@@ -923,7 +921,7 @@ function BookingFlowInner() {
                 {(() => {
                   const todayObj = new Date();
                   todayObj.setHours(0, 0, 0, 0);
-                  const maxDateObj = maxDate ? new Date(maxDate + 'T00:00:00') : null;
+                  const maxDateObj = maxDate ? parseLocalDate(maxDate) : null;
 
                   const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
                   const firstDayOfWeek = new Date(calendarYear, calendarMonth, 1).getDay();
@@ -1078,7 +1076,7 @@ function BookingFlowInner() {
                             ) : (
                               <div>
                                 <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: brand.textMuted, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                                  Available times for {new Date(date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                                  Available times for {parseLocalDate(date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                                 </label>
                                 <div style={{ position: 'relative' }}>
                                   <select

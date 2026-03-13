@@ -41,6 +41,11 @@ function Logo() {
   );
 }
 
+function parseLocalDate(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
 function CheckoutForm({ booking, user, signUp }) {
   const router = useRouter();
   const stripe = useStripe();
@@ -218,7 +223,7 @@ function CheckoutForm({ booking, user, signUp }) {
       // Auto-generate next 4 recurring bookings if interval_days > 0
       if (booking.frequency_interval_days > 0 && recurringGroupId) {
         const futureBookings = [];
-        const startDate = new Date(booking.date + 'T00:00:00');
+        const startDate = parseLocalDate(booking.date);
 
         for (let i = 1; i <= 4; i++) {
           const nextDate = new Date(startDate);
@@ -360,7 +365,7 @@ function CheckoutForm({ booking, user, signUp }) {
   const isFormValid = cardComplete;
 
   const formatDate = (dateStr) => {
-    return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+    return parseLocalDate(dateStr).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
   };
 
   const hasFrequencyDiscount = frequencyDiscountAmount > 0;

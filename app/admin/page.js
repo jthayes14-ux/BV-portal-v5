@@ -467,7 +467,7 @@ export default function AdminPanel() {
 
   const getWorkerAvailability = (workerId) => {
     return DAY_NAMES.map((_, idx) => {
-      const existing = availability.find(a => a.worker_id === workerId && a.day_of_week === idx);
+      const existing = availability.find(a => a.worker_id === workerId && Number(a.day_of_week) === idx);
       return existing || { worker_id: workerId, day_of_week: idx, start_time: '09:00', end_time: '16:00', is_active: true, isNew: true };
     });
   };
@@ -485,7 +485,7 @@ export default function AdminPanel() {
           end_time: day.end_time,
           is_active: day.is_active,
         };
-        const existing = availability.find(a => a.worker_id === workerId && a.day_of_week === day.day_of_week);
+        const existing = availability.find(a => a.worker_id === workerId && Number(a.day_of_week) === day.day_of_week);
         if (existing) {
           const { error } = await supabase.from('availability').update(payload).eq('id', existing.id);
           if (error) throw error;

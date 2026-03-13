@@ -217,7 +217,7 @@ function BookingFlowInner() {
           startTime = override.start_time;
           endTime = override.end_time;
         } else {
-          const weeklyAvail = allAvailability.find(a => a.worker_id === worker.id && a.day_of_week === dbDayOfWeek);
+          const weeklyAvail = allAvailability.find(a => a.worker_id === worker.id && Number(a.day_of_week) === dbDayOfWeek);
           if (weeklyAvail) {
             if (!weeklyAvail.is_active) continue;
             isAvailable = true;
@@ -1000,7 +1000,7 @@ function BookingFlowInner() {
                               const override = allOverrides.find(o => o.worker_id === worker.id && o.override_date === dateStr);
                               if (override) return override.is_available;
                               // Check weekly availability
-                              const weeklyAvail = allAvailability.find(a => a.worker_id === worker.id && a.day_of_week === dbDay);
+                              const weeklyAvail = allAvailability.find(a => a.worker_id === worker.id && Number(a.day_of_week) === dbDay);
                               if (weeklyAvail && !weeklyAvail.is_active) return false;
                               // Check all-day blocks
                               const hasAllDayBlock = allBlockedDates.some(bd => bd.worker_id === worker.id && bd.blocked_date === dateStr && bd.all_day);

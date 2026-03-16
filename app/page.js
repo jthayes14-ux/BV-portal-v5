@@ -131,10 +131,10 @@ export default function LandingPage() {
             padding: '12px 28px',
             fontSize: 15,
             fontWeight: 600,
-            background: brand.text,
+            background: brand.primary,
             border: 'none',
             borderRadius: 9999,
-            color: '#FFFFFF',
+            color: brand.text,
             cursor: 'pointer',
             textDecoration: 'none',
             letterSpacing: '0.02em'
@@ -259,10 +259,10 @@ export default function LandingPage() {
               padding: '18px 36px',
               fontSize: 16,
               fontWeight: 600,
-              background: brand.text,
+              background: brand.primary,
               border: 'none',
               borderRadius: 9999,
-              color: '#FFFFFF',
+              color: brand.text,
               cursor: 'pointer',
               textDecoration: 'none',
               letterSpacing: '0.02em',
@@ -319,18 +319,18 @@ export default function LandingPage() {
         }}>
           {/* Phone Frame */}
           <div style={{
-            width: 320,
+            width: 360,
             background: '#FFFFFF',
-            borderRadius: 40,
-            border: '8px solid #1a1a2e',
+            borderRadius: 44,
+            border: '10px solid #1a1a2e',
             boxShadow: '0 25px 80px rgba(0,0,0,0.15), 0 8px 32px rgba(0,0,0,0.08)',
             overflow: 'hidden',
             position: 'relative'
           }}>
             {/* Notch */}
             <div style={{
-              width: 120,
-              height: 28,
+              width: 130,
+              height: 30,
               background: '#1a1a2e',
               borderRadius: '0 0 20px 20px',
               margin: '0 auto',
@@ -340,7 +340,7 @@ export default function LandingPage() {
 
             {/* Phone Screen Content */}
             <div style={{
-              padding: '16px 20px 24px',
+              padding: '20px 24px 28px',
               fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
             }}>
               {/* App Header */}
@@ -375,10 +375,10 @@ export default function LandingPage() {
               </div>
 
               {/* Mock Form Fields */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {/* Neighborhood */}
                 <div style={{
-                  padding: '12px 14px',
+                  padding: '14px 16px',
                   borderRadius: 10,
                   border: '1.5px solid #E5E7EB',
                   display: 'flex',
@@ -394,7 +394,7 @@ export default function LandingPage() {
 
                 {/* Building */}
                 <div style={{
-                  padding: '12px 14px',
+                  padding: '14px 16px',
                   borderRadius: 10,
                   border: '1.5px solid #E5E7EB',
                   display: 'flex',
@@ -410,9 +410,9 @@ export default function LandingPage() {
 
                 {/* Unit */}
                 <div style={{
-                  padding: '12px 14px',
+                  padding: '14px 16px',
                   borderRadius: 10,
-                  border: '2px solid ' + brand.text,
+                  border: '2px solid ' + brand.primaryDark,
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
@@ -423,7 +423,7 @@ export default function LandingPage() {
 
                 {/* Price Result */}
                 <div style={{
-                  padding: '12px 14px',
+                  padding: '14px 16px',
                   borderRadius: 10,
                   background: '#ECFDF5',
                   border: '1.5px solid #BBF7D0',
@@ -441,7 +441,7 @@ export default function LandingPage() {
 
                 {/* Date/Time */}
                 <div style={{
-                  padding: '12px 14px',
+                  padding: '14px 16px',
                   borderRadius: 10,
                   border: '1.5px solid #E5E7EB',
                   display: 'flex',
@@ -460,10 +460,10 @@ export default function LandingPage() {
                   padding: '14px',
                   fontSize: 14,
                   fontWeight: 700,
-                  background: brand.text,
+                  background: brand.primary,
                   border: 'none',
                   borderRadius: 10,
-                  color: '#FFFFFF',
+                  color: brand.text,
                   cursor: 'default',
                   letterSpacing: '0.04em',
                   textTransform: 'uppercase',

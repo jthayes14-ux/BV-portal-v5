@@ -128,16 +128,15 @@ export default function LandingPage() {
             Log in
           </Link>
           <Link href="/book" style={{
-            padding: '12px 28px',
-            fontSize: 15,
+            padding: '11px 26px',
+            fontSize: 14,
             fontWeight: 600,
-            background: brand.primary,
+            background: '#1B2B5A',
             border: 'none',
             borderRadius: 9999,
-            color: brand.text,
+            color: '#FFFFFF',
             cursor: 'pointer',
-            textDecoration: 'none',
-            letterSpacing: '0.02em'
+            textDecoration: 'none'
           }}>
             See Your Price Instantly
           </Link>
@@ -175,57 +174,62 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <section className="hero-section" style={{
-        display: 'flex',
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        maxWidth: 1200,
+        margin: '0 auto',
+        padding: '0 40px',
+        minHeight: 'calc(100vh - 69px)',
         alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '90vh',
-        padding: '80px 48px',
-        background: '#FFFFFF',
-        gap: 64
+        gap: 40
       }}>
         {/* Left Column - Text */}
-        <div className="hero-text" style={{ flex: 1, maxWidth: 560 }}>
+        <div className="hero-text" style={{
+          padding: '60px 40px 60px 0',
+          display: 'flex',
+          flexDirection: 'column',
+          fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+        }}>
           <div style={{
-            display: 'flex',
+            display: 'inline-flex',
             alignItems: 'center',
             gap: 8,
-            marginBottom: 32
+            marginBottom: 22
           }}>
             <div style={{
-              width: 8,
-              height: 8,
+              width: 6,
+              height: 6,
               borderRadius: '50%',
-              background: brand.primary
+              background: '#9AA8E0'
             }} />
             <span style={{
-              fontSize: 13,
-              fontWeight: 600,
-              letterSpacing: '0.08em',
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: '0.16em',
               textTransform: 'uppercase',
-              color: brand.textLight,
-              fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+              color: '#9AA8E0'
             }}>
               Miami&#39;s Luxury High-Rise Window Service
             </span>
           </div>
 
           <h1 style={{
-            fontSize: 52,
-            fontWeight: 600,
+            fontSize: 60,
+            fontWeight: 300,
             color: brand.text,
-            lineHeight: 1.2,
-            marginBottom: 24,
+            lineHeight: 1.06,
+            marginBottom: 22,
+            letterSpacing: '-0.01em'
           }}>
             Crystal clear views, one tap away.
           </h1>
 
           <p style={{
-            fontSize: 18,
+            fontSize: 16,
             color: brand.textLight,
-            lineHeight: 1.7,
-            marginBottom: 40,
-            maxWidth: 460,
-            fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+            lineHeight: 1.65,
+            marginBottom: 32,
+            maxWidth: 400
           }}>
             Enter your unit number. See your exact price in seconds — no quote requests, no callbacks, no waiting. Book your Brickell or Edgewater condo in under a minute.
           </p>
@@ -233,61 +237,63 @@ export default function LandingPage() {
           {/* Stats Row */}
           <div style={{
             display: 'flex',
-            gap: 40,
-            marginBottom: 40,
-            fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+            alignItems: 'center',
+            gap: 20,
+            marginBottom: 32
           }}>
-            <div>
-              <div style={{ fontSize: 28, fontWeight: 700, color: brand.text }}>60s</div>
-              <div style={{ fontSize: 13, color: brand.textLight, marginTop: 2 }}>To book</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <span style={{ fontSize: 18, fontWeight: 700, color: '#1B2B5A' }}>60s</span>
+              <span style={{ fontSize: 10, color: brand.textLight, fontWeight: 500 }}>To book</span>
             </div>
-            <div style={{ width: 1, background: '#E5E7EB', alignSelf: 'stretch' }} />
-            <div>
-              <div style={{ fontSize: 28, fontWeight: 700, color: brand.text }}>$0</div>
-              <div style={{ fontSize: 13, color: brand.textLight, marginTop: 2 }}>Upfront charge</div>
+            <div style={{ width: 1, height: 32, background: brand.primaryLight }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <span style={{ fontSize: 18, fontWeight: 700, color: '#1B2B5A' }}>$0</span>
+              <span style={{ fontSize: 10, color: brand.textLight, fontWeight: 500 }}>Upfront charge</span>
             </div>
-            <div style={{ width: 1, background: '#E5E7EB', alignSelf: 'stretch' }} />
-            <div>
-              <div style={{ fontSize: 28, fontWeight: 700, color: brand.text }}>24hr</div>
-              <div style={{ fontSize: 13, color: brand.textLight, marginTop: 2 }}>Free cancellation</div>
+            <div style={{ width: 1, height: 32, background: brand.primaryLight }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <span style={{ fontSize: 18, fontWeight: 700, color: '#1B2B5A' }}>24hr</span>
+              <span style={{ fontSize: 10, color: brand.textLight, fontWeight: 500 }}>Free cancellation</span>
             </div>
           </div>
 
           {/* CTA Buttons */}
-          <div ref={heroButtonRef} className="hero-buttons" style={{ display: 'flex', gap: 20, alignItems: 'center', marginBottom: 24 }}>
+          <div ref={heroButtonRef} className="hero-buttons" style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 18 }}>
             <Link href="/book" style={{
-              padding: '18px 36px',
-              fontSize: 16,
-              fontWeight: 600,
-              background: brand.primary,
-              border: 'none',
-              borderRadius: 9999,
-              color: brand.text,
-              cursor: 'pointer',
-              textDecoration: 'none',
-              letterSpacing: '0.02em',
-              transition: 'all 0.3s ease',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
-              gap: 8,
-              fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+              gap: 9,
+              padding: '17px 34px',
+              background: '#1B2B5A',
+              color: '#FFFFFF',
+              borderRadius: 9999,
+              fontSize: 14,
+              fontWeight: 700,
+              letterSpacing: '0.02em',
+              border: 'none',
+              textDecoration: 'none',
+              boxShadow: '0 8px 24px rgba(27,43,90,0.28)',
+              transition: 'all 0.3s ease'
             }}>
               See Your Price Instantly
-              <span style={{ fontSize: 18 }}>→</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
             </Link>
             <a href="#how-it-works" style={{
-              fontSize: 16,
+              fontSize: 13,
               fontWeight: 500,
               color: brand.textLight,
               textDecoration: 'none',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: 6,
-              fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+              gap: 5
             }}>
               How it works
-              <span style={{ fontSize: 14 }}>▾</span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
             </a>
           </div>
 
@@ -295,14 +301,12 @@ export default function LandingPage() {
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 8,
-            fontSize: 13,
-            color: '#9CA3AF',
-            fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+            gap: 6,
+            fontSize: 11,
+            color: '#9CA3AF'
           }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              <polyline points="9 12 11 14 15 10" />
             </svg>
             <span>Insured &amp; bonded · Card charged only after service completion</span>
           </div>
@@ -310,241 +314,279 @@ export default function LandingPage() {
 
         {/* Right Column - Phone Mockup */}
         <div className="hero-phone" style={{
-          flex: 1,
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          position: 'relative',
-          maxWidth: 520
+          padding: '60px 0 60px 20px',
+          position: 'relative'
         }}>
-          {/* Phone Frame */}
+          {/* Glow effect */}
           <div style={{
-            width: 360,
-            background: '#FFFFFF',
-            borderRadius: 44,
-            border: '10px solid #1a1a2e',
-            boxShadow: '0 25px 80px rgba(0,0,0,0.15), 0 8px 32px rgba(0,0,0,0.08)',
+            position: 'absolute',
+            width: 400,
+            height: 480,
+            borderRadius: '50%',
+            background: 'radial-gradient(ellipse, rgba(184,197,242,0.2) 0%, transparent 70%)',
+            pointerEvents: 'none'
+          }} />
+
+          {/* Phone Frame */}
+          <div className="hero-phone-frame" style={{
+            width: 272,
+            height: 548,
+            background: '#fff',
+            borderRadius: 38,
+            position: 'relative',
+            flexShrink: 0,
+            boxShadow: '0 0 0 1.5px rgba(184,197,242,0.3), 0 0 0 9px #111827, 0 0 0 11px #1e2a3a, 0 40px 80px rgba(0,0,0,0.32), 0 14px 36px rgba(27,43,90,0.18)',
             overflow: 'hidden',
-            position: 'relative'
+            display: 'flex',
+            flexDirection: 'column'
           }}>
             {/* Notch */}
             <div style={{
-              width: 130,
-              height: 30,
-              background: '#1a1a2e',
-              borderRadius: '0 0 20px 20px',
-              margin: '0 auto',
-              position: 'relative',
-              zIndex: 2
+              position: 'absolute',
+              top: 10,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: 76,
+              height: 22,
+              background: '#111827',
+              borderRadius: 16,
+              zIndex: 50
             }} />
 
-            {/* Phone Screen Content */}
+            {/* Phone Header */}
             <div style={{
-              padding: '20px 24px 28px',
+              height: 50,
+              background: '#fff',
+              borderBottom: '1px solid #E8EDFC',
+              display: 'flex',
+              alignItems: 'flex-end',
+              padding: '0 14px 9px'
+            }}>
+              <div style={{ display: 'flex', gap: 2.5, marginRight: 6 }}>
+                <div style={{ width: 3, height: 15, background: brand.primary }} />
+                <div style={{ width: 3, height: 15, background: brand.primary }} />
+                <div style={{ width: 3, height: 15, background: brand.primary }} />
+              </div>
+              <span style={{ fontSize: 11, fontWeight: 700, color: brand.text }}>BetterView</span>
+            </div>
+
+            {/* Phone Body */}
+            <div style={{
+              padding: '14px 13px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 10,
+              background: '#FAFBFF',
+              flex: 1,
               fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
             }}>
-              {/* App Header */}
+              <h3 style={{
+                fontSize: 19,
+                fontWeight: 300,
+                textAlign: 'center',
+                lineHeight: 1.2,
+                marginTop: 4,
+                color: brand.text,
+                fontFamily: "'Cormorant Garamond', Georgia, serif"
+              }}>
+                Schedule Your<br />Service
+              </h3>
+              <p style={{ fontSize: 9, color: brand.textLight, textAlign: 'center' }}>
+                Premium window care for luxury residences
+              </p>
+
+              {/* Brickell - done */}
               <div style={{
+                background: 'rgba(184,197,242,0.07)',
+                border: '1.5px solid #B8C5F2',
+                borderRadius: 9,
+                padding: '9px 11px',
+                fontSize: 10.5,
+                fontWeight: 600,
+                color: '#1B2B5A',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 8,
-                marginBottom: 20
+                justifyContent: 'space-between'
               }}>
-                <div style={{ display: 'flex', gap: 3 }}>
-                  <div style={{ width: 5, height: 16, background: brand.primary, borderRadius: 1 }} />
-                  <div style={{ width: 5, height: 16, background: brand.primary, borderRadius: 1 }} />
-                  <div style={{ width: 5, height: 16, background: brand.primary, borderRadius: 1 }} />
-                </div>
-                <span style={{ fontSize: 14, fontWeight: 600, color: brand.text }}>BetterView</span>
+                Brickell
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9AA8E0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
               </div>
 
-              {/* Form Title */}
-              <div style={{ textAlign: 'center', marginBottom: 16 }}>
-                <h3 style={{
-                  fontSize: 18,
-                  fontWeight: 600,
-                  color: brand.text,
-                  marginBottom: 4,
-                  fontFamily: "'Cormorant Garamond', Georgia, serif"
-                }}>
-                  Schedule Your Service
-                </h3>
-                <p style={{ fontSize: 12, color: brand.textLight }}>
-                  Premium window care for luxury residences
-                </p>
+              {/* 1010 Brickell - done */}
+              <div style={{
+                background: 'rgba(184,197,242,0.07)',
+                border: '1.5px solid #B8C5F2',
+                borderRadius: 9,
+                padding: '9px 11px',
+                fontSize: 10.5,
+                fontWeight: 600,
+                color: '#1B2B5A',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                1010 Brickell
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9AA8E0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
               </div>
 
-              {/* Mock Form Fields */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {/* Neighborhood */}
-                <div style={{
-                  padding: '14px 16px',
-                  borderRadius: 10,
-                  border: '1.5px solid #E5E7EB',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  background: '#FAFBFC'
-                }}>
-                  <span style={{ fontSize: 14, color: brand.text, fontWeight: 500 }}>Brickell</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                </div>
-
-                {/* Building */}
-                <div style={{
-                  padding: '14px 16px',
-                  borderRadius: 10,
-                  border: '1.5px solid #E5E7EB',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  background: '#FAFBFC'
-                }}>
-                  <span style={{ fontSize: 14, color: brand.text, fontWeight: 500 }}>1010 Brickell</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                </div>
-
-                {/* Unit */}
-                <div style={{
-                  padding: '14px 16px',
-                  borderRadius: 10,
-                  border: '2px solid ' + brand.primaryDark,
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  background: '#FFFFFF'
-                }}>
-                  <span style={{ fontSize: 14, color: brand.text, fontWeight: 500 }}>3207</span>
-                </div>
-
-                {/* Price Result */}
-                <div style={{
-                  padding: '14px 16px',
-                  borderRadius: 10,
-                  background: '#ECFDF5',
-                  border: '1.5px solid #BBF7D0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8
-                }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: '#166534' }}>
-                    Unit 3207 — 2BR/2BA — &nbsp;$189
-                  </span>
-                </div>
-
-                {/* Date/Time */}
-                <div style={{
-                  padding: '14px 16px',
-                  borderRadius: 10,
-                  border: '1.5px solid #E5E7EB',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  background: '#FAFBFC'
-                }}>
-                  <span style={{ fontSize: 14, color: brand.text, fontWeight: 500 }}>Thu, Apr 3 · 10:00 AM</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                </div>
-
-                {/* Book Button */}
-                <button style={{
-                  padding: '14px',
-                  fontSize: 14,
-                  fontWeight: 700,
-                  background: brand.primary,
-                  border: 'none',
-                  borderRadius: 10,
-                  color: brand.text,
-                  cursor: 'default',
-                  letterSpacing: '0.04em',
-                  textTransform: 'uppercase',
-                  marginTop: 4
-                }}>
-                  BOOK NOW — $189
-                </button>
-
-                <p style={{ fontSize: 11, color: '#9CA3AF', textAlign: 'center', marginTop: 2 }}>
-                  Charged after service · Free 24hr cancellation
-                </p>
+              {/* Unit - active */}
+              <div style={{
+                background: '#fff',
+                border: '1.5px solid #1B2B5A',
+                borderRadius: 9,
+                padding: '9px 11px',
+                fontSize: 10.5,
+                fontWeight: 600,
+                color: '#1B2B5A',
+                boxShadow: '0 0 0 3px rgba(27,43,90,0.08)',
+                display: 'flex',
+                alignItems: 'center'
+              }}>
+                3207
+                <span style={{ display: 'inline-block', width: 1.5, height: 12, background: '#1B2B5A', marginLeft: 1, verticalAlign: 'text-bottom' }} />
               </div>
+
+              {/* Price reveal */}
+              <div style={{
+                background: '#F0FDF4',
+                border: '1px solid #BBF7D0',
+                borderRadius: 9,
+                padding: '9px 11px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                fontSize: 10.5,
+                fontWeight: 600,
+                color: '#15803D'
+              }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                Unit 3207 — 2BR/2BA — <strong style={{ marginLeft: 3 }}>$189</strong>
+              </div>
+
+              {/* Date - done */}
+              <div style={{
+                background: 'rgba(184,197,242,0.07)',
+                border: '1.5px solid #B8C5F2',
+                borderRadius: 9,
+                padding: '9px 11px',
+                fontSize: 10,
+                fontWeight: 600,
+                color: '#1B2B5A',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                Thu, Apr 3 · 10:00 AM
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9AA8E0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+
+              {/* Book button */}
+              <button style={{
+                width: '100%',
+                padding: 11,
+                background: '#1B2B5A',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 9,
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                boxShadow: '0 4px 14px rgba(27,43,90,0.28)',
+                cursor: 'default'
+              }}>
+                Book Now — $189
+              </button>
+
+              <p style={{ fontSize: 8.5, color: '#9CA3AF', textAlign: 'center' }}>
+                Charged after service · Free 24hr cancellation
+              </p>
             </div>
           </div>
 
-          {/* Floating notification - top right */}
+          {/* Floating badge - Unit matched (top right) */}
           <div className="hero-float-notification" style={{
             position: 'absolute',
-            top: 40,
-            right: -20,
-            background: '#FFFFFF',
-            borderRadius: 12,
-            padding: '10px 14px',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.05)',
+            right: -14,
+            top: 76,
+            background: '#fff',
+            borderRadius: 11,
+            padding: '9px 13px',
             display: 'flex',
             alignItems: 'center',
-            gap: 10,
+            gap: 8,
+            boxShadow: '0 6px 20px rgba(0,0,0,0.11), 0 0 0 1px rgba(232,237,252,0.9)',
+            whiteSpace: 'nowrap',
+            zIndex: 20,
             fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
           }}>
             <div style={{
-              width: 28,
-              height: 28,
-              borderRadius: '50%',
-              background: '#ECFDF5',
+              width: 26,
+              height: 26,
+              borderRadius: 7,
+              background: '#F0FDF4',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              flexShrink: 0
             }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             </div>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: brand.text }}>Unit 2207 matched</div>
-              <div style={{ fontSize: 11, color: brand.textLight }}>Panorama Tower · $224</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#1B2B5A', lineHeight: 1.25 }}>Unit 2207 matched</div>
+              <div style={{ fontSize: 8.5, color: brand.textLight }}>Panorama Tower · $224</div>
             </div>
           </div>
 
-          {/* Floating confirmation - bottom */}
+          {/* Floating badge - Booked (bottom left) */}
           <div className="hero-float-booking" style={{
             position: 'absolute',
-            bottom: 30,
-            left: -30,
-            background: '#FFFFFF',
-            borderRadius: 12,
-            padding: '10px 14px',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.05)',
+            left: 0,
+            bottom: 108,
+            background: '#fff',
+            borderRadius: 11,
+            padding: '9px 13px',
             display: 'flex',
             alignItems: 'center',
-            gap: 10,
+            gap: 8,
+            boxShadow: '0 6px 20px rgba(0,0,0,0.11), 0 0 0 1px rgba(232,237,252,0.9)',
+            whiteSpace: 'nowrap',
+            zIndex: 20,
             fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
           }}>
             <div style={{
-              width: 28,
-              height: 28,
-              borderRadius: '50%',
-              background: brand.primaryLight,
+              width: 26,
+              height: 26,
+              borderRadius: 7,
+              background: '#EEF1FC',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              flexShrink: 0
             }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={brand.text} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1B2B5A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
                 <line x1="16" y1="2" x2="16" y2="6" />
                 <line x1="8" y1="2" x2="8" y2="6" />
                 <line x1="3" y1="10" x2="21" y2="10" />
               </svg>
             </div>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: brand.text }}>Booked for Apr 3</div>
-              <div style={{ fontSize: 11, color: brand.textLight }}>1010 Brickell · 10:00 AM</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#1B2B5A', lineHeight: 1.25 }}>Booked for Apr 3</div>
+              <div style={{ fontSize: 8.5, color: brand.textLight }}>1010 Brickell · 10:00 AM</div>
             </div>
           </div>
         </div>

@@ -32,7 +32,7 @@ function FAQItem({ question, answer }) {
   const [open, setOpen] = useState(false);
   return (
     <div style={{
-      borderBottom: '1px solid #E8EDFC',
+      borderBottom: '1px solid rgba(184,197,242,0.15)',
       padding: '20px 0'
     }}>
       <button
@@ -48,14 +48,14 @@ function FAQItem({ question, answer }) {
           textAlign: 'left'
         }}
       >
-        <span style={{ fontSize: 18, fontWeight: 600, color: '#2D3748' }}>{question}</span>
+        <span style={{ fontSize: 18, fontWeight: 600, color: '#F1F5F9' }}>{question}</span>
         <span style={{ fontSize: 24, color: '#B8C5F2' }}>{open ? '−' : '+'}</span>
       </button>
       {open && (
         <p style={{
           marginTop: 12,
           fontSize: 16,
-          color: '#718096',
+          color: '#94A3B8',
           lineHeight: 1.6
         }}>
           {answer}
@@ -84,10 +84,10 @@ export default function LandingPage() {
   const brand = {
     primary: '#B8C5F2',
     primaryDark: '#9AA8E0',
-    primaryLight: '#E8EDFC',
-    text: '#2D3748',
-    textLight: '#718096',
-    bg: '#FFFFFF',
+    primaryLight: 'rgba(184,197,242,0.15)',
+    text: '#F1F5F9',
+    textLight: '#94A3B8',
+    bg: '#0F172A',
   };
 
   return (
@@ -102,8 +102,8 @@ export default function LandingPage() {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        background: 'white',
-        borderBottom: `1px solid ${brand.primaryLight}`,
+        background: '#0F172A',
+        borderBottom: '1px solid rgba(184,197,242,0.12)',
         position: 'sticky',
         top: 0,
         zIndex: 100,
@@ -131,14 +131,14 @@ export default function LandingPage() {
             padding: '11px 26px',
             fontSize: 14,
             fontWeight: 600,
-            background: '#1B2B5A',
+            background: '#B8C5F2',
             border: 'none',
             borderRadius: 9999,
-            color: '#FFFFFF',
+            color: '#0F172A',
             cursor: 'pointer',
             textDecoration: 'none'
           }}>
-            See Your Price Instantly
+            Book Now
           </Link>
         </div>
 
@@ -157,7 +157,7 @@ export default function LandingPage() {
         <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
           <Link href="/book" onClick={() => setMobileMenuOpen(false)} style={{
             padding: '14px 16px', fontSize: 16, fontWeight: 600,
-            background: '#B8C5F2', color: '#2D3748', textDecoration: 'none',
+            background: '#B8C5F2', color: '#0F172A', textDecoration: 'none',
             textAlign: 'center', borderRadius: 9999
           }}>
             Book Now
@@ -242,17 +242,17 @@ export default function LandingPage() {
             marginBottom: 32
           }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <span style={{ fontSize: 18, fontWeight: 700, color: '#1B2B5A' }}>60s</span>
+              <span style={{ fontSize: 18, fontWeight: 700, color: '#F1F5F9' }}>60s</span>
               <span style={{ fontSize: 10, color: brand.textLight, fontWeight: 500 }}>To book</span>
             </div>
             <div style={{ width: 1, height: 32, background: brand.primaryLight }} />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <span style={{ fontSize: 18, fontWeight: 700, color: '#1B2B5A' }}>$0</span>
+              <span style={{ fontSize: 18, fontWeight: 700, color: '#F1F5F9' }}>$0</span>
               <span style={{ fontSize: 10, color: brand.textLight, fontWeight: 500 }}>Upfront charge</span>
             </div>
             <div style={{ width: 1, height: 32, background: brand.primaryLight }} />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <span style={{ fontSize: 18, fontWeight: 700, color: '#1B2B5A' }}>24hr</span>
+              <span style={{ fontSize: 18, fontWeight: 700, color: '#F1F5F9' }}>24hr</span>
               <span style={{ fontSize: 10, color: brand.textLight, fontWeight: 500 }}>Free cancellation</span>
             </div>
           </div>
@@ -264,18 +264,18 @@ export default function LandingPage() {
               alignItems: 'center',
               gap: 9,
               padding: '17px 34px',
-              background: '#1B2B5A',
-              color: '#FFFFFF',
+              background: '#B8C5F2',
+              color: '#0F172A',
               borderRadius: 9999,
               fontSize: 14,
               fontWeight: 700,
               letterSpacing: '0.02em',
               border: 'none',
               textDecoration: 'none',
-              boxShadow: '0 8px 24px rgba(27,43,90,0.28)',
+              boxShadow: '0 8px 24px rgba(184,197,242,0.25)',
               transition: 'all 0.3s ease'
             }}>
-              See Your Price Instantly
+              Book Now
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
@@ -360,7 +360,7 @@ export default function LandingPage() {
             <div style={{
               height: 50,
               background: '#fff',
-              borderBottom: '1px solid #E8EDFC',
+              borderBottom: '1px solid rgba(184,197,242,0.15)',
               display: 'flex',
               alignItems: 'flex-end',
               padding: '0 14px 9px'
@@ -370,7 +370,7 @@ export default function LandingPage() {
                 <div style={{ width: 3, height: 15, background: brand.primary }} />
                 <div style={{ width: 3, height: 15, background: brand.primary }} />
               </div>
-              <span style={{ fontSize: 11, fontWeight: 700, color: brand.text }}>BetterView</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#2D3748' }}>BetterView</span>
             </div>
 
             {/* Phone Body */}
@@ -389,12 +389,12 @@ export default function LandingPage() {
                 textAlign: 'center',
                 lineHeight: 1.2,
                 marginTop: 4,
-                color: brand.text,
+                color: '#2D3748',
                 fontFamily: "'Cormorant Garamond', Georgia, serif"
               }}>
                 Schedule Your<br />Service
               </h3>
-              <p style={{ fontSize: 9, color: brand.textLight, textAlign: 'center' }}>
+              <p style={{ fontSize: 9, color: '#718096', textAlign: 'center' }}>
                 Premium window care for luxury residences
               </p>
 
@@ -406,13 +406,13 @@ export default function LandingPage() {
                 padding: '9px 11px',
                 fontSize: 10.5,
                 fontWeight: 600,
-                color: '#1B2B5A',
+                color: '#2D3748',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between'
               }}>
                 Brickell
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9AA8E0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#1B2B5A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               </div>
@@ -425,13 +425,13 @@ export default function LandingPage() {
                 padding: '9px 11px',
                 fontSize: 10.5,
                 fontWeight: 600,
-                color: '#1B2B5A',
+                color: '#2D3748',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between'
               }}>
                 1010 Brickell
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9AA8E0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#1B2B5A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               </div>
@@ -444,13 +444,13 @@ export default function LandingPage() {
                 padding: '9px 11px',
                 fontSize: 10.5,
                 fontWeight: 600,
-                color: '#1B2B5A',
+                color: '#2D3748',
                 boxShadow: '0 0 0 3px rgba(27,43,90,0.08)',
                 display: 'flex',
                 alignItems: 'center'
               }}>
                 3207
-                <span style={{ display: 'inline-block', width: 1.5, height: 12, background: '#1B2B5A', marginLeft: 1, verticalAlign: 'text-bottom' }} />
+                <span style={{ display: 'inline-block', width: 1.5, height: 12, background: '#B8C5F2', marginLeft: 1, verticalAlign: 'text-bottom' }} />
               </div>
 
               {/* Price reveal */}
@@ -480,13 +480,13 @@ export default function LandingPage() {
                 padding: '9px 11px',
                 fontSize: 10,
                 fontWeight: 600,
-                color: '#1B2B5A',
+                color: '#2D3748',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between'
               }}>
                 Thu, Apr 3 · 10:00 AM
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9AA8E0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#1B2B5A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               </div>
@@ -546,8 +546,8 @@ export default function LandingPage() {
               </svg>
             </div>
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#1B2B5A', lineHeight: 1.25 }}>Unit 2207 matched</div>
-              <div style={{ fontSize: 8.5, color: brand.textLight }}>Panorama Tower · $224</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#1B2B5A', lineHeight: 1.25 }}>Unit found</div>
+              <div style={{ fontSize: 8.5, color: '#718096' }}>1010 Brickell · $224</div>
             </div>
           </div>
 
@@ -586,7 +586,7 @@ export default function LandingPage() {
             </div>
             <div>
               <div style={{ fontSize: 11, fontWeight: 700, color: '#1B2B5A', lineHeight: 1.25 }}>Booked for Apr 3</div>
-              <div style={{ fontSize: 8.5, color: brand.textLight }}>1010 Brickell · 10:00 AM</div>
+              <div style={{ fontSize: 8.5, color: '#718096' }}>1010 Brickell · 10:00 AM</div>
             </div>
           </div>
         </div>
@@ -595,7 +595,7 @@ export default function LandingPage() {
       {/* What We Do */}
       <section style={{
         padding: '80px 24px',
-        background: 'white'
+        background: '#141E33'
       }}>
         <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
           <h2 className="section-heading" style={{
@@ -625,7 +625,7 @@ export default function LandingPage() {
               <div style={{
                 width: 64,
                 height: 64,
-                background: '#8E9FD9',
+                background: '#B8C5F2',
                 borderRadius: 16,
                 display: 'flex',
                 alignItems: 'center',
@@ -657,7 +657,7 @@ export default function LandingPage() {
               <div style={{
                 width: 64,
                 height: 64,
-                background: '#8E9FD9',
+                background: '#B8C5F2',
                 borderRadius: 16,
                 display: 'flex',
                 alignItems: 'center',
@@ -680,7 +680,7 @@ export default function LandingPage() {
               <div style={{
                 width: 64,
                 height: 64,
-                background: '#8E9FD9',
+                background: '#B8C5F2',
                 borderRadius: 16,
                 display: 'flex',
                 alignItems: 'center',
@@ -737,7 +737,7 @@ export default function LandingPage() {
               <div style={{
                 width: 48,
                 height: 48,
-                background: brand.primary,
+                background: 'rgba(184,197,242,0.15)',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
@@ -745,7 +745,7 @@ export default function LandingPage() {
                 margin: '0 auto 16px',
                 fontSize: 20,
                 fontWeight: 600,
-                color: brand.text
+                color: brand.primary
               }}>
                 1
               </div>
@@ -761,7 +761,7 @@ export default function LandingPage() {
               <div style={{
                 width: 48,
                 height: 48,
-                background: brand.primary,
+                background: 'rgba(184,197,242,0.15)',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
@@ -769,12 +769,12 @@ export default function LandingPage() {
                 margin: '0 auto 16px',
                 fontSize: 20,
                 fontWeight: 600,
-                color: brand.text
+                color: brand.primary
               }}>
                 2
               </div>
               <h3 style={{ fontSize: 18, fontWeight: 600, color: brand.text, marginBottom: 8 }}>
-                See Your Price
+                Book Now
               </h3>
               <p style={{ fontSize: 16, color: brand.textLight, lineHeight: 1.5 }}>
                 Get instant pricing based on your unit - no surprises
@@ -785,7 +785,7 @@ export default function LandingPage() {
               <div style={{
                 width: 48,
                 height: 48,
-                background: brand.primary,
+                background: 'rgba(184,197,242,0.15)',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
@@ -793,7 +793,7 @@ export default function LandingPage() {
                 margin: '0 auto 16px',
                 fontSize: 20,
                 fontWeight: 600,
-                color: brand.text
+                color: brand.primary
               }}>
                 3
               </div>
@@ -809,7 +809,7 @@ export default function LandingPage() {
               <div style={{
                 width: 48,
                 height: 48,
-                background: brand.primary,
+                background: 'rgba(184,197,242,0.15)',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
@@ -817,7 +817,7 @@ export default function LandingPage() {
                 margin: '0 auto 16px',
                 fontSize: 20,
                 fontWeight: 600,
-                color: brand.text
+                color: brand.primary
               }}>
                 4
               </div>
@@ -838,7 +838,7 @@ export default function LandingPage() {
               background: '#B8C5F2',
               border: 'none',
               borderRadius: 9999,
-              color: brand.text,
+              color: '#0F172A',
               cursor: 'pointer',
               textDecoration: 'none',
               display: 'inline-block',
@@ -854,7 +854,7 @@ export default function LandingPage() {
       {/* FAQs */}
       <section style={{
         padding: '80px 24px',
-        background: 'white'
+        background: '#141E33'
       }}>
         <div style={{ maxWidth: 700, margin: '0 auto' }}>
           <h2 className="section-heading" style={{
@@ -897,7 +897,7 @@ export default function LandingPage() {
       {/* CTA Section */}
       <section className="cta-section" style={{
         padding: '80px 24px',
-        background: 'linear-gradient(135deg, #2D3748 0%, #1a202c 100%)',
+        background: 'linear-gradient(135deg, #1B2B5A 0%, #0F172A 100%)',
         textAlign: 'center'
       }}>
         <h2 style={{
@@ -922,7 +922,7 @@ export default function LandingPage() {
           background: '#B8C5F2',
           border: 'none',
           borderRadius: 9999,
-          color: '#2D3748',
+          color: '#0F172A',
           cursor: 'pointer',
           textDecoration: 'none',
           display: 'inline-block',
@@ -936,7 +936,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer style={{
         padding: '40px 24px',
-        background: brand.text,
+        background: '#0A0F1E',
         color: 'white'
       }}>
         <div className="footer-content" style={{
@@ -980,9 +980,9 @@ export default function LandingPage() {
         right: 0,
         padding: '12px 16px',
         paddingBottom: 'max(12px, env(safe-area-inset-bottom))',
-        background: 'rgba(255, 255, 255, 0.97)',
+        background: 'rgba(15, 23, 42, 0.97)',
         backdropFilter: 'blur(12px)',
-        borderTop: '1px solid #E5E7EB',
+        borderTop: '1px solid rgba(184,197,242,0.12)',
         zIndex: 999,
         boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.08)'
       }}>
@@ -995,7 +995,7 @@ export default function LandingPage() {
           background: '#B8C5F2',
           border: 'none',
           borderRadius: 9999,
-          color: '#2D3748',
+          color: '#0F172A',
           cursor: 'pointer',
           textDecoration: 'none',
           textAlign: 'center',

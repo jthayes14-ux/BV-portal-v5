@@ -365,10 +365,8 @@ export default function LandingPage() {
               alignItems: 'flex-end',
               padding: '0 14px 9px'
             }}>
-              <div style={{ display: 'flex', gap: 2.5, marginRight: 6 }}>
-                <div style={{ width: 3, height: 15, background: brand.primary }} />
-                <div style={{ width: 3, height: 15, background: brand.primary }} />
-                <div style={{ width: 3, height: 15, background: brand.primary }} />
+              <div style={{ marginRight: 4, transform: 'scale(0.5)', transformOrigin: 'bottom left' }}>
+                <Logo />
               </div>
               <span style={{ fontSize: 11, fontWeight: 700, color: brand.text }}>BetterView</span>
             </div>

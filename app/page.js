@@ -547,7 +547,7 @@ export default function LandingPage() {
             </div>
             <div>
               <div style={{ fontSize: 11, fontWeight: 700, color: '#1B2B5A', lineHeight: 1.25 }}>Unit found</div>
-              <div style={{ fontSize: 8.5, color: brand.textLight }}>1010 Brickell · $224</div>
+              <div style={{ fontSize: 8.5, color: brand.textLight }}>1010 Brickell · $189</div>
             </div>
           </div>
 

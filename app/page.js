@@ -412,7 +412,7 @@ export default function LandingPage() {
                 justifyContent: 'space-between'
               }}>
                 Brickell
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9AA8E0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#1B2B5A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               </div>
@@ -431,7 +431,7 @@ export default function LandingPage() {
                 justifyContent: 'space-between'
               }}>
                 1010 Brickell
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9AA8E0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#1B2B5A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               </div>
@@ -486,7 +486,7 @@ export default function LandingPage() {
                 justifyContent: 'space-between'
               }}>
                 Thu, Apr 3 · 10:00 AM
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9AA8E0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#1B2B5A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               </div>
@@ -546,8 +546,8 @@ export default function LandingPage() {
               </svg>
             </div>
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#1B2B5A', lineHeight: 1.25 }}>Unit 2207 matched</div>
-              <div style={{ fontSize: 8.5, color: brand.textLight }}>Panorama Tower · $224</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#1B2B5A', lineHeight: 1.25 }}>Unit found</div>
+              <div style={{ fontSize: 8.5, color: brand.textLight }}>1010 Brickell · $224</div>
             </div>
           </div>
 
@@ -625,7 +625,7 @@ export default function LandingPage() {
               <div style={{
                 width: 64,
                 height: 64,
-                background: '#8E9FD9',
+                background: '#1B2B5A',
                 borderRadius: 16,
                 display: 'flex',
                 alignItems: 'center',
@@ -657,7 +657,7 @@ export default function LandingPage() {
               <div style={{
                 width: 64,
                 height: 64,
-                background: '#8E9FD9',
+                background: '#1B2B5A',
                 borderRadius: 16,
                 display: 'flex',
                 alignItems: 'center',
@@ -680,7 +680,7 @@ export default function LandingPage() {
               <div style={{
                 width: 64,
                 height: 64,
-                background: '#8E9FD9',
+                background: '#1B2B5A',
                 borderRadius: 16,
                 display: 'flex',
                 alignItems: 'center',
